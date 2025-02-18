@@ -146,6 +146,8 @@ def compute_mlm(pl_module, batch):
 
 
 def compute_itm(pl_module, batch):
+    # import pdb
+    # pdb.set_trace()
     pos_len = len(batch["text"]) // 2
     neg_len = len(batch["text"]) - pos_len
     itm_labels = torch.cat([torch.ones(pos_len), torch.zeros(neg_len)]).to(
@@ -252,7 +254,7 @@ def compute_scl(pl_module, batch, token_recover=False):
     # msm cls contrast
     sim_mt_img = torch.mm(mask_image_feat_cls, image_feat_cls.transpose(0, 1))
     sim_mt_txt = torch.mm(mask_text_feat_cls, text_feat_cls.transpose(0, 1))
-    loss_contrastive_func = NormSoftmaxLoss(pl_module.msm_temp)
+    loss_contrastive_func = NormSoftmaxLoss(pl_module.cl_temp)
     con_img_loss = loss_contrastive_func(sim_mt_img)
     con_txt_loss = loss_contrastive_func(sim_mt_txt)
 
@@ -290,8 +292,8 @@ def compute_scl(pl_module, batch, token_recover=False):
     ret = {'msm_loss': msm_loss}
 
     phase = "train" if pl_module.training else "val"
-    msm_loss = getattr(pl_module, f"{phase}_msm_loss")(ret["msm_loss"])
-    pl_module.log(f"msm/{phase}/loss", msm_loss)
+    # msm_loss = getattr(pl_module, f"{phase}_msm_loss")(ret["msm_loss"])
+    pl_module.log(f"msm/{phase}/loss", ret["msm_loss"])
     if token_recover:
         pl_module.log(f"msm/{phase}/image_tokens_loss", image_tokens_loss)
         pl_module.log(f"msm/{phase}/text_tokens_loss", text_tokens_loss)
@@ -925,7 +927,7 @@ def get_1d_sincos_pos_embed_from_grid(embed_dim, pos):
     out: (M, D)
     """
     assert embed_dim % 2 == 0
-    omega = np.arange(embed_dim // 2, dtype=np.float)
+    omega = np.arange(embed_dim // 2, dtype=np.float64)
     omega /= embed_dim / 2.
     omega = 1. / 10000**omega  # (D/2,)
 

@@ -35,6 +35,7 @@ class MTDataModule(LightningDataModule):
 
     def prepare_data(self):
         for dm in self.dms:
+            print(dm)
             dm.prepare_data()
 
     def setup(self, stage):

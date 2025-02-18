@@ -8,7 +8,7 @@ import torch.nn.functional as F
 from torch import nn
 
 from .mae_transformer import Block
-from vlc.modules import objectives
+from scl.modules import objectives
 
 class LayerNorm(nn.LayerNorm):
     """Subclass torch's LayerNorm to handle fp16."""

@@ -61,3 +61,10 @@ def make_arrow(root, dataset_root):
         ) as sink:
             with pa.RecordBatchFileWriter(sink, table.schema) as writer:
                 writer.write_table(table)
+
+
+if __name__ == "__main__":
+    root = "/content/data/coco"
+    arrow_root = "/content/data/coco/arrow"
+
+    make_arrow(root, arrow_root)

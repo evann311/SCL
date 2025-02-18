@@ -30,7 +30,7 @@ class SCLTransformer(pl.LightningModule):
         self.mask_ratio = self.hparams.config["mask_ratio"]
         hs = self.hparams.config["hidden_size"]
 
-        self.text_transformer = RobertaModel.from_pretrained('/apdcephfs/share_1367250/auroraji/pretrained_weight/roberta_base')
+        self.text_transformer = RobertaModel.from_pretrained('/content/scl_prepare/roberta-base')
 
         self.vision_transformer = build_model(config['vit_path'], resolution_after=config["image_size"])
 
@@ -77,7 +77,7 @@ class SCLTransformer(pl.LightningModule):
                 nn.Linear(hs, 512),
             )
 
-        if config["loss_names"]["scl"] > 0:
+        if "scl" in config["loss_names"] and config["loss_names"]["scl"] > 0:
             self.scl_temp = 0.03
 
         # ===================== Downstream ===================== #
@@ -174,6 +174,7 @@ class SCLTransformer(pl.LightningModule):
         text_embeds = self.cross_modal_text_transform(text_embeds)
 
         if image_embeds is None and image_masks is None:
+            # import pdb; pdb.set_trace()
             img = batch[imgkey][0]
             if token_mask_ratio != None: # token mask
                 image_embeds, ids_mask = self.vision_transformer.visual.visual_embed(img, mask_image, token_mask_ratio, token_mask=True)
@@ -365,14 +366,16 @@ class SCLTransformer(pl.LightningModule):
 
         return total_loss
 
-    def training_epoch_end(self, outs):
+    def on_training_epoch_end(self, outs):
         scl_utils.epoch_wrapup(self)
 
     def validation_step(self, batch, batch_idx):
         scl_utils.set_task(self)
         output = self(batch)
 
-    def validation_epoch_end(self, outs):
+        return output
+
+    def on_validation_epoch_end(self, outs=None):
         scl_utils.epoch_wrapup(self)
 
     def test_step(self, batch, batch_idx):
@@ -389,7 +392,7 @@ class SCLTransformer(pl.LightningModule):
 
         return ret
 
-    def test_epoch_end(self, outs):
+    def on_test_epoch_end(self, outs):
         model_name = self.hparams.config["load_path"].split("/")[-1][:-5]
 
         if self.hparams.config["loss_names"]["vqa"] > 0:

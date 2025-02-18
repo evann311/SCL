@@ -203,7 +203,7 @@ class BaseDataset(torch.utils.data.Dataset):
                         orig = img[bi][vi]
                         new_images[vi][bi, :, : orig.shape[1], : orig.shape[2]] = orig
 
-            new_images = [new_images[0].unsqueeze(1)] # same as video
+            # new_images = [new_images[0].unsqueeze(1)] # same as video
             dict_batch[img_key] = new_images
 
         txt_keys = [k for k in list(dict_batch.keys()) if "text" in k]

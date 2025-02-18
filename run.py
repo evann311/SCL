@@ -9,7 +9,8 @@ from scl.modules import SCLTransformer
 from scl.datamodules.multitask_datamodule import MTDataModule
 
 from pytorch_lightning.plugins.environments import ClusterEnvironment
-from pytorch_lightning.plugins.training_type import DDPPlugin
+from pytorch_lightning.strategies import DDPStrategy
+
 import torch.distributed as dist
 
 import argparse
@@ -44,7 +45,7 @@ class MyCluster(ClusterEnvironment):
     def set_world_size(self, size: int) -> None:
         pass
 
-class MyDDPPlugin(DDPPlugin):
+class MyDDPPlugin(DDPStrategy):
 
     def init_ddp_connection(self, global_rank = None, world_size = None) -> None:
         master_uri = "tcp://%s:%s" % (os.environ['CHIEF_IP'], os.environ['MASTER_PORT'])
@@ -114,32 +115,28 @@ if __name__ == '__main__':
 
     trainer = pl.Trainer(
         # plugins=[MyCluster(), MyDDPPlugin()], # for multi-machine ddp
-        gpus=_config["num_gpus"],
+        accelerator="gpu" if _config.get("num_gpus", 0) > 0 else "cpu",
+        devices=_config.get("num_gpus", 1),
         num_nodes=_config["num_nodes"],
         precision=_config["precision"],
-        accelerator="ddp",
+        strategy="ddp",
         benchmark=True,
         deterministic=True,
         max_epochs=_config["max_epoch"] if max_steps is None else 1000,
         max_steps=max_steps,
         callbacks=callbacks,
         logger=logger,
-        prepare_data_per_node=False,
-        replace_sampler_ddp=False,
         accumulate_grad_batches=grad_steps,
         log_every_n_steps=10,
-        flush_logs_every_n_steps=10,
-        resume_from_checkpoint=_config["resume_from"],
-        weights_summary="top",
+        enable_model_summary=True,
         fast_dev_run=_config["fast_dev_run"],
         val_check_interval=_config["val_check_interval"],
-        terminate_on_nan = True,
-        amp_level='O1',
+        detect_anomaly= True,
         # limit_train_batches=5,
         # limit_val_batches=1
     )
 
     if not _config["test_only"]:
-        trainer.fit(model, datamodule=dm)
+        trainer.fit(model, datamodule=dm, ckpt_path=_config.get("resume_from", None))
     else:
         trainer.test(model, datamodule=dm)
