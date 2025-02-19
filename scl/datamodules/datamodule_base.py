@@ -13,9 +13,9 @@ from transformers import (
 def get_pretrained_tokenizer(from_pretrained):
     if torch.distributed.is_initialized():
         if torch.distributed.get_rank() == 0:
-            RobertaTokenizer.from_pretrained('/content/scl_prepare/roberta-base')
+            RobertaTokenizer.from_pretrained('/kaggle/scl_prepare/roberta-base')
         torch.distributed.barrier()
-    return RobertaTokenizer.from_pretrained('/content/scl_prepare/roberta-base')
+    return RobertaTokenizer.from_pretrained('/kaggle/scl_prepare/roberta-base')
 
 
 class BaseDataModule(LightningDataModule):

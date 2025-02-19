@@ -30,7 +30,7 @@ class SCLTransformer(pl.LightningModule):
         self.mask_ratio = self.hparams.config["mask_ratio"]
         hs = self.hparams.config["hidden_size"]
 
-        self.text_transformer = RobertaModel.from_pretrained('/content/scl_prepare/roberta-base')
+        self.text_transformer = RobertaModel.from_pretrained('/kaggle/scl_prepare/roberta-base')
 
         self.vision_transformer = build_model(config['vit_path'], resolution_after=config["image_size"])
 

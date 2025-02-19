@@ -50,7 +50,7 @@ _config_pretrain = {
     'num_heads': 12,
 
     # mae transformer settings
-    'vit_path': "/content/scl_prepare/clip-vit/ViT-B-16.pt",
+    'vit_path': "/kaggle/scl_prepare/clip-vit/ViT-B-16.pt",
     'mask_ratio': 0.8, # mgsc image mask ratio
     'mtm_ratio': 0.4, # text mask ratio
     'image_token_mask_ratio': 0.3, # mltc image mask ratio
