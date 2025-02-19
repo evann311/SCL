@@ -17,7 +17,7 @@ _config_pretrain = {
         "mgsc": 1, # global
         "mltc": 1, # local
         },
-    'batch_size': 16,  # this is a desired batch size; pl trainer will accumulate gradients when per step batch is smaller.
+    'batch_size': 4,  # this is a desired batch size; pl trainer will accumulate gradients when per step batch is smaller.
 
     # Image setting
     'image_size': 288, # 224 for video
