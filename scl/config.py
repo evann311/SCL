@@ -81,7 +81,7 @@ _config_pretrain = {
     'num_nodes': 1,
     'load_path': "",
     'num_workers': 8,
-    'precision': 16,
+    'precision': 32,
     'is_pretrain': True,
 
     # contrast
