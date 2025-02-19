@@ -17,7 +17,7 @@ _config_pretrain = {
         "mgsc": 1, # global
         "mltc": 1, # local
         },
-    'batch_size': 4096,  # this is a desired batch size; pl trainer will accumulate gradients when per step batch is smaller.
+    'batch_size': 8,  # this is a desired batch size; pl trainer will accumulate gradients when per step batch is smaller.
 
     # Image setting
     'image_size': 288, # 224 for video
@@ -49,7 +49,7 @@ _config_pretrain = {
     'num_heads': 12,
 
     # mae transformer settings
-    'vit_path': "/kaggle/scl_prepare/clip-vit/clip-vit/ViT-B-16.pt",
+    'vit_path': "/kaggle/scl_prepare/clip-vit/ViT-B-16.pt",
     'mask_ratio': 0.8, # mgsc image mask ratio
     'mtm_ratio': 0.4, # text mask ratio
     'image_token_mask_ratio': 0.3, # mltc image mask ratio
@@ -75,7 +75,7 @@ _config_pretrain = {
     # below params varies with the environment
     'data_root': '/content/data/coco/arrow',
     'log_dir': "result",
-    'per_gpu_batchsize': 16,  # you should define this manually with per_gpu_batch_size=#
+    'per_gpu_batchsize': 4,  # you should define this manually with per_gpu_batch_size=#
     'video_per_gpu_batchsize': 6,
     'num_gpus': 2,
     'num_nodes': 1,
