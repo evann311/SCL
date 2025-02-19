@@ -1,99 +1,3 @@
-
-# pretrain - kaggle
-_config_pretrain = {
-    'exp_name': "mlm_itm_cl_mgsc_mltc",
-    'seed': 0,
-    # 'datasets': ["coco", "vg", "sbu", "gcc"], 
-    # 'datasets': ["coco", "vg"], 
-    'datasets': ["coco"], 
-    # 'datasets': ["webvid"],
-    'loss_names': {
-        "itm": 1,
-        "mlm": 1,
-        "vqa": 0,
-        "nlvr2": 0,
-        "irtr": 0,
-        "mae": 0,
-        "con": 1,
-        "mgsc": 1, # global
-        "mltc": 1, # local
-        },
-    'batch_size': 4096,  # this is a desired batch size; pl trainer will accumulate gradients when per step batch is smaller.
-
-    # Image setting
-    'image_size': 288, # 224 for video
-    'draw_false_image': 1,
-    'image_only': False,
-    'vit': 'mae_vit_base_patch16',
-    'patch_size': 16,
-    'num_frames': 4,
-    'train_transform_keys': ["clip"],
-    'val_transform_keys': ["clip"],
-    'video_train_transform_keys': ["video_randaug"],
-    'video_val_transform_keys': ["video_test"],
-
-    # Text Setting
-    'tokenizer': "roberta-base",
-    'vocab_size': 50265,
-    'max_text_len': 50,
-    'vqav2_label_size': 3129,
-    'mlm_prob': 0.15,
-    'draw_false_text': 0,
-    'whole_word_masking': True,
-
-    # Transformer Setting 
-    'num_layers': 12,
-    'num_top_layer': 6,
-    'mlp_ratio': 4,
-    'drop_rate': 0.1,
-    'hidden_size': 768,
-    'num_heads': 12,
-
-    # mae transformer settings
-    'vit_path': "/kaggle/scl_prepare/clip-vit/ViT-B-16.pt",
-    'mask_ratio': 0.8, # mgsc image mask ratio
-    'mtm_ratio': 0.4, # text mask ratio
-    'image_token_mask_ratio': 0.3, # mltc image mask ratio
-
-    # Optimizer Setting
-    'optim_type': "adamw",
-    'weight_decay': 0.01,
-    'decay_power': 1,
-    'end_lr': 0,
-    'learning_rate': 2e-5,
-    'val_check_interval': 1.0,
-    'lr_mult_head': 5,
-    'lr_mult_cross_modal': 5,
-    'max_epoch': 100,
-    'max_steps': 15000,
-    'warmup_steps': 0.1,
-
-    # PL Trainer Setting
-    'resume_from': None, # load interrupted ckpt
-    'fast_dev_run': False, # for debug
-    'test_only': False,
-
-    # below params varies with the environment
-    'data_root': '/home/hoaithi/pretrained_weight/data/arrow',
-    'log_dir': "result",
-    'per_gpu_batchsize': 16,  # you should define this manually with per_gpu_batch_size=#
-    'video_per_gpu_batchsize': 6,
-    'num_gpus': 1,
-    'num_nodes': 1,
-    'load_path': "",
-    'num_workers': 8,
-    'precision': 16,
-    'is_pretrain': True,
-
-    # contrast
-    'con_weight': 0.5,
-
-    # for retrieval
-    'get_recall_metric': False,
-    'candidate_N': 128,
-
-}
-
 # pretrain 
 _config_pretrain = {
     'exp_name': "mlm_itm_cl_mgsc_mltc",
@@ -145,7 +49,7 @@ _config_pretrain = {
     'num_heads': 12,
 
     # mae transformer settings
-    'vit_path': "/home/hoaithi/pretrained_weight/clip-vit/ViT-B-16.pt",
+    'vit_path': "/kaggle/scl_prepare/clip-vit/clip-vit/ViT-B-16.pt",
     'mask_ratio': 0.8, # mgsc image mask ratio
     'mtm_ratio': 0.4, # text mask ratio
     'image_token_mask_ratio': 0.3, # mltc image mask ratio
@@ -173,7 +77,7 @@ _config_pretrain = {
     'log_dir': "result",
     'per_gpu_batchsize': 16,  # you should define this manually with per_gpu_batch_size=#
     'video_per_gpu_batchsize': 6,
-    'num_gpus': 1,
+    'num_gpus': 2,
     'num_nodes': 1,
     'load_path': "",
     'num_workers': 8,
@@ -186,7 +90,6 @@ _config_pretrain = {
     # for retrieval
     'get_recall_metric': False,
     'candidate_N': 128,
-
 }
 
 # VQA2.0
