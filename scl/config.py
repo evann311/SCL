@@ -64,7 +64,7 @@ _config_pretrain = {
     'lr_mult_head': 5,
     'lr_mult_cross_modal': 5,
     'max_epoch': 100,
-    'max_steps': 15000,
+    'max_steps': 150,
     'warmup_steps': 0.1,
 
     # PL Trainer Setting
