@@ -18,7 +18,7 @@ def path2rest(path, iid2captions, iid2split):
     return [binary, captions, name, split]
 
 
-def make_arrow(root, dataset_root):
+def make_arrow(root, dataset_root, max_images=None):
     with open(f"{root}/karpathy/dataset_coco.json", "r") as fp:
         captions = json.load(fp)
 
@@ -37,13 +37,14 @@ def make_arrow(root, dataset_root):
     random.shuffle(paths)
     caption_paths = [path for path in paths if path.split("/")[-1] in iid2captions]
 
+    if max_images is not None:
+        caption_paths = caption_paths[:max_images]
+
     if len(paths) == len(caption_paths):
         print("all images have caption annotations")
     else:
         print("not all images have caption annotations")
-    print(
-        len(paths), len(caption_paths), len(iid2captions),
-    )
+    print("Total images:", len(paths), "Processed images:", len(caption_paths), "Caption annotations:", len(iid2captions))
 
     bs = [path2rest(path, iid2captions, iid2split) for path in tqdm(caption_paths)]
 
@@ -66,5 +67,7 @@ def make_arrow(root, dataset_root):
 if __name__ == "__main__":
     root = "/kaggle/data/coco"
     arrow_root = "/kaggle/data/coco/arrow"
-
-    make_arrow(root, arrow_root)
+    
+    # Giới hạn xử lý tối đa 1000 ảnh, thay đổi giá trị theo nhu cầu
+    max_images = 1000
+    make_arrow(root, arrow_root, max_images)
