@@ -73,7 +73,7 @@ _config_pretrain = {
     'test_only': False,
 
     # below params varies with the environment
-    'data_root': '/content/data/coco/arrow',
+    'data_root': '/kaggle/data/coco/arrow',
     'log_dir': "result",
     'per_gpu_batchsize': 4,  # you should define this manually with per_gpu_batch_size=#
     'video_per_gpu_batchsize': 6,
