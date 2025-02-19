@@ -64,7 +64,7 @@ def make_arrow(root, dataset_root):
 
 
 if __name__ == "__main__":
-    root = "/content/data/coco"
-    arrow_root = "/content/data/coco/arrow"
+    root = "/kaggle/data/coco"
+    arrow_root = "/kaggle/data/coco/arrow"
 
     make_arrow(root, arrow_root)

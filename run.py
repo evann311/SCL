@@ -119,7 +119,7 @@ if __name__ == '__main__':
         devices=_config.get("num_gpus", 1),
         num_nodes=_config["num_nodes"],
         precision=_config["precision"],
-        strategy="ddp",
+        strategy="ddp_find_unused_parameters_true",
         benchmark=True,
         deterministic=True,
         max_epochs=_config["max_epoch"] if max_steps is None else 1000,
