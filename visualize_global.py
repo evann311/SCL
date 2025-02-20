@@ -68,6 +68,8 @@ class VLmae_vis(SCLTransformer):
             x1 = text_layer(x, y, extend_text_masks, extend_image_masks, output_attentions=True)
             print(x1[0].shape)
             print(x1[1].shape)
+            print(y1[0].shape)
+            print(y1[1].shape)
             y1 = image_layer(y, x, extend_image_masks, extend_text_masks, output_attentions=True)
             x, y = x1[0], y1[0]
             t2v_mt.append(x1[1][0,:,0,1:])
