@@ -2,7 +2,7 @@ import os
 import copy
 import torch
 import pytorch_lightning as pl
-from scl.config import _config
+from scl.config import _config_pretrain
 
 from scl.modules import SCLTransformer
 from scl.datamodules.multitask_datamodule import MTDataModule
@@ -75,14 +75,14 @@ class VLmae_vis(SCLTransformer):
 if __name__ == '__main__':
     size = 288
 
-    tokenizer = RobertaTokenizer.from_pretrained('/mnt/bn/automl-aigc/yatai/data/pretrained_weight/roberta-base')
+    tokenizer = RobertaTokenizer.from_pretrained('/kaggle/scl_prepare/roberta-base')
     t1 = transforms.Resize((size, size), interpolation=PIL.Image.BICUBIC)
     t2 = transforms.CenterCrop(size)
     t3 = transforms.ToTensor()
     t4 = transforms.Normalize(mean=[0.48145466, 0.4578275, 0.40821073], std=[0.26862954, 0.26130258, 0.27577711])
 
     _config = copy.deepcopy(_config)
-    _config["load_path"] = "/mnt/bn/automl-aigc/yatai/data/scl_weight/mgsc_100k/epoch=41-step=99999.ckpt"
+    _config["load_path"] = "/kaggle/checkpoints/SCL/MGSC-100k.ckpt"
     _config["image_size"] = 288
     pl.seed_everything(_config["seed"])
     model = VLmae_vis(_config)
