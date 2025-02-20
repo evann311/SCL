@@ -50,7 +50,6 @@ class VLmae_vis(SCLTransformer):
                                 dtype=torch.long, device=text_masks.device)
 
         image_embeds = self.vision_transformer(image_embeds)
-        print(image_embeds.shape)
         image_embeds = self.cross_modal_image_transform(image_embeds)
         extend_image_masks = self.text_transformer.get_extended_attention_mask(image_masks, image_masks.size(), device)
 
@@ -63,6 +62,7 @@ class VLmae_vis(SCLTransformer):
         )
 
         x, y = text_embeds, image_embeds
+        print(image_embeds.shape)
         t2v_mt = []
         for text_layer, image_layer in zip(self.cross_modal_text_layers, self.cross_modal_image_layers):
             x1 = text_layer(x, y, extend_text_masks, extend_image_masks, output_attentions=True)
