@@ -105,6 +105,7 @@ if __name__ == '__main__':
     text_ids = torch.tensor(encoding['input_ids']).unsqueeze(0)
     text_mask = torch.tensor(encoding['attention_mask']).unsqueeze(0)
     print(text_ids.shape, text_mask.shape)
+    print(text_mask)
     image = t1(image1)
     image = t2(image)
     image.save('/kaggle/working/pami_vis/%s/orig.jpg'%(caption))
