@@ -89,7 +89,7 @@ if __name__ == '__main__':
     model.eval()
 
     caption = 'Curled fabric on a shoe rack, resembling a fluffy shape among various shoes and sandals'
-    os.makedirs('./pami_vis/%s'%(caption), exist_ok=True)
+    os.makedirs('/kaggle/working/pami_vis/%s'%(caption), exist_ok=True)
     image1 = Image.open('COCO_val2014_000000000042.jpg')
 
     encoding = tokenizer(caption)
@@ -98,19 +98,13 @@ if __name__ == '__main__':
     text_mask = torch.tensor(encoding['attention_mask']).unsqueeze(0)
     image = t1(image1)
     image = t2(image)
-    image.save('./pami_vis/%s/orig.jpg'%(caption))
+    image.save('/kaggle/working/pami_vis/%s/orig.jpg'%(caption))
     image = t3(image)
     image = t4(image)
     image = image.unsqueeze(0)
 
     t2v_att_list = model.visualize(image, text_ids, text_mask)
-    att_tensor = t2v_att_list[-1]
-    print("Số token ban đầu:", att_tensor.shape[1])
-    att_tensor_no_cls = att_tensor[:, 1:]  # loại bỏ token đầu tiên
-    print("Số token sau khi loại [CLS]:", att_tensor_no_cls.shape[1])
-    # att_map = t2v_att_list[-1].reshape([-1, size//16, size//16]).numpy().max(0)
-
-    att_map = att_tensor_no_cls.reshape(12, 3, 6).numpy().max(0)
+    att_map = t2v_att_list[-1].reshape([-1, size//16, size//16]).numpy().max(0)
 
 
     # att_map = att_map * (att_map > (np.max(att_map) * 0.2))
