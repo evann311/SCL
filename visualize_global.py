@@ -97,7 +97,7 @@ if __name__ == '__main__':
     model = VLmae_vis(_config)
     model.eval()
 
-    caption = 'A dog with a green hat sitting in a truck'
+    caption = 'a shoe rack with various footwear and a curly, light brown fabric-like object among them'
     os.makedirs('/kaggle/working/pami_vis/%s'%(caption), exist_ok=True)
     image1 = Image.open('COCO_val2014_000000000042.jpg')
 
