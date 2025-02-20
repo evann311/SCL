@@ -2,7 +2,7 @@ import os
 import copy
 import torch
 import pytorch_lightning as pl
-from scl.config import _config_pretrain as _configk
+from scl.config import _config_pretrain as _config
 
 from scl.modules import SCLTransformer
 from scl.datamodules.multitask_datamodule import MTDataModule
