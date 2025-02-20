@@ -62,8 +62,8 @@ class VLmae_vis(SCLTransformer):
             ),
         )
 
-        print(x.shape, y.shape)
         x, y = text_embeds, image_embeds
+        print(x.shape, y.shape)
         t2v_mt = []
         for text_layer, image_layer in zip(self.cross_modal_text_layers, self.cross_modal_image_layers):
             x1 = text_layer(x, y, extend_text_masks, extend_image_masks, output_attentions=True)
