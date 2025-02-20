@@ -70,6 +70,8 @@ class VLmae_vis(SCLTransformer):
             y1 = image_layer(y, x, extend_image_masks, extend_text_masks, output_attentions=True)
             x, y = x1[0], y1[0]
             t2v_mt.append(x1[1][0,:,0,1:])
+        
+        print(len(t2v_mt))
 
         return t2v_mt
         
