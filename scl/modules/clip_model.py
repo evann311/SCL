@@ -155,7 +155,6 @@ class VisualTransformer(nn.Module):
 
     def visual_embed(self, x, is_mask, mask_ratio, token_mask=False):
         # embed patches
-        print(x.shape)
         x = self.conv1(x)  # shape = [*, width, grid, grid]
         x = x.reshape(x.shape[0], x.shape[1], -1)  # shape = [*, width, grid ** 2]
         x = x.permute(0, 2, 1)  # shape = [*, grid ** 2, width]
@@ -180,6 +179,7 @@ class VisualTransformer(nn.Module):
             t = self.class_embedding.to(x.dtype) + torch.zeros(x.shape[0], 1, x.shape[-1], dtype=x.dtype, device=x.device)
             x = torch.cat([t, x], dim=1)  # shape = [*, grid ** 2 + 1, width]
             x = x + self.positional_embedding.to(x.dtype)
+            print(x.shape)
             return x, None
 
 

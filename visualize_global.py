@@ -45,7 +45,7 @@ class VLmae_vis(SCLTransformer):
             text_embeds = layer(text_embeds, extend_text_masks)[0]
         text_embeds = self.cross_modal_text_transform(text_embeds)
 
-        image_embeds, _ = self.vision_transformer.visual.visual_embed(image, False, self.mask_ratio)
+        image_embeds, _ = self.vision_transformer.visual.visual_embed(image, False, 0)
         image_masks = torch.ones((image_embeds.shape[0], image_embeds.shape[1]),
                                 dtype=torch.long, device=text_masks.device)
         image_embeds = self.vision_transformer(image_embeds)
