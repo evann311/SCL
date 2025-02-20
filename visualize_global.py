@@ -2,7 +2,7 @@ import os
 import copy
 import torch
 import pytorch_lightning as pl
-from scl.config import _config_pretrain as _config
+from scl.config import _config_pretrain as _configk
 
 from scl.modules import SCLTransformer
 from scl.datamodules.multitask_datamodule import MTDataModule
@@ -88,9 +88,9 @@ if __name__ == '__main__':
     model = VLmae_vis(_config)
     model.eval()
 
-    caption = 'Bearded man shows off his grilled cheese sandwiches'
+    caption = 'Curled fabric on a shoe rack, resembling a fluffy shape among various shoes and sandals'
     os.makedirs('./pami_vis/%s'%(caption), exist_ok=True)
-    image1 = Image.open('image_path/000000045550.jpg')
+    image1 = Image.open('COCO_val2014_000000000042.jpg')
 
     encoding = tokenizer(caption)
     caption_tokens = tokenizer.tokenize(caption)
