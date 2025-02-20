@@ -71,7 +71,7 @@ class VLmae_vis(SCLTransformer):
             x, y = x1[0], y1[0]
             t2v_mt.append(x1[1][0,:,0,1:])
         
-        print(len(t2v_mt))
+        print(t2v_mt[-1].shape)
 
         return t2v_mt
         
