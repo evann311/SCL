@@ -88,7 +88,7 @@ if __name__ == '__main__':
     model = VLmae_vis(_config)
     model.eval()
 
-    caption = 'Curled fabric on a shoe rack, resembling a fluffy shape among various shoes and sandals'
+    caption = 'resembling a fluffy shape among various shoes and sandals'
     os.makedirs('./pami_vis/%s'%(caption), exist_ok=True)
     image1 = Image.open('COCO_val2014_000000000042.jpg')
 
@@ -111,7 +111,6 @@ if __name__ == '__main__':
     att_map_tensor = t2v_att_list[-1].unsqueeze(0).unsqueeze(0)  # Add batch & channel dims: (1, 1, 12, 19)
     att_map_resized = F.interpolate(att_map_tensor, size=(18, 18), mode='bilinear', align_corners=False)
     att_map = att_map_resized.squeeze().numpy().max(0)  # Remove added dims
-
 
 
     # att_map = att_map * (att_map > (np.max(att_map) * 0.2))
