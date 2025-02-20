@@ -105,5 +105,8 @@ if __name__ == '__main__':
 
     t2v_att_list = model.visualize(image, text_ids, text_mask)
     att_map = t2v_att_list[-1].reshape([-1, size//16, size//16]).numpy().max(0)
+    print(t2v_att_list[-1].shape)
+    print(t2v_att_list[-1].numel())  # Total number of elements
+
     # att_map = att_map * (att_map > (np.max(att_map) * 0.2))
     visualize_grid_to_grid(att_map, image1, caption=caption)
