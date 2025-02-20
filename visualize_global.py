@@ -108,7 +108,10 @@ if __name__ == '__main__':
     print("Số token ban đầu:", att_tensor.shape[1])
     att_tensor_no_cls = att_tensor[:, 1:]  # loại bỏ token đầu tiên
     print("Số token sau khi loại [CLS]:", att_tensor_no_cls.shape[1])
-    att_map = t2v_att_list[-1].reshape([-1, size//16, size//16]).numpy().max(0)
+    # att_map = t2v_att_list[-1].reshape([-1, size//16, size//16]).numpy().max(0)
+
+    att_map = att_tensor_no_cls.reshape(12, 3, 6).numpy().max(0)
+
 
     # att_map = att_map * (att_map > (np.max(att_map) * 0.2))
     visualize_grid_to_grid(att_map, image1, caption=caption)
