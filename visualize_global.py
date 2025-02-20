@@ -89,7 +89,7 @@ if __name__ == '__main__':
     t4 = transforms.Normalize(mean=[0.48145466, 0.4578275, 0.40821073], std=[0.26862954, 0.26130258, 0.27577711])
 
     _config = copy.deepcopy(_config)
-    _config["load_path"] = "/kaggle/checkpoints/SCL/MGSC-100k.ckpt"
+    _config["load_path"] = "/kaggle/checkpoints/SCL/GLSCL-100k.ckpt"
     _config["image_size"] = 288
     _config["mask_ratio"] = 0.0  # hoặc giá trị phù hợp để đảm bảo không drop các patch
 
