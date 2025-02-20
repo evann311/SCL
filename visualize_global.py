@@ -66,13 +66,10 @@ class VLmae_vis(SCLTransformer):
         t2v_mt = []
         for text_layer, image_layer in zip(self.cross_modal_text_layers, self.cross_modal_image_layers):
             x1 = text_layer(x, y, extend_text_masks, extend_image_masks, output_attentions=True)
-            print(x1[0].shape)
-            print(x1[1].shape)
             y1 = image_layer(y, x, extend_image_masks, extend_text_masks, output_attentions=True)
             x, y = x1[0], y1[0]
             t2v_mt.append(x1[1][0,:,0,1:])
         
-        print(t2v_mt[-1].shape)
 
         return t2v_mt
         
@@ -96,7 +93,7 @@ if __name__ == '__main__':
     model = VLmae_vis(_config)
     model.eval()
 
-    caption = 'Curled fabric on a shoe rack, resembling a fluffy shape among various shoes and sandals'
+    caption = 'A dog with a green hat sitting in a truck'
     os.makedirs('/kaggle/working/pami_vis/%s'%(caption), exist_ok=True)
     image1 = Image.open('COCO_val2014_000000000042.jpg')
 
