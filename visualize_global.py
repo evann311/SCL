@@ -100,7 +100,7 @@ if __name__ == '__main__':
     os.makedirs('/kaggle/working/pami_vis/%s'%(caption), exist_ok=True)
     image1 = Image.open('COCO_val2014_000000000042.jpg')
 
-    encoding = tokenizer(caption)
+    encoding = tokenizer(caption, padding='max_length', max_length=24, truncation=True)
     caption_tokens = tokenizer.tokenize(caption)
     text_ids = torch.tensor(encoding['input_ids']).unsqueeze(0)
     text_mask = torch.tensor(encoding['attention_mask']).unsqueeze(0)
