@@ -38,7 +38,6 @@ class VLmae_vis(SCLTransformer):
     def visualize(self, image, text_ids, text_masks):
 
         text_embeds = self.text_transformer.embeddings(input_ids=text_ids)
-        print(text_embeds)
         device = text_embeds.device
         input_shape = text_masks.size()
         extend_text_masks = self.text_transformer.get_extended_attention_mask(text_masks, input_shape, device) # [bs,len] -> [bs,1,1,len]
@@ -85,6 +84,8 @@ if __name__ == '__main__':
     _config = copy.deepcopy(_config)
     _config["load_path"] = "/kaggle/checkpoints/SCL/MGSC-100k.ckpt"
     _config["image_size"] = 288
+    _config["mask_ratio"] = 0.0  # hoặc giá trị phù hợp để đảm bảo không drop các patch
+
     pl.seed_everything(_config["seed"])
     model = VLmae_vis(_config)
     model.eval()
