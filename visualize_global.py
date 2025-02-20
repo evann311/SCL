@@ -48,6 +48,8 @@ class VLmae_vis(SCLTransformer):
         image_embeds, _ = self.vision_transformer.visual.visual_embed(image, False, 0)
         image_masks = torch.ones((image_embeds.shape[0], image_embeds.shape[1]),
                                 dtype=torch.long, device=text_masks.device)
+
+        self.vision_transformer.mask_ratio = 0
         image_embeds = self.vision_transformer(image_embeds)
         image_embeds = self.cross_modal_image_transform(image_embeds)
         extend_image_masks = self.text_transformer.get_extended_attention_mask(image_masks, image_masks.size(), device)
