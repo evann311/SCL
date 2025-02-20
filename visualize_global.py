@@ -106,10 +106,11 @@ if __name__ == '__main__':
     t2v_att_list = model.visualize(image, text_ids, text_mask)
     print(t2v_att_list[-1].shape)
     print(t2v_att_list[-1].numel())  # Total number of elements
-    num_elements = t2v_att_list[-1].numel()  # 228
-    new_dim = int(num_elements ** 0.5)  # Find the closest square root (rounding down)
 
-    att_map = t2v_att_list[-1].reshape([-1, new_dim, new_dim]).numpy().max(0)
+    import torch.nn.functional as F
+    att_map_tensor = t2v_att_list[-1].unsqueeze(0).unsqueeze(0)  # Add batch & channel dims: (1, 1, 12, 19)
+    att_map_resized = F.interpolate(att_map_tensor, size=(18, 18), mode='bilinear', align_corners=False)
+    att_map = att_map_resized.squeeze().numpy().max(0)  # Remove added dims
 
 
 
