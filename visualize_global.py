@@ -28,7 +28,7 @@ def visualize_grid_to_grid(masks, grid_image, caption, alpha=0.6):
     ax[1].imshow(grid_image)
     ax[1].imshow(mask / np.max(mask), alpha=alpha, cmap='rainbow')
     ax[1].axis('off')        
-    plt.savefig("/kaggle/working/t2v_heat_cls.jpg", dpi = 500)
+    plt.savefig("./pami_vis/%s/t2v_heat_cls.jpg"%(caption), dpi = 500)
     
 class VLmae_vis(SCLTransformer):
     def __init__(self, config):
@@ -88,7 +88,7 @@ if __name__ == '__main__':
     model = VLmae_vis(_config)
     model.eval()
 
-    caption = 'resembling a fluffy shape among various shoes and sandals'
+    caption = 'Curled fabric on a shoe rack, resembling a fluffy shape among various shoes and sandals'
     os.makedirs('./pami_vis/%s'%(caption), exist_ok=True)
     image1 = Image.open('COCO_val2014_000000000042.jpg')
 
@@ -104,14 +104,11 @@ if __name__ == '__main__':
     image = image.unsqueeze(0)
 
     t2v_att_list = model.visualize(image, text_ids, text_mask)
-    print(t2v_att_list[-1].shape)
-    print(t2v_att_list[-1].numel())  # Total number of elements
-
-    import torch.nn.functional as F
-    att_map_tensor = t2v_att_list[-1].unsqueeze(0).unsqueeze(0)  # Add batch & channel dims: (1, 1, 12, 19)
-    att_map_resized = F.interpolate(att_map_tensor, size=(18, 18), mode='bilinear', align_corners=False)
-    att_map = att_map_resized.squeeze().numpy().max(0)  # Remove added dims
-
+    att_tensor = t2v_att_list[-1]
+    print("Số token ban đầu:", att_tensor.shape[1])
+    att_tensor_no_cls = att_tensor[:, 1:]  # loại bỏ token đầu tiên
+    print("Số token sau khi loại [CLS]:", att_tensor_no_cls.shape[1])
+    att_map = t2v_att_list[-1].reshape([-1, size//16, size//16]).numpy().max(0)
 
     # att_map = att_map * (att_map > (np.max(att_map) * 0.2))
     visualize_grid_to_grid(att_map, image1, caption=caption)
