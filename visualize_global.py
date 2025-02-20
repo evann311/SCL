@@ -106,8 +106,11 @@ if __name__ == '__main__':
     t2v_att_list = model.visualize(image, text_ids, text_mask)
     print(t2v_att_list[-1].shape)
     print(t2v_att_list[-1].numel())  # Total number of elements
-    padded = torch.nn.functional.pad(t2v_att_list[-1], (0, 18 - 19 % 18))  # Pad to 18 columns
-    att_map = padded.reshape([-1, 18, 18]).numpy().max(0)
+    num_elements = t2v_att_list[-1].numel()  # 228
+    new_dim = int(num_elements ** 0.5)  # Find the closest square root (rounding down)
+
+    att_map = t2v_att_list[-1].reshape([-1, new_dim, new_dim]).numpy().max(0)
+
 
 
     # att_map = att_map * (att_map > (np.max(att_map) * 0.2))
