@@ -38,6 +38,7 @@ class VLmae_vis(SCLTransformer):
     def visualize(self, image, text_ids, text_masks):
 
         text_embeds = self.text_transformer.embeddings(input_ids=text_ids)
+        print(text_embeds)
         device = text_embeds.device
         input_shape = text_masks.size()
         extend_text_masks = self.text_transformer.get_extended_attention_mask(text_masks, input_shape, device) # [bs,len] -> [bs,1,1,len]
