@@ -90,7 +90,7 @@ if __name__ == '__main__':
     model = VLmae_vis(_config)
     model.eval()
 
-    caption = 'A dog with a green hat sitting in a truck'
+    caption = 'A dog with a green hat sitting in a truck truck'
     os.makedirs('./pami_vis/%s/t2v_heat_glscl'%(caption), exist_ok=True)
     image1 = Image.open('image_path/000000053529.jpg')
 
