@@ -106,7 +106,19 @@ if __name__ == '__main__':
     image = image.unsqueeze(0)
 
     t2v_att_list = model.visualize(image, text_ids, text_mask)
-    att_map = t2v_att_list[-1].reshape([-1, size//16, size//16]).numpy().max(0)
+    
+    t2v_att = t2v_att_list[-1]  # tensor shape: [num_heads, num_tokens]
+    att_vector = t2v_att.reshape(-1)[1:]  # loại bỏ token [CLS] nếu cần
+    num_tokens = att_vector.numel()
+
+    grid_size = int(np.ceil(np.sqrt(num_tokens)))
+    pad_size = grid_size * grid_size - num_tokens
+    if pad_size > 0:
+        att_vector = torch.cat([att_vector, torch.zeros(pad_size, device=att_vector.device)])
+    att_map = att_vector.reshape(grid_size, grid_size).cpu().numpy()
+
+
+    # att_map = t2v_att_list[-1].reshape([-1, size//16, size//16]).numpy().max(0)
 
 
     # att_map = att_map * (att_map > (np.max(att_map) * 0.2))
