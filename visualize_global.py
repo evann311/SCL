@@ -121,5 +121,5 @@ if __name__ == '__main__':
     # att_map = t2v_att_list[-1].reshape([-1, size//16, size//16]).numpy().max(0)
 
 
-    # att_map = att_map * (att_map > (np.max(att_map) * 0.2))
+    att_map = att_map * (att_map > (np.max(att_map) * 0.2))
     visualize_grid_to_grid(att_map, image1, caption=caption)
