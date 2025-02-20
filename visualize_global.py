@@ -96,7 +96,7 @@ if __name__ == '__main__':
     model = VLmae_vis(_config)
     model.eval()
 
-    caption = 'A dog with a green hat sitting in a truck ha ha ha ha ha ha ha ha sandal sandal'
+    caption = 'A dog with a green hat sitting in a truck'
     os.makedirs('/kaggle/working/pami_vis/%s'%(caption), exist_ok=True)
     image1 = Image.open('COCO_val2014_000000000042.jpg')
 
@@ -104,6 +104,7 @@ if __name__ == '__main__':
     caption_tokens = tokenizer.tokenize(caption)
     text_ids = torch.tensor(encoding['input_ids']).unsqueeze(0)
     text_mask = torch.tensor(encoding['attention_mask']).unsqueeze(0)
+    print(text_ids.shape, text_mask.shape)
     image = t1(image1)
     image = t2(image)
     image.save('/kaggle/working/pami_vis/%s/orig.jpg'%(caption))
