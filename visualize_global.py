@@ -17,6 +17,7 @@ from PIL import Image
 from PIL import Image, ImageDraw
 import pickle
 from tqdm import tqdm
+import random
 
 def visualize_grid_to_grid(masks, grid_image, caption, alpha=0.6):
     
@@ -28,7 +29,7 @@ def visualize_grid_to_grid(masks, grid_image, caption, alpha=0.6):
     ax[1].imshow(grid_image)
     ax[1].imshow(mask / np.max(mask), alpha=alpha, cmap='rainbow')
     ax[1].axis('off')        
-    plt.savefig("./pami_vis/%s/t2v_heat_cls.jpg"%(caption), dpi = 500)
+    plt.savefig(f"/kaggle/working/t2v_heat_cls.jpg", dpi = 500)
     
 class VLmae_vis(SCLTransformer):
     def __init__(self, config):
