@@ -54,10 +54,10 @@ def make_arrow(root, dataset_root, max_images=1000):
         questions_train2014 = json.load(fp)["questions"]
     with open(f"{root}/v2_OpenEnded_mscoco_val2014_questions.json", "r") as fp:
         questions_val2014 = json.load(fp)["questions"]
-    # with open(f"{root}/v2_OpenEnded_mscoco_test2015_questions.json", "r") as fp:
-    #     questions_test2015 = json.load(fp)["questions"]
-    # with open(f"{root}/v2_OpenEnded_mscoco_test-dev2015_questions.json", "r") as fp:
-    #     questions_test_dev2015 = json.load(fp)["questions"]
+    with open(f"{root}/v2_OpenEnded_mscoco_test2015_questions.json", "r") as fp:
+        questions_test2015 = json.load(fp)["questions"]
+    with open(f"{root}/v2_OpenEnded_mscoco_test-dev2015_questions.json", "r") as fp:
+        questions_test_dev2015 = json.load(fp)["questions"]
 
     with open(f"{root}/v2_mscoco_train2014_annotations.json", "r") as fp:
         annotations_train2014 = json.load(fp)["annotations"]
@@ -67,20 +67,20 @@ def make_arrow(root, dataset_root, max_images=1000):
     annotations = dict()
 
     for split, questions in zip(
-        # ["train", "val", "test", "test-dev"],
-        # [
-        #     questions_train2014,
-        #     questions_val2014,
-        #     questions_test2015,
-        #     questions_test_dev2015,
-        # ],
-        ["train", "val"],
+        ["train", "val", "test", "test-dev"],
         [
             questions_train2014,
             questions_val2014,
-            # questions_test2015,
-            # questions_test_dev2015,
+            questions_test2015,
+            questions_test_dev2015,
         ],
+        # ["train", "val"],
+        # [
+        #     questions_train2014,
+        #     questions_val2014,
+        #     # questions_test2015,
+        #     # questions_test_dev2015,
+        # ],
     ):
         _annot = defaultdict(dict)
         for q in tqdm(questions):
@@ -140,15 +140,15 @@ def make_arrow(root, dataset_root, max_images=1000):
     for split in [
         "train",
         "val",
-        # "test",
-        # "test-dev",
+        "test",
+        "test-dev",
     ]:
         annot = annotations[split]
         split_name = {
             "train": "train2014",
             "val": "val2014",
-            # "test": "test2015",
-            # "test-dev": "test2015",
+            "test": "test2015",
+            "test-dev": "test2015",
         }[split]
         paths = list(glob(f"{root}/{split_name}/*.jpg"))
         random.shuffle(paths)
