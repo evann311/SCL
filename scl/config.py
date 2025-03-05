@@ -252,7 +252,7 @@ _config_vqa_kg = {
     'data_root': '/kaggle/data/arrow',
     'log_dir': "result",
     'per_gpu_batchsize': 4,  # you should define this manually with per_gpu_batch_size=#
-    'num_gpus': 1,
+    'num_gpus': 2,
     'num_nodes': 1,
     'load_path': "/kaggle/checkpoints/SCL/GLSCL-100k.ckpt",
     'num_workers': 8,
