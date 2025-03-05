@@ -141,7 +141,7 @@ if __name__ == '__main__':
         devices=8,  # TPU v3-8 có 8 cores
         num_nodes=_config["num_nodes"],
         precision="bf16-mixed",  # TPU hỗ trợ tốt hơn với `bfloat16`
-        strategy="tpu",  # Hoặc có thể dùng "tpu" tùy cách sử dụng
+        strategy="auto",  # Hoặc có thể dùng "tpu" tùy cách sử dụng
         benchmark=True,
         deterministic=True,
         max_epochs=_config["max_epoch"] if max_steps is None else 1000,
