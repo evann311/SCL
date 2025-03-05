@@ -268,7 +268,7 @@ _config_vqa_kg = {
     'shift': 4,
 
     #
-    'roberta_path': "/home/hoaithi/pretrained_weight/roberta-base",
+    'roberta_path': "/kaggle/scl_prepare/roberta-base",
 }
 
 
