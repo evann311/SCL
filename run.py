@@ -140,7 +140,7 @@ if __name__ == '__main__':
         accelerator="tpu",  # Chuyển từ GPU/CPU sang TPU
         devices=8,  # TPU v3-8 có 8 cores
         num_nodes=_config["num_nodes"],
-        precision="bf16-mixed",  # TPU hỗ trợ tốt hơn với `bfloat16`
+        precision="bf16-true",  # TPU hỗ trợ tốt hơn với `bfloat16`
         strategy="auto",  # Hoặc có thể dùng "tpu" tùy cách sử dụng
         benchmark=True,
         deterministic=True,
