@@ -249,7 +249,7 @@ _config_vqa_kg = {
     'test_only': False,
 
     # below params varies with the environment
-    'data_root': '/kaggle/data/arrow',
+    'data_root': '/kaggle/input/arrow-vqa2',
     'log_dir': "result",
     'per_gpu_batchsize': 12,  # you should define this manually with per_gpu_batch_size=#
     'num_gpus': 2,
