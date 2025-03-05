@@ -255,7 +255,7 @@ _config_vqa_kg = {
     'num_gpus': 2,
     'num_nodes': 1,
     'load_path': "/kaggle/checkpoints/SCL/GLSCL-100k.ckpt",
-    'num_workers': 8,
+    'num_workers': 0,
     'precision': '16-mixed',
     'is_pretrain': False,
 
