@@ -138,7 +138,7 @@ if __name__ == '__main__':
 
     trainer = pl.Trainer(
         accelerator="tpu",  # Chuyển từ GPU/CPU sang TPU
-        devices=8,  # TPU v3-8 có 8 cores
+        devices=4,  # TPU v3-8 có 8 cores
         num_nodes=_config["num_nodes"],
         precision="bf16-true",  # TPU hỗ trợ tốt hơn với `bfloat16`
         benchmark=True,
