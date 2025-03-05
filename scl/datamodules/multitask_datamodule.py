@@ -54,8 +54,11 @@ class MTDataModule(LightningDataModule):
             if self.dist:
                 from torch.utils.data import RandomSampler
 
-                self.train_sampler = RandomSampler(self.train_dataset, shuffle=True)
-                self.val_sampler = RandomSampler(self.val_dataset, shuffle=True)
+                self.train_sampler = RandomSampler(self.train_dataset)
+                self.val_sampler = RandomSampler(self.val_dataset)
+
+                # self.train_sampler = RandomSampler(self.train_dataset, shuffle=True)
+                # self.val_sampler = RandomSampler(self.val_dataset, shuffle=True)
                 # self.test_sampler = DistributedSampler(self.test_dataset, shuffle=False)
             else:
                 self.train_sampler = None
