@@ -1,0 +1,8 @@
+result/
+scl/__pycache__/
+scl/datamodules/__pycache__/
+scl/datasets/__pycache__/
+scl/gadgets/__pycache__/
+scl/modules/__pycache__/
+scl/transforms/__pycache__/
+scl/utils/__pycache__/

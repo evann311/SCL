@@ -30,23 +30,28 @@ class SCLTransformer(pl.LightningModule):
         self.mask_ratio = self.hparams.config["mask_ratio"]
         hs = self.hparams.config["hidden_size"]
 
-        self.text_transformer = RobertaModel.from_pretrained('/kaggle/scl_prepare/roberta-base')
-
+        # ===================== Pretrain ===================== #
+        self.text_transformer = RobertaModel.from_pretrained(self.hparams.config["roberta_path"])
         self.vision_transformer = build_model(config['vit_path'], resolution_after=config["image_size"])
 
+
+        # ===================== Cross Modal ===================== #
         self.cross_modal_text_transform = nn.Linear(config['hidden_size'], config['hidden_size'])
         self.cross_modal_text_transform.apply(objectives.init_weights) # 设置一些初始化参数，比如均值、标准差
         self.cross_modal_image_transform = nn.Linear(config['hidden_size'], config['hidden_size'])
         self.cross_modal_image_transform.apply(objectives.init_weights)
 
+        # ===================== Cross Modal Layers ===================== #
         self.token_type_embeddings = nn.Embedding(2, config["hidden_size"])
         self.token_type_embeddings.apply(objectives.init_weights)
 
+        # ===================== Cross Modal Attention ===================== #
         self.cross_modal_image_layers = nn.ModuleList([BertCrossLayer(bert_config) for _ in range(config['num_top_layer'])])
         self.cross_modal_image_layers.apply(objectives.init_weights)
         self.cross_modal_text_layers = nn.ModuleList([BertCrossLayer(bert_config) for _ in range(config['num_top_layer'])])
         self.cross_modal_text_layers.apply(objectives.init_weights)
 
+        # ===================== Pooler ===================== #
         self.cross_modal_image_pooler = heads.Pooler(config["hidden_size"]) # 一层mlp
         self.cross_modal_image_pooler.apply(objectives.init_weights)
         self.cross_modal_text_pooler = heads.Pooler(config["hidden_size"])
@@ -79,7 +84,6 @@ class SCLTransformer(pl.LightningModule):
 
         if "scl" in config["loss_names"] and config["loss_names"]["scl"] > 0:
             self.scl_temp = 0.03
-
         # ===================== Downstream ===================== #
         if (
             self.hparams.config["load_path"] != ""
@@ -91,6 +95,7 @@ class SCLTransformer(pl.LightningModule):
             else:
                 state_dict = ckpt["state_dict"]
             state_dict = adapt_position_encoding(state_dict, after=config['image_size'], patch_size=config['patch_size'])
+
             msg = self.load_state_dict(state_dict, strict=False)
             print(msg)
 
@@ -140,6 +145,15 @@ class SCLTransformer(pl.LightningModule):
                 state_dict = ckpt["state_dict"]
             state_dict = adapt_position_encoding(state_dict, after=config['image_size'], patch_size=config['patch_size'])
             self.load_state_dict(state_dict, strict=False)
+
+        # ===================== freeze ======================
+        for param in self.cross_modal_text_layers.parameters():
+            param.requires_grad = False
+
+        for param in self.cross_modal_image_layers.parameters():
+            param.requires_grad = False
+
+        self.eval()
             
     # image
     def infer(
@@ -358,9 +372,19 @@ class SCLTransformer(pl.LightningModule):
 
         return ret
 
+    def check_for_nan(self, batch):
+        for key, value in batch.items():
+            if isinstance(value, torch.Tensor):  # Chỉ kiểm tra tensor, bỏ qua dict
+                if torch.isnan(value).any():
+                    print(f"⚠️ Warning: NaN detected in {key}")
+                if torch.isinf(value).any():
+                    print(f"⚠️ Warning: Inf detected in {key}")
+
     def training_step(self, batch, batch_idx):
         scl_utils.set_task(self)
+        self.check_for_nan(batch)
         output = self(batch)
+        self.check_for_nan(batch)
 
         total_loss = sum([v for k, v in output.items() if "loss" in k])
 

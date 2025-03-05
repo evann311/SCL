@@ -51,7 +51,6 @@ class VLmae_vis(SCLTransformer):
                                 dtype=torch.long, device=text_masks.device)
 
         image_embeds = self.vision_transformer(image_embeds)
-        print(image_embeds.shape)
         image_embeds = self.cross_modal_image_transform(image_embeds)
         extend_image_masks = self.text_transformer.get_extended_attention_mask(image_masks, image_masks.size(), device)
 
@@ -82,7 +81,7 @@ class VLmae_vis(SCLTransformer):
 if __name__ == '__main__':
     size = 288
 
-    tokenizer = RobertaTokenizer.from_pretrained('/kaggle/scl_prepare/roberta-base')
+    tokenizer = RobertaTokenizer.from_pretrained('/home/hoaithi/pretrained_weight/roberta-base')
     t1 = transforms.Resize((size, size), interpolation=PIL.Image.BICUBIC)
     t2 = transforms.CenterCrop(size)
     t3 = transforms.ToTensor()

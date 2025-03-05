@@ -7,7 +7,7 @@ import os
 from tqdm import tqdm
 from glob import glob
 from collections import defaultdict, Counter
-from .glossary import normalize_word
+from glossary import normalize_word
 
 
 def get_score(occurences):
@@ -49,15 +49,15 @@ def path2rest(path, split, annotations, label2ans):
     return [binary, questions, answers, answer_labels, answer_scores, iid, qids, split]
 
 
-def make_arrow(root, dataset_root):
+def make_arrow(root, dataset_root, max_images=1000):
     with open(f"{root}/v2_OpenEnded_mscoco_train2014_questions.json", "r") as fp:
         questions_train2014 = json.load(fp)["questions"]
     with open(f"{root}/v2_OpenEnded_mscoco_val2014_questions.json", "r") as fp:
         questions_val2014 = json.load(fp)["questions"]
-    with open(f"{root}/v2_OpenEnded_mscoco_test2015_questions.json", "r") as fp:
-        questions_test2015 = json.load(fp)["questions"]
-    with open(f"{root}/v2_OpenEnded_mscoco_test-dev2015_questions.json", "r") as fp:
-        questions_test_dev2015 = json.load(fp)["questions"]
+    # with open(f"{root}/v2_OpenEnded_mscoco_test2015_questions.json", "r") as fp:
+    #     questions_test2015 = json.load(fp)["questions"]
+    # with open(f"{root}/v2_OpenEnded_mscoco_test-dev2015_questions.json", "r") as fp:
+    #     questions_test_dev2015 = json.load(fp)["questions"]
 
     with open(f"{root}/v2_mscoco_train2014_annotations.json", "r") as fp:
         annotations_train2014 = json.load(fp)["annotations"]
@@ -67,12 +67,19 @@ def make_arrow(root, dataset_root):
     annotations = dict()
 
     for split, questions in zip(
-        ["train", "val", "test", "test-dev"],
+        # ["train", "val", "test", "test-dev"],
+        # [
+        #     questions_train2014,
+        #     questions_val2014,
+        #     questions_test2015,
+        #     questions_test_dev2015,
+        # ],
+        ["train", "val"],
         [
             questions_train2014,
             questions_val2014,
-            questions_test2015,
-            questions_test_dev2015,
+            # questions_test2015,
+            # questions_test_dev2015,
         ],
     ):
         _annot = defaultdict(dict)
@@ -133,18 +140,22 @@ def make_arrow(root, dataset_root):
     for split in [
         "train",
         "val",
-        "test",
-        "test-dev",
+        # "test",
+        # "test-dev",
     ]:
         annot = annotations[split]
         split_name = {
             "train": "train2014",
             "val": "val2014",
-            "test": "test2015",
-            "test-dev": "test2015",
+            # "test": "test2015",
+            # "test-dev": "test2015",
         }[split]
         paths = list(glob(f"{root}/{split_name}/*.jpg"))
         random.shuffle(paths)
+        
+        # Giới hạn số lượng ảnh xử lý
+        paths = paths[:max_images]
+
         annot_paths = [
             path
             for path in paths
@@ -203,3 +214,10 @@ def make_arrow(root, dataset_root):
     with pa.OSFile(f"{dataset_root}/vqav2_rest_val.arrow", "wb") as sink:
         with pa.RecordBatchFileWriter(sink, df2.schema) as writer:
             writer.write_table(df2)
+
+if __name__ == "__main__":
+    root = "/home/hoaithi/pretrained_weight/data"
+    arrow_root = "/home/hoaithi/pretrained_weight/coco"
+    
+    max_images = 2000
+    make_arrow(root, arrow_root, max_images)

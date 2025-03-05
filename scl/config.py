@@ -48,6 +48,9 @@ _config_pretrain = {
     'hidden_size': 768,
     'num_heads': 12,
 
+    #
+    'roberta_path': "/home/hoaithi/pretrained_weight/roberta-base",
+
     # mae transformer settings
     'vit_path': "/kaggle/scl_prepare/clip-vit/ViT-B-16.pt",
     'mask_ratio': 0.8, # mgsc image mask ratio
@@ -107,7 +110,7 @@ _config_vqa = {
         "con": 0,
         "scl": 0,
         },
-    'batch_size': 512,  # this is a desired batch size; pl trainer will accumulate gradients when per step batch is smaller.
+    'batch_size': 4,  # this is a desired batch size; pl trainer will accumulate gradients when per step batch is smaller.
 
     # Image setting
     'image_size': 384,
@@ -149,7 +152,7 @@ _config_vqa = {
     'lr_mult_head': 50,
     'lr_mult_cross_modal': 10, # 5
     'max_epoch': 10,
-    'max_steps': None,
+    'max_steps': 1000,
     'warmup_steps': 0.1,
 
     # PL Trainer Setting
@@ -158,14 +161,14 @@ _config_vqa = {
     'test_only': False,
 
     # below params varies with the environment
-    'data_root': '/apdcephfs/share_1367250/auroraji/data/arrow/ft_local',
+    'data_root': '/home/hoaithi/pretrained_weight/coco',
     'log_dir': "result",
-    'per_gpu_batchsize': 16,  # you should define this manually with per_gpu_batch_size=#
-    'num_gpus': 8,
+    'per_gpu_batchsize': 4,  # you should define this manually with per_gpu_batch_size=#
+    'num_gpus': 1,
     'num_nodes': 1,
-    'load_path': "/apdcephfs_cq2/share_1367250/auroraji/VL-MAE4/result/mlm_itm_cl_msm_seed0_from_/version_56/checkpoints/epoch=41-step=99999.ckpt",
+    'load_path': "/home/hoaithi/pretrained_weight/checkpoint/GLSCL-100k.ckpt",
     'num_workers': 8,
-    'precision': 16,
+    'precision': 32,
     'is_pretrain': False,
 
     # for retrieval
@@ -176,7 +179,98 @@ _config_vqa = {
     'negative_scale': 1/200,
     'shift': 4,
 
+    #
+    'roberta_path': "/home/hoaithi/pretrained_weight/roberta-base",
 }
+
+# VQA2.0
+_config_vqa_kg = {
+    'exp_name': "finetune_vqa_randaug",
+    'seed': 0,
+    'datasets': ["vqa"], 
+    'loss_names': {
+        "itm": 0,
+        "mlm": 0,
+        "vqa": 1,
+        "nlvr2": 0,
+        "irtr": 0,
+        "mae": 0,
+        "con": 0,
+        "scl": 0,
+        },
+    'batch_size': 4,  # this is a desired batch size; pl trainer will accumulate gradients when per step batch is smaller.
+
+    # Image setting
+    'image_size': 384,
+    'draw_false_image': 0,
+    'image_only': False,
+    'vit': 'mae_vit_base_patch16',
+    'patch_size': 16,
+    'train_transform_keys': ["clip_randaug"],
+    'val_transform_keys': ["clip_test"],
+
+    # Text Setting
+    'tokenizer': "roberta-base",
+    'vocab_size': 50265,
+    'max_text_len': 50,
+    'vqav2_label_size': 3129,
+    'mlm_prob': 0.15,
+    'draw_false_text': 0,
+    'whole_word_masking': True,
+
+    # Transformer Setting 
+    'num_layers': 12,
+    'num_top_layer': 6,
+    'mlp_ratio': 4,
+    'drop_rate': 0.1,
+    'hidden_size': 768,
+    'num_heads': 12,
+
+    # mae transformer settings
+    'vit_path': "/kaggle/scl_prepare/clip-vit/ViT-B-16.pt",
+    'mask_ratio': 0.6,
+
+    # Optimizer Setting
+    'optim_type': "adamw",
+    'weight_decay': 0.01,
+    'decay_power': 1,
+    'end_lr': 0,
+    'learning_rate': 5e-6,
+    'val_check_interval': 0.1,
+    'lr_mult_head': 50,
+    'lr_mult_cross_modal': 10, # 5
+    'max_epoch': 10,
+    'max_steps': 1000,
+    'warmup_steps': 0.1,
+
+    # PL Trainer Setting
+    'resume_from': None, # load interrupted ckpt
+    'fast_dev_run': False, # for debug
+    'test_only': False,
+
+    # below params varies with the environment
+    'data_root': '/home/hoaithi/pretrained_weight/coco',
+    'log_dir': "result",
+    'per_gpu_batchsize': 4,  # you should define this manually with per_gpu_batch_size=#
+    'num_gpus': 1,
+    'num_nodes': 1,
+    'load_path': "/kaggle/scl_prepare/checkpoints/GLSCL-100k.ckpt",
+    'num_workers': 8,
+    'precision': 32,
+    'is_pretrain': False,
+
+    # for retrieval
+    'get_recall_metric': False,
+    'candidate_N': 128,
+    
+    # contrast
+    'negative_scale': 1/200,
+    'shift': 4,
+
+    #
+    'roberta_path': "/home/hoaithi/pretrained_weight/roberta-base",
+}
+
 
 # NVLR2
 _config_nlvr2 = {
@@ -527,6 +621,7 @@ _config_lsmdc = {
 config_dict = {
     'pretrain': _config_pretrain,
     'vqa': _config_vqa,
+    'vqa_kg': _config_vqa_kg,
     'nlvr2': _config_nlvr2,
     'f30k': _config_f30k,
     'coco': _config_coco,

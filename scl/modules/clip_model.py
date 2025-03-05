@@ -179,7 +179,6 @@ class VisualTransformer(nn.Module):
             t = self.class_embedding.to(x.dtype) + torch.zeros(x.shape[0], 1, x.shape[-1], dtype=x.dtype, device=x.device)
             x = torch.cat([t, x], dim=1)  # shape = [*, grid ** 2 + 1, width]
             x = x + self.positional_embedding.to(x.dtype)
-            print(x.shape)
             return x, None
 
 
@@ -444,6 +443,7 @@ def build_model(name, resolution_after=224):
             del state_dict[key]
 
     model_dict = model.state_dict()
+
     pretrained_dict = state_dict
     if resolution_after != image_resolution:
         pretrained_dict = adapt_position_encoding(pretrained_dict, after=resolution_after, patch_size=vision_patch_size)
@@ -453,4 +453,5 @@ def build_model(name, resolution_after=224):
     model_dict.update(pretrained_dict) 
     # 3. load the new state dict
     model.load_state_dict(model_dict)
+
     return model

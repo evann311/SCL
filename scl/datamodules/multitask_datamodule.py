@@ -35,7 +35,6 @@ class MTDataModule(LightningDataModule):
 
     def prepare_data(self):
         for dm in self.dms:
-            print(dm)
             dm.prepare_data()
 
     def setup(self, stage):
@@ -47,7 +46,7 @@ class MTDataModule(LightningDataModule):
         if self.has_image:
             self.train_dataset = ConcatDataset([dm.train_dataset for dm in self.dms])
             self.val_dataset = ConcatDataset([dm.val_dataset for dm in self.dms])
-            self.test_dataset = ConcatDataset([dm.test_dataset for dm in self.dms])            
+            # self.test_dataset = ConcatDataset([dm.test_dataset for dm in self.dms])            
             self.tokenizer = self.dms[0].tokenizer
             self.collate = functools.partial(
                 self.dms[0].train_dataset.collate, mlm_collator=self.dms[0].mlm_collator,
@@ -55,11 +54,11 @@ class MTDataModule(LightningDataModule):
             if self.dist:
                 self.train_sampler = DistributedSampler(self.train_dataset, shuffle=True)
                 self.val_sampler = DistributedSampler(self.val_dataset, shuffle=True)
-                self.test_sampler = DistributedSampler(self.test_dataset, shuffle=False)
+                # self.test_sampler = DistributedSampler(self.test_dataset, shuffle=False)
             else:
                 self.train_sampler = None
                 self.val_sampler = None
-                self.test_sampler = None
+                # self.test_sampler = None
 
         if self.has_video:
             self.train_video_dataset = ConcatDataset([dm.train_dataset for dm in self.video_dms])

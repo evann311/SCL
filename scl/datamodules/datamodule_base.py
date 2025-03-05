@@ -10,12 +10,12 @@ from transformers import (
 )
 
 
-def get_pretrained_tokenizer(from_pretrained):
+def get_pretrained_tokenizer(from_pretrained, _config):
     if torch.distributed.is_initialized():
         if torch.distributed.get_rank() == 0:
-            RobertaTokenizer.from_pretrained('/kaggle/scl_prepare/roberta-base')
+            RobertaTokenizer.from_pretrained(_config['roberta_path'])
         torch.distributed.barrier()
-    return RobertaTokenizer.from_pretrained('/kaggle/scl_prepare/roberta-base')
+    return RobertaTokenizer.from_pretrained(_config['roberta_path'])
 
 
 class BaseDataModule(LightningDataModule):
@@ -47,7 +47,7 @@ class BaseDataModule(LightningDataModule):
         )
 
         tokenizer = _config["tokenizer"]
-        self.tokenizer = get_pretrained_tokenizer(tokenizer)
+        self.tokenizer = get_pretrained_tokenizer(tokenizer, _config)
         self.vocab_size = self.tokenizer.vocab_size
 
         collator = (
@@ -133,11 +133,11 @@ class BaseDataModule(LightningDataModule):
         if not self.setup_flag:
             self.set_train_dataset()
             self.set_val_dataset()
-            self.set_test_dataset()
+            # self.set_test_dataset()
 
             self.train_dataset.tokenizer = self.tokenizer
             self.val_dataset.tokenizer = self.tokenizer
-            self.test_dataset.tokenizer = self.tokenizer
+            # self.test_dataset.tokenizer = self.tokenizer
 
             self.setup_flag = True
 
