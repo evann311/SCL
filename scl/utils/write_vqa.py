@@ -216,8 +216,8 @@ def make_arrow(root, dataset_root, max_images=1000):
             writer.write_table(df2)
 
 if __name__ == "__main__":
-    root = "/home/hoaithi/pretrained_weight/data"
-    arrow_root = "/home/hoaithi/pretrained_weight/coco"
+    root = "/kaggle/data/coco"
+    arrow_root = "/kaggle/data/arrow"
     
     max_images = 2000
     make_arrow(root, arrow_root, max_images)

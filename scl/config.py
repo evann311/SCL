@@ -76,7 +76,7 @@ _config_pretrain = {
     'test_only': False,
 
     # below params varies with the environment
-    'data_root': '/kaggle/data/coco/arrow',
+    'data_root': '/kaggle/data/arrow',
     'log_dir': "result",
     'per_gpu_batchsize': 2,  # you should define this manually with per_gpu_batch_size=#
     'video_per_gpu_batchsize': 6,
@@ -249,12 +249,12 @@ _config_vqa_kg = {
     'test_only': False,
 
     # below params varies with the environment
-    'data_root': '/home/hoaithi/pretrained_weight/coco',
+    'data_root': '/kaggle/data/arrow',
     'log_dir': "result",
     'per_gpu_batchsize': 4,  # you should define this manually with per_gpu_batch_size=#
     'num_gpus': 1,
     'num_nodes': 1,
-    'load_path': "/kaggle/scl_prepare/checkpoints/GLSCL-100k.ckpt",
+    'load_path': "/kaggle/checkpoints/SCL/GLSCL-100k.ckpt",
     'num_workers': 8,
     'precision': 32,
     'is_pretrain': False,
