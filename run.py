@@ -154,6 +154,7 @@ if __name__ == '__main__':
         fast_dev_run=_config["fast_dev_run"],
         val_check_interval=_config["val_check_interval"],
         detect_anomaly=True,
+        num_sanity_val_steps=0  # 🚨 Bỏ Sanity Check
     )
     
 
