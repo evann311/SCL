@@ -115,6 +115,7 @@ if __name__ == '__main__':
 
     trainer = pl.Trainer(
         # plugins=[MyCluster(), MyDDPPlugin()], # for multi-machine ddp
+        val_check_interval=1.0,
         accelerator="gpu" if _config.get("num_gpus", 0) > 0 else "cpu",
         devices=_config.get("num_gpus", 1),
         num_nodes=_config["num_nodes"],
