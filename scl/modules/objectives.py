@@ -467,6 +467,8 @@ def compute_vqa(pl_module, batch):
         
         print("--------------------------------------------------")
 
+    print("Number of non-zero elements:", (vqa_targets != 0).sum())
+
 
     # standard bce loss
     vqa_loss = (
