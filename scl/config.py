@@ -254,7 +254,7 @@ _config_vqa_kg = {
     'per_gpu_batchsize': 12,  # you should define this manually with per_gpu_batch_size=#
     'num_gpus': 2,
     'num_nodes': 1,
-    'load_path': "/kaggle/checkpoints/SCL/GLSCL-100k.ckpt",
+    'load_path': "/kaggle/input/glscl/pytorch/default/1/GLSCL-100k.ckpt",
     'num_workers': 8,
     'precision': '32',
     'is_pretrain': False,
