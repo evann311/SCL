@@ -438,11 +438,11 @@ def compute_vqa(pl_module, batch):
 
 
     for i, (_label, _score) in enumerate(zip(vqa_labels, vqa_scores)):
-        # Chuyển _label và _score thành tensor trên cùng device
         indices = torch.tensor(_label, device=vqa_targets.device, dtype=torch.long)
         values = torch.tensor(_score, device=vqa_targets.device, dtype=vqa_targets.dtype)
-        # Sử dụng scatter_ để gán các giá trị vào vqa_targets
-        vqa_targets[i].scatter_(0, indices, values)
+        # index_copy_ thay thế cho scatter_: copy giá trị từ 'values' vào 'vqa_targets[i]' tại các vị trí 'indices'
+        vqa_targets[i].index_copy_(0, indices, values)
+
 
 
 
