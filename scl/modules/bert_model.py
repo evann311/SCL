@@ -397,8 +397,7 @@ class BertAttention(nn.Module):
         self.output = BertSelfOutput(bert_config)
         self.pruned_heads = set()
 
-        self.use_adapter = getattr(config, "use_adapter", False)
-        print(config["use_adapter"], '\n\n')
+        self.use_adapter = config["use_adapter"] if "use_adapter" in config else False
         if self.use_adapter:
             # Lấy adapter bottleneck dimension từ bert_config, nếu không có thì mặc định là 64
             adapter_bottleneck_dim = getattr(bert_config, "adapter_bottleneck_dim", 64)
