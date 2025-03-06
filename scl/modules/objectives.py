@@ -438,12 +438,10 @@ def compute_vqa(pl_module, batch):
 
 
     for i, (_label, _score) in enumerate(zip(vqa_labels, vqa_scores)):
-        print(i, _label, _score)
         for l, s in zip(_label, _score):
-            print(l, s)
             vqa_targets[i, l] = s
-            print(vqa_targets[i, l])
 
+    print(vqa_targets)
 
     # standard bce loss
     vqa_loss = (
