@@ -462,6 +462,8 @@ def compute_vqa(pl_module, batch):
     pl_module.log(f"vqa/{phase}/loss", loss)
     pl_module.log(f"vqa/{phase}/score", score)
 
+    print(f"vqa/{phase}/loss: {loss}, vqa/{phase}/score: {score}")
+    
     return ret
 
 
