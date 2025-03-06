@@ -236,7 +236,7 @@ _config_vqa_kg = {
     'decay_power': 1,
     'end_lr': 0,
     'learning_rate': 5e-6,
-    'val_check_interval': 0.1,
+    'val_check_interval': 1.0,
     'lr_mult_head': 50,
     'lr_mult_cross_modal': 10, # 5
     'max_epoch': 10,
