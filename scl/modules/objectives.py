@@ -452,7 +452,6 @@ def compute_vqa(pl_module, batch):
         print(f"Updated vqa_targets for sample {i}: {vqa_targets[i]}")
 
 
-    print(vqa_targets)
 
     # standard bce loss
     vqa_loss = (
