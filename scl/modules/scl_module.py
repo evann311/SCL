@@ -46,10 +46,10 @@ class SCLTransformer(pl.LightningModule):
         self.token_type_embeddings.apply(objectives.init_weights)
 
         # ===================== Cross Modal Attention ===================== #
-        self.cross_modal_image_layers = nn.ModuleList([BertCrossLayer(bert_config) for _ in range(config['num_top_layer'])])
+        self.cross_modal_image_layers = nn.ModuleList([BertCrossLayer(bert_config, config) for _ in range(config['num_top_layer'])])
         self.cross_modal_image_layers.apply(objectives.init_weights)
 
-        self.cross_modal_text_layers = nn.ModuleList([BertCrossLayer(bert_config) for _ in range(config['num_top_layer'])])
+        self.cross_modal_text_layers = nn.ModuleList([BertCrossLayer(bert_config, config) for _ in range(config['num_top_layer'])])
         self.cross_modal_text_layers.apply(objectives.init_weights)
 
         # ===================== Pooler ===================== #

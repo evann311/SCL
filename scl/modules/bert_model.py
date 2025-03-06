@@ -391,18 +391,17 @@ class Adapter(nn.Module):
 
 
 class BertAttention(nn.Module):
-    def __init__(self, config):
+    def __init__(self, bert_config, config):
         super().__init__()
-        self.self = BertSelfAttention(config)
-        self.output = BertSelfOutput(config)
+        self.self = BertSelfAttention(bert_config)
+        self.output = BertSelfOutput(bert_config)
         self.pruned_heads = set()
 
         self.use_adapter = getattr(config, "use_adapter", False)
-        print(config["use_adapter"], '\n\n\n\n')
         if self.use_adapter:
-            # Lấy adapter bottleneck dimension từ config, nếu không có thì mặc định là 64
-            adapter_bottleneck_dim = getattr(config, "adapter_bottleneck_dim", 64)
-            self.adapter = Adapter(config.hidden_size, adapter_bottleneck_dim, use_adapter=True)
+            # Lấy adapter bottleneck dimension từ bert_config, nếu không có thì mặc định là 64
+            adapter_bottleneck_dim = getattr(bert_config, "adapter_bottleneck_dim", 64)
+            self.adapter = Adapter(bert_config.hidden_size, adapter_bottleneck_dim, use_adapter=True)
         else:
             self.adapter = None
 
