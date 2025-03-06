@@ -438,8 +438,19 @@ def compute_vqa(pl_module, batch):
 
 
     for i, (_label, _score) in enumerate(zip(vqa_labels, vqa_scores)):
-        for l, s in zip(_label, _score):
-            vqa_targets[i, l] = s
+        print(f"Processing sample {i}:")
+        print("  _label:", _label)
+        print("  _score:", _score)
+        for idx, (l, s) in enumerate(zip(_label, _score)):
+            # Nếu s là tensor, lấy giá trị số thực bằng .item()
+            s_val = s.item() if torch.is_tensor(s) else s
+            print(f"  Token {idx}: label index = {l}, score = {s_val}")
+            if l >= vqa_targets.shape[1]:
+                print(f"❌ Lỗi: Chỉ mục {l} vượt quá kích thước {vqa_targets.shape[1]}")
+            else:
+                vqa_targets[i, l] = s_val
+        print(f"Updated vqa_targets for sample {i}: {vqa_targets[i]}")
+
 
     print(vqa_targets)
 
