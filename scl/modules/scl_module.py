@@ -250,6 +250,8 @@ class SCLTransformer(pl.LightningModule):
     def forward(self, batch): 
         ret = dict()
 
+        print(batch["vqa_scores"])
+
         if len(self.current_tasks) == 0:
             ret.update(self.infer(batch))
             return ret
