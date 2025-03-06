@@ -438,37 +438,8 @@ def compute_vqa(pl_module, batch):
 
 
     for i, (_label, _score) in enumerate(zip(vqa_labels, vqa_scores)):
-        # In ra chỉ số i
-        print(f"[DEBUG] Sample index (i): {i}")
-        
-        # In ra chính xác giá trị của _label, _score
-        print(f"[DEBUG] _label: {_label}")
-        print(f"[DEBUG] _score: {_score}")
-        
-        # Trường hợp _label, _score là list/tuple
         for l, s in zip(_label, _score):
-            print(f"[DEBUG] - label item: {l}, score item: {s}")
-            
-            # Ở đây nếu l hoặc s là tensor, có thể in .shape, .dtype, .item()...
-            if isinstance(l, torch.Tensor):
-                print("[DEBUG] - l.shape:", l.shape, "l.dtype:", l.dtype)
-            if isinstance(s, torch.Tensor):
-                print("[DEBUG] - s.shape:", s.shape, "s.dtype:", s.dtype)
-            
-            # Test gán thử:
-            print(f"[DEBUG] - Gán vào vqa_targets[{i}, {l}]. Trước khi gán:")
-            print("[DEBUG] - Giá trị cũ:", vqa_targets[i, l] if int(l) < vqa_targets.shape[1] else "index out of range?")
-            
-            # Gán
             vqa_targets[i, l] = s
-            
-            # Kiểm tra lại giá trị ngay sau khi gán
-            print("[DEBUG] - Giá trị mới:", vqa_targets[i, l] if int(l) < vqa_targets.shape[1] else "index out of range?")
-        
-        print("--------------------------------------------------")
-
-    print("Number of non-zero elements:", (vqa_targets != 0).sum())
-
 
     # standard bce loss
     vqa_loss = (
