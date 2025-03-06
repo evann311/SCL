@@ -219,5 +219,5 @@ if __name__ == "__main__":
     root = "/content"
     arrow_root = "/content/arrow"
     
-    max_images = 2000
+    max_images = 10000
     make_arrow(root, arrow_root, max_images)
