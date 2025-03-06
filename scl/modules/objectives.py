@@ -442,15 +442,15 @@ def compute_vqa(pl_module, batch):
         print("  _label:", _label)
         print("  _score:", _score)
         for idx, (l, s) in enumerate(zip(_label, _score)):
-            # Nếu s là tensor, lấy giá trị số thực bằng .item()
+            l = int(l)  # đảm bảo chỉ mục là int
             s_val = s.item() if torch.is_tensor(s) else s
             print(f"  Token {idx}: label index = {l}, score = {s_val}")
             if l >= vqa_targets.shape[1]:
                 print(f"❌ Lỗi: Chỉ mục {l} vượt quá kích thước {vqa_targets.shape[1]}")
             else:
                 vqa_targets[i, l] = s_val
-        print(f"Updated vqa_targets for sample {i}: {vqa_targets[i]}")
-
+        # In ra vqa_targets mẫu hiện tại, chuyển về CPU để dễ đọc
+        print(f"Updated vqa_targets for sample {i}: {vqa_targets[i].detach().cpu().numpy()}")
 
 
     # standard bce loss
