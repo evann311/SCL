@@ -367,6 +367,28 @@ class BertSelfOutput(nn.Module):
         hidden_states = self.LayerNorm(hidden_states + input_tensor)
         return hidden_states
 
+class Adapter(nn.Module):
+    def __init__(self, d_model: int, bottleneck_dim: int, activation=nn.GELU(), use_adapter: bool = True):
+        super(Adapter, self).__init__()
+        self.use_adapter = use_adapter
+        self.down_proj = nn.Linear(d_model, bottleneck_dim)
+        self.activation = activation
+        self.up_proj = nn.Linear(bottleneck_dim, d_model)
+        nn.init.zeros_(self.up_proj.weight)
+        nn.init.zeros_(self.up_proj.bias)
+
+    def forward(self, x):
+        if not self.use_adapter:
+            return x
+        residual = x
+        x = self.down_proj(x)
+        x = self.activation(x)
+        x = self.up_proj(x)
+        return residual + x
+
+    def set_enabled(self, enabled: bool):
+        self.use_adapter = enabled
+
 
 class BertAttention(nn.Module):
     def __init__(self, config):
@@ -374,6 +396,15 @@ class BertAttention(nn.Module):
         self.self = BertSelfAttention(config)
         self.output = BertSelfOutput(config)
         self.pruned_heads = set()
+
+        self.use_adapter = getattr(config, "use_adapter", False)
+        if self.use_adapter:
+            # Lấy adapter bottleneck dimension từ config, nếu không có thì mặc định là 64
+            adapter_bottleneck_dim = getattr(config, "adapter_bottleneck_dim", 64)
+            self.adapter = Adapter(config.hidden_size, adapter_bottleneck_dim, use_adapter=True)
+        else:
+            self.adapter = None
+
 
     def prune_heads(self, heads):
         if len(heads) == 0:
@@ -413,6 +444,10 @@ class BertAttention(nn.Module):
             output_attentions,
         )
         attention_output = self.output(self_outputs[0], hidden_states)
+
+        if self.adapter is not None:
+            attention_output = self.adapter(attention_output)
+
         outputs = (attention_output,) + self_outputs[1:]  # add attentions if we output them
         return outputs
 

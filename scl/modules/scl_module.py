@@ -8,7 +8,7 @@ from transformers import RobertaConfig, RobertaModel
 from scl.modules import heads, objectives, scl_utils
 from .clip_model import build_model, adapt_position_encoding 
 # from .clip_model_video import build_model, adapt_position_encoding
-from .bert_model import BertCrossLayer
+from .bert_model import BertCrossLayer, Adapter
 
 class SCLTransformer(pl.LightningModule):
     def __init__(self, config):
@@ -48,6 +48,7 @@ class SCLTransformer(pl.LightningModule):
         # ===================== Cross Modal Attention ===================== #
         self.cross_modal_image_layers = nn.ModuleList([BertCrossLayer(bert_config) for _ in range(config['num_top_layer'])])
         self.cross_modal_image_layers.apply(objectives.init_weights)
+
         self.cross_modal_text_layers = nn.ModuleList([BertCrossLayer(bert_config) for _ in range(config['num_top_layer'])])
         self.cross_modal_text_layers.apply(objectives.init_weights)
 
@@ -152,6 +153,12 @@ class SCLTransformer(pl.LightningModule):
                 param.requires_grad = False
             else:
                 param.requires_grad = True
+
+        for name, module in self.named_modules():
+            if isinstance(module, Adapter):
+                print(f"Unfreezing {name}")
+                for param in module.parameters():
+                    param.requires_grad = True
             
     # image
     def infer(
