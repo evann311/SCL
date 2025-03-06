@@ -436,6 +436,10 @@ def compute_vqa(pl_module, batch):
     vqa_labels = batch["vqa_labels"]
     vqa_scores = batch["vqa_scores"]
 
+    print("vqa_labels:", vqa_labels)
+    print("vqa_scores:", vqa_scores)
+
+
     for i, (_label, _score) in enumerate(zip(vqa_labels, vqa_scores)):
         for l, s in zip(_label, _score):
             vqa_targets[i, l] = s
@@ -463,8 +467,6 @@ def compute_vqa(pl_module, batch):
     pl_module.log(f"vqa/{phase}/score", score)
 
     print(f"vqa/{phase}/loss: {loss}, vqa/{phase}/score: {score}")
-    print("vqa_logits:", vqa_logits)
-    print("vqa_targets:", vqa_targets)
 
 
     
