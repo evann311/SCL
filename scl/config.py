@@ -227,7 +227,7 @@ _config_vqa_kg = {
     'num_heads': 12,
 
     # mae transformer settings
-    'vit_path': "/kaggle/scl_prepare/clip-vit/ViT-B-16.pt",
+    'vit_path': "/kaggle/input/clip-vit/pytorch/default/1/ViT-B-16.pt",
     'mask_ratio': 0.6,
 
     # Optimizer Setting
@@ -268,7 +268,7 @@ _config_vqa_kg = {
     'shift': 4,
 
     #
-    'roberta_path': "/kaggle/scl_prepare/roberta-base",
+    'roberta_path': "/kaggle/input/roberta-base/pytorch/default/1",
 }
 
 
