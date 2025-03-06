@@ -147,13 +147,11 @@ class SCLTransformer(pl.LightningModule):
             self.load_state_dict(state_dict, strict=False)
 
         # ===================== freeze ======================
-        for param in self.cross_modal_text_layers.parameters():
-            param.requires_grad = False
-
-        for param in self.cross_modal_image_layers.parameters():
-            param.requires_grad = False
-
-        self.eval()
+        for name, param in self.named_parameters():
+            if "vqa_classifier" not in name:
+                param.requires_grad = False
+            else:
+                param.requires_grad = True
             
     # image
     def infer(
