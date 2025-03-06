@@ -427,7 +427,9 @@ def compute_con(pl_module, batch):
 
 
 def compute_vqa(pl_module, batch):
+    print(vqa_scores)
     infer = pl_module.infer(batch, mask_text=False)
+    print(vqa_scores)
     vqa_logits = pl_module.vqa_classifier(infer["cls_feats"])
     vqa_targets = torch.zeros(
         len(vqa_logits), pl_module.hparams.config["vqav2_label_size"]
