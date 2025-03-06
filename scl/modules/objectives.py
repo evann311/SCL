@@ -438,14 +438,10 @@ def compute_vqa(pl_module, batch):
 
 
     for i, (_label, _score) in enumerate(zip(vqa_labels, vqa_scores)):
+        print(i, _label, _score)
         for l, s in zip(_label, _score):
-            if l >= vqa_targets.shape[1]:  
-                print(f"❌ Lỗi: Chỉ mục {l} vượt quá kích thước {vqa_targets.shape[1]}")
-            else:
-                vqa_targets[i, l] = s
+            vqa_targets[i, l] = s
 
-
-    print(vqa_targets)
 
     # standard bce loss
     vqa_loss = (
