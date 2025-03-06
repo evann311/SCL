@@ -433,8 +433,6 @@ def compute_vqa(pl_module, batch):
         len(vqa_logits), pl_module.hparams.config["vqav2_label_size"]
     ).to(pl_module.device)
 
-    vqa_labels = batch["vqa_labels"]
-    vqa_scores = batch["vqa_scores"]
 
     print("vqa_labels:", vqa_labels)
     print("vqa_scores:", vqa_scores)

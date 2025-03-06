@@ -38,6 +38,8 @@ class VQAv2Dataset(BaseDataset):
             labels = list()
             scores = list()
 
+        print("vqa_scores", scores)
+
         return {
             "image": image_tensor,
             "text": text,
