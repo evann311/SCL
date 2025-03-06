@@ -442,7 +442,7 @@ def compute_vqa(pl_module, batch):
             vqa_targets[i, l] = s
 
     # caclulate the sum of scores for each label
-    vqa_scores = vqa_targets.sum(0)
+    print(vqa_targets.sum(0))
 
     # standard bce loss
     vqa_loss = (
