@@ -155,8 +155,8 @@ class SCLTransformer(pl.LightningModule):
                 param.requires_grad = True
 
         for name, module in self.named_modules():
+            print(name, module)
             if isinstance(module, Adapter):
-                print(f"Unfreezing {name}")
                 for param in module.parameters():
                     param.requires_grad = True
             
