@@ -251,7 +251,7 @@ _config_vqa_kg = {
     # below params varies with the environment
     'data_root': '/kaggle/input/arrow-vqa2',
     'log_dir': "result",
-    'per_gpu_batchsize': 64,  # you should define this manually with per_gpu_batch_size=#
+    'per_gpu_batchsize': 128,  # you should define this manually with per_gpu_batch_size=#
     'num_gpus': 1,
     'num_nodes': 1,
     'load_path': "/kaggle/input/glscl/pytorch/default/1/GLSCL-100k.ckpt",
