@@ -256,6 +256,9 @@ class SCLTransformer(pl.LightningModule):
             ret.update(self.infer(batch))
             return ret
 
+        print(batch["vqa_scores"])
+
+
         # Image Text Matching
         if "itm" in self.current_tasks:
             ret.update(objectives.compute_itm(self, batch))
