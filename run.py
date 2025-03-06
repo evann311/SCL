@@ -113,34 +113,13 @@ if __name__ == '__main__':
 
     max_steps = _config["max_steps"] if _config["max_steps"] is not None else None
 
-    # trainer = pl.Trainer(
-    #     # plugins=[MyCluster(), MyDDPPlugin()], # for multi-machine ddp
-    #     accelerator="gpu" if _config.get("num_gpus", 0) > 0 else "cpu",
-    #     devices=_config.get("num_gpus", 1),
-    #     num_nodes=_config["num_nodes"],
-    #     precision=_config["precision"],
-    #     strategy="ddp_find_unused_parameters_true",
-    #     benchmark=True,
-    #     deterministic=True,
-    #     max_epochs=_config["max_epoch"] if max_steps is None else 1000,
-    #     max_steps=max_steps,
-    #     callbacks=callbacks,
-    #     logger=logger,
-    #     accumulate_grad_batches=grad_steps,
-    #     log_every_n_steps=10,
-    #     enable_model_summary=True,
-    #     fast_dev_run=_config["fast_dev_run"],
-    #     val_check_interval=_config["val_check_interval"],
-    #     detect_anomaly= True,
-    #     # limit_train_batches=5,
-    #     # limit_val_batches=1
-    # )
-
     trainer = pl.Trainer(
-        accelerator="tpu",  # Chuyển từ GPU/CPU sang TPU
-        devices=1,  # TPU v3-8 có 8 cores
+        # plugins=[MyCluster(), MyDDPPlugin()], # for multi-machine ddp
+        accelerator="gpu" if _config.get("num_gpus", 0) > 0 else "cpu",
+        devices=_config.get("num_gpus", 1),
         num_nodes=_config["num_nodes"],
-        precision="bf16-true",  # TPU hỗ trợ tốt hơn với `bfloat16`
+        precision=_config["precision"],
+        strategy="ddp_find_unused_parameters_true",
         benchmark=True,
         deterministic=True,
         max_epochs=_config["max_epoch"] if max_steps is None else 1000,
@@ -152,10 +131,10 @@ if __name__ == '__main__':
         enable_model_summary=True,
         fast_dev_run=_config["fast_dev_run"],
         val_check_interval=_config["val_check_interval"],
-        detect_anomaly=True,
-        num_sanity_val_steps=0  # 🚨 Bỏ Sanity Check
+        detect_anomaly= True,
+        # limit_train_batches=5,
+        # limit_val_batches=1
     )
-    
 
     if not _config["test_only"]:
         trainer.fit(model, datamodule=dm, ckpt_path=_config.get("resume_from", None))
