@@ -250,14 +250,12 @@ class SCLTransformer(pl.LightningModule):
     def forward(self, batch): 
         ret = dict()
 
-        print(batch["vqa_scores"])
 
         if len(self.current_tasks) == 0:
             ret.update(self.infer(batch))
             return ret
 
-        print(batch["vqa_scores"])
-
+        print(self.current_tasks)
 
         # Image Text Matching
         if "itm" in self.current_tasks:
