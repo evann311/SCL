@@ -427,9 +427,7 @@ def compute_con(pl_module, batch):
 
 
 def compute_vqa(pl_module, batch):
-    print(batch["vqa_scores"])
     infer = pl_module.infer(batch, mask_text=False)
-    print(batch["vqa_scores"])
     vqa_logits = pl_module.vqa_classifier(infer["cls_feats"])
     vqa_targets = torch.zeros(
         len(vqa_logits), pl_module.hparams.config["vqav2_label_size"]
@@ -442,6 +440,8 @@ def compute_vqa(pl_module, batch):
     for i, (_label, _score) in enumerate(zip(vqa_labels, vqa_scores)):
         for l, s in zip(_label, _score):
             vqa_targets[i, l] = s
+
+    print(vqa_targets)
 
     # standard bce loss
     vqa_loss = (
