@@ -269,6 +269,10 @@ _config_vqa_kg = {
 
     #
     'roberta_path': "/kaggle/input/roberta-base/pytorch/default/1",
+
+    # use adapter
+    'use_adapter': True,
+    'adapter_bottleneck_dim': 64,
 }
 
 
