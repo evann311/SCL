@@ -319,7 +319,6 @@ class SCLTransformer(pl.LightningModule):
     def validation_step(self, batch, batch_idx):
         scl_utils.set_task(self)
         output = self(batch)
-        print(output["vqa_loss"])
 
         self.val_vqa_loss_list.append(output["vqa_loss"].detach().cpu().numpy())
 
@@ -329,7 +328,7 @@ class SCLTransformer(pl.LightningModule):
 
         avg_loss = sum(self.val_vqa_loss_list) / len(self.val_vqa_loss_list) if len(self.val_vqa_loss_list) > 0 else 0
         
-        print(f"Validation loss: {avg_loss}")
+        self.val_vqa_loss_list.clear()
 
         scl_utils.epoch_wrapup(self)
 
