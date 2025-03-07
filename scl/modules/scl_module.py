@@ -319,21 +319,17 @@ class SCLTransformer(pl.LightningModule):
     def validation_step(self, batch, batch_idx):
         scl_utils.set_task(self)
         output = self(batch)
-        print(output["vqa_scores"])
+        print(output["vqa_loss"])
 
         self.val_vqa_loss_list.append(output["vqa_loss"].detach().cpu().numpy())
-        self.val_vqa_score_list.append(output["vqa_scores"].detach().cpu().numpy())
 
         return output
 
     def on_validation_epoch_end(self, outs=None):
 
         avg_loss = sum(self.val_vqa_loss_list) / len(self.val_vqa_loss_list) if len(self.val_vqa_loss_list) > 0 else 0
-        avg_score = sum(self.val_vqa_score_list) / len(self.val_vqa_score_list) if len(self.val_vqa_score_list) > 0 else 0 
         
-        print(f"Validation loss: {avg_loss}, Validation score: {avg_score}")
-        
-        print(f"Validation loss: {avg_loss}, Validation score: {avg_score}")
+        print(f"Validation loss: {avg_loss}")
 
         scl_utils.epoch_wrapup(self)
 
