@@ -235,7 +235,7 @@ _config_vqa_kg = {
     'weight_decay': 0.01,
     'decay_power': 1,
     'end_lr': 0,
-    'learning_rate': 1e-4,
+    'learning_rate': 5e-5,
     'val_check_interval': 0.5,
     'lr_mult_head': 50,
     'lr_mult_cross_modal': 10, # 5
@@ -272,7 +272,7 @@ _config_vqa_kg = {
 
     # use adapter
     'use_adapter': True,
-    'adapter_bottleneck_dim': 128,
+    'adapter_bottleneck_dim': 64,
 }
 
 
