@@ -159,6 +159,9 @@ class SCLTransformer(pl.LightningModule):
                 print(name, module)
                 for param in module.parameters():
                     param.requires_grad = True
+
+        self.val_vqa_loss_list = []
+        self.val_vqa_score_list = []
             
     # image
     def infer(
@@ -317,9 +320,20 @@ class SCLTransformer(pl.LightningModule):
         scl_utils.set_task(self)
         output = self(batch)
 
+        self.val_vqa_loss_list.append(output["total_loss"].detach().cpu().numpy())
+        self.val_vqa_score_list.append(output["score"].detach().cpu().numpy())
+
         return output
 
     def on_validation_epoch_end(self, outs=None):
+
+        avg_loss = sum(self.val_vqa_loss_list) / len(self.val_vqa_loss_list) if len(self.val_vqa_loss_list) > 0 else
+        avg_score = sum(self.val_vqa_score_list) / len(self.val_vqa_score_list) if len(self.val_vqa_score_list) > 0 else
+        
+        print(f"Validation loss: {avg_loss}, Validation score: {avg_score}")
+        
+        print(f"Validation loss: {avg_loss}, Validation score: {avg_score}")
+
         scl_utils.epoch_wrapup(self)
 
     def test_step(self, batch, batch_idx):

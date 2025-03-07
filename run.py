@@ -64,12 +64,6 @@ def parse_args():
     return parser.parse_args()
 
 
-class MyProgressBar(TQDMProgressBar):
-    def init_train_tqdm(self):
-        bar = super().init_train_tqdm()
-        bar.bar_format = "{l_bar}{bar}| {n_fmt}/{total_fmt} [{elapsed}<{remaining}]"
-        return bar
-
 if __name__ == '__main__':
     config = parse_args()
     _config = copy.deepcopy(config_dict[config.task])
@@ -108,7 +102,7 @@ if __name__ == '__main__':
     )
 
     lr_callback = pl.callbacks.LearningRateMonitor(logging_interval="step")
-    callbacks = [checkpoint_callback, lr_callback, MyProgressBar()]
+    callbacks = [checkpoint_callback, lr_callback]
 
     num_gpus = (
         _config["num_gpus"]
