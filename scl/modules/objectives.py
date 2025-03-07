@@ -461,8 +461,8 @@ def compute_vqa(pl_module, batch):
         ret["vqa_logits"], ret["vqa_targets"]
     )
 
-    pl_module.log(f"vqa/{phase}/loss", loss)
-    pl_module.log(f"vqa/{phase}/score", score)
+    pl_module.log(f"vqa/{phase}/loss", loss, on_step=True, on_epoch=True, prog_bar=True, logger=True)
+    pl_module.log(f"vqa/{phase}/score", score, on_step=True, on_epoch=True, prog_bar=True, logger=True)
 
     if (phase == "val"):
         print(f"\nvqa/{phase}/loss: {loss}, vqa/{phase}/score: {score}")
