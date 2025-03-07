@@ -305,9 +305,7 @@ class SCLTransformer(pl.LightningModule):
 
     def training_step(self, batch, batch_idx):
         scl_utils.set_task(self)
-        self.check_for_nan(batch)
         output = self(batch)
-        self.check_for_nan(batch)
 
         total_loss = sum([v for k, v in output.items() if "loss" in k])
 
