@@ -63,14 +63,11 @@ def parse_args():
     parser.add_argument("--task", type=str, default='pretrain')
     return parser.parse_args()
 
+
 class MyProgressBar(TQDMProgressBar):
     def init_train_tqdm(self):
         bar = super().init_train_tqdm()
-        # Tăng độ dài bar, ví dụ từ 10 lên 50
-        bar.bar_format = (
-            "{desc}"
-            "{percentage:3.0f}%|{bar:50}{r_bar}"
-        )
+        bar.bar_format = "{l_bar}{bar}| {n_fmt}/{total_fmt} [{elapsed}<{remaining}]"
         return bar
 
 if __name__ == '__main__':
