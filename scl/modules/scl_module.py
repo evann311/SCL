@@ -327,8 +327,8 @@ class SCLTransformer(pl.LightningModule):
 
     def on_validation_epoch_end(self, outs=None):
 
-        avg_loss = sum(self.val_vqa_loss_list) / len(self.val_vqa_loss_list) if len(self.val_vqa_loss_list) > 0 else
-        avg_score = sum(self.val_vqa_score_list) / len(self.val_vqa_score_list) if len(self.val_vqa_score_list) > 0 else
+        avg_loss = sum(self.val_vqa_loss_list) / len(self.val_vqa_loss_list) if len(self.val_vqa_loss_list) > 0 else 0
+        avg_score = sum(self.val_vqa_score_list) / len(self.val_vqa_score_list) if len(self.val_vqa_score_list) > 0 else 0 
         
         print(f"Validation loss: {avg_loss}, Validation score: {avg_score}")
         
