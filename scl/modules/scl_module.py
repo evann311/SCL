@@ -319,6 +319,7 @@ class SCLTransformer(pl.LightningModule):
     def validation_step(self, batch, batch_idx):
         scl_utils.set_task(self)
         output = self(batch)
+        print(output["vqa_scores"])
 
         self.val_vqa_loss_list.append(output["vqa_loss"].detach().cpu().numpy())
         self.val_vqa_score_list.append(output["vqa_scores"].detach().cpu().numpy())
