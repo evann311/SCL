@@ -320,8 +320,6 @@ class SCLTransformer(pl.LightningModule):
         return output
 
     def on_validation_epoch_end(self, outs=None):
-        print(outs)
-        print("\n\n\n\n\n\n")
         scl_utils.epoch_wrapup(self)
 
     def test_step(self, batch, batch_idx):
