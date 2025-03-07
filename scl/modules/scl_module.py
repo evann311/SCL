@@ -321,8 +321,8 @@ class SCLTransformer(pl.LightningModule):
 
     def on_validation_epoch_end(self, outs=None):
 
-        avg_loss = torch.stack([x["vqa_loss"] for x in outs]).mean()
-        self.log("avg_val_loss", avg_loss, prog_bar=True, logger=True)
+        avg_loss = torch.stack([x["vqa_val_loss"] for x in outs]).mean()
+        self.log("avg_vqa_val_loss", avg_loss, prog_bar=True, logger=True)
 
 
         scl_utils.epoch_wrapup(self)
