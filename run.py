@@ -111,7 +111,7 @@ if __name__ == '__main__':
     )
 
     lr_callback = pl.callbacks.LearningRateMonitor(logging_interval="step")
-    callbacks = [checkpoint_callback, lr_callback]
+    callbacks = [checkpoint_callback, lr_callback, MyProgressBar()]
 
     num_gpus = (
         _config["num_gpus"]
@@ -127,7 +127,6 @@ if __name__ == '__main__':
 
     trainer = pl.Trainer(
         # plugins=[MyCluster(), MyDDPPlugin()], # for multi-machine ddp
-        callbacks=[MyProgressBar], # for single-machine ddp
         accelerator="gpu" if _config.get("num_gpus", 0) > 0 else "cpu",
         devices=_config.get("num_gpus", 1),
         num_nodes=_config["num_nodes"],
