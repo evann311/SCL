@@ -391,14 +391,17 @@ class Adapter(nn.Module):
 
 
 class BertAttention(nn.Module):
-    def __init__(self, bert_config, config, use_adapter=False):
+    def __init__(self, bert_config, config):
         super().__init__()
         self.self = BertSelfAttention(bert_config)
         self.output = BertSelfOutput(bert_config)
         self.pruned_heads = set()
 
-        if use_adapter:
-            self.adapter = Adapter(bert_config.hidden_size, 64, use_adapter=True)
+        self.use_adapter = getattr(config, "use_adapter", False)
+        if self.use_adapter:
+            # Lấy adapter bottleneck dimension từ bert_config, nếu không có thì mặc định là 64
+            adapter_bottleneck_dim = getattr(bert_config, "adapter_bottleneck_dim", 64)
+            self.adapter = Adapter(bert_config.hidden_size, adapter_bottleneck_dim, use_adapter=True)
         else:
             self.adapter = None
 
@@ -483,10 +486,10 @@ class BertCrossLayer(nn.Module):
         super().__init__()
         self.chunk_size_feed_forward = bert_config.chunk_size_feed_forward
         self.seq_len_dim = 1
-        self.attention = BertAttention(bert_config, config, False)
+        self.attention = BertAttention(bert_config, config)
         self.is_decoder = bert_config.is_decoder
         self.add_cross_attention = bert_config.add_cross_attention
-        self.crossattention = BertAttention(bert_config, config, True)
+        self.crossattention = BertAttention(bert_config, config)
         self.intermediate = BertIntermediate(bert_config)
         self.output = BertOutput(bert_config)
 

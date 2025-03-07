@@ -272,7 +272,7 @@ _config_vqa_kg = {
 
     # use adapter
     'use_adapter': True,
-    'adapter_bottleneck_dim': 128,
+    'adapter_bottleneck_dim': 64,
 }
 
 
