@@ -2,6 +2,8 @@ import os
 import copy
 import torch
 import pytorch_lightning as pl
+from pytorch_lightning.callbacks import TQDMProgressBar
+
 
 from scl.config import config_dict
 
@@ -61,6 +63,16 @@ def parse_args():
     parser.add_argument("--task", type=str, default='pretrain')
     return parser.parse_args()
 
+class MyProgressBar(TQDMProgressBar):
+    def init_train_tqdm(self):
+        bar = super().init_train_tqdm()
+        # Tăng độ dài bar, ví dụ từ 10 lên 50
+        bar.bar_format = (
+            "{desc}"
+            "{percentage:3.0f}%|{bar:50}{r_bar}"
+        )
+        return bar
+
 if __name__ == '__main__':
     config = parse_args()
     _config = copy.deepcopy(config_dict[config.task])
@@ -115,6 +127,7 @@ if __name__ == '__main__':
 
     trainer = pl.Trainer(
         # plugins=[MyCluster(), MyDDPPlugin()], # for multi-machine ddp
+        plugins=[MyProgressBar], # for single-machine ddp
         accelerator="gpu" if _config.get("num_gpus", 0) > 0 else "cpu",
         devices=_config.get("num_gpus", 1),
         num_nodes=_config["num_nodes"],
