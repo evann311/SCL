@@ -316,11 +316,13 @@ class SCLTransformer(pl.LightningModule):
     def validation_step(self, batch, batch_idx):
         scl_utils.set_task(self)
         output = self(batch)
-        print(output)
 
         return output
 
     def on_validation_epoch_end(self, outs=None):
+        for out in outs:
+            for k, v in out.items():
+                print(k, v)
 
         scl_utils.epoch_wrapup(self)
 
