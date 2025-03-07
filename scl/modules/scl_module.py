@@ -320,8 +320,8 @@ class SCLTransformer(pl.LightningModule):
         scl_utils.set_task(self)
         output = self(batch)
 
-        self.val_vqa_loss_list.append(output["total_loss"].detach().cpu().numpy())
-        self.val_vqa_score_list.append(output["score"].detach().cpu().numpy())
+        self.val_vqa_loss_list.append(output["vqa_loss"].detach().cpu().numpy())
+        self.val_vqa_score_list.append(output["vqa_score"].detach().cpu().numpy())
 
         return output
 
