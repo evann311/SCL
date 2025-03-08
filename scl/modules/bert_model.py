@@ -485,10 +485,10 @@ class BertCrossLayer(nn.Module):
         super().__init__()
         self.chunk_size_feed_forward = bert_config.chunk_size_feed_forward
         self.seq_len_dim = 1
-        self.attention = BertAttention(bert_config, config, False)
+        self.attention = BertAttention(bert_config, config, True)
         self.is_decoder = bert_config.is_decoder
         self.add_cross_attention = bert_config.add_cross_attention
-        self.crossattention = BertAttention(bert_config, config, False)
+        self.crossattention = BertAttention(bert_config, config, True)
         self.intermediate = BertIntermediate(bert_config)
         self.output = BertOutput(bert_config)
 
