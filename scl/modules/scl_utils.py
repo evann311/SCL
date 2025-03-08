@@ -442,7 +442,7 @@ def set_schedule(pl_module):
             power=decay_power,
         )
 
-    sched = {"scheduler": scheduler, "interval": "step", "frequency": 1}
+    sched = {"scheduler": scheduler, "interval": "step"}
 
 
     return (
