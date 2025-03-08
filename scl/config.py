@@ -275,6 +275,97 @@ _config_vqa_kg = {
     'adapter_bottleneck_dim': 64,
 }
 
+_config_vqa_vast = {
+    'exp_name': "finetune_vqa_randaug",
+    'seed': 0,
+    'datasets': ["vqa"], 
+    'loss_names': {
+        "itm": 0,
+        "mlm": 0,
+        "vqa": 1,
+        "nlvr2": 0,
+        "irtr": 0,
+        "mae": 0,
+        "con": 0,
+        "scl": 0,
+        },
+    'batch_size': 72,  # this is a desired batch size; pl trainer will accumulate gradients when per step batch is smaller.
+
+    # Image setting
+    'image_size': 384,
+    'draw_false_image': 0,
+    'image_only': False,
+    'vit': 'mae_vit_base_patch16',
+    'patch_size': 16,
+    'train_transform_keys': ["clip_randaug"],
+    'val_transform_keys': ["clip_test"],
+
+    # Text Setting
+    'tokenizer': "roberta-base",
+    'vocab_size': 50265,
+    'max_text_len': 50,
+    'vqav2_label_size': 3129,
+    'mlm_prob': 0.15,
+    'draw_false_text': 0,
+    'whole_word_masking': True,
+
+    # Transformer Setting 
+    'num_layers': 12,
+    'num_top_layer': 6,
+    'mlp_ratio': 4,
+    'drop_rate': 0.1,
+    'hidden_size': 768,
+    'num_heads': 12,
+
+    # mae transformer settings
+    'vit_path': "/home/user/scl_prepare/clip-vit/ViT-B-16.pt",
+    'mask_ratio': 0.6,
+
+    # Optimizer Setting
+    'optim_type': "adamw",
+    'weight_decay': 0.01,
+    'decay_power': 1,
+    'end_lr': 0,
+    'learning_rate': 1e-4,
+    'val_check_interval': 0.5,
+    'lr_mult_head': 50,
+    'lr_mult_cross_modal': 10, # 5
+    'max_epoch': 10,
+    'max_steps': 1000,
+    'warmup_steps': 0.1,
+
+    # PL Trainer Setting
+    'resume_from': None, # load interrupted ckpt
+    'fast_dev_run': False, # for debug
+    'test_only': False,
+
+    # below params varies with the environment
+    'data_root': '/home/user/data',
+    'log_dir': "result",
+    'per_gpu_batchsize': 36,  # you should define this manually with per_gpu_batch_size=#
+    'num_gpus': 1,
+    'num_nodes': 1,
+    'load_path': "/home/user/scl_prepare/glscl/GLSCL-100k.ckpt",
+    'num_workers': 8,
+    'precision': '16-mixed',
+    'is_pretrain': False,
+
+    # for retrieval
+    'get_recall_metric': False,
+    'candidate_N': 128,
+    
+    # contrast
+    'negative_scale': 1/200,
+    'shift': 4,
+
+    #
+    'roberta_path': "/home/user/scl_prepare/roberta-base",
+
+    # use adapter
+    'use_adapter': False,
+    'adapter_bottleneck_dim': 64,
+}
+
 
 # NVLR2
 _config_nlvr2 = {
@@ -626,6 +717,7 @@ config_dict = {
     'pretrain': _config_pretrain,
     'vqa': _config_vqa,
     'vqa_kg': _config_vqa_kg,
+    'vqa_vast': _config_vqa_vast,
     'nlvr2': _config_nlvr2,
     'f30k': _config_f30k,
     'coco': _config_coco,
