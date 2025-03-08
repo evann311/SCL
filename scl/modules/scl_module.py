@@ -156,7 +156,6 @@ class SCLTransformer(pl.LightningModule):
 
         for name, module in self.named_modules():
             if isinstance(module, Adapter):
-                print(name, module)
                 for param in module.parameters():
                     param.requires_grad = True
 
