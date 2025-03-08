@@ -330,7 +330,7 @@ _config_vqa_vast = {
     'val_check_interval': 0.2,
     'lr_mult_head': 50,
     'lr_mult_cross_modal': 10, # 5
-    'max_epoch': 10,
+    'max_epoch': 5,
     'max_steps': None,
     'warmup_steps': 0.1,
 
