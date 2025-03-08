@@ -114,7 +114,7 @@ if __name__ == '__main__':
         _config["per_gpu_batchsize"] * num_gpus * _config["num_nodes"]
     )
 
-    max_steps = _config["max_steps"] if _config["max_steps"] is not None else None
+    max_steps = _config["max_steps"] if _config["max_steps"] is not None else -1
 
     trainer = pl.Trainer(
         # plugins=[MyCluster(), MyDDPPlugin()], # for multi-machine ddp
