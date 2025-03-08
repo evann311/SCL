@@ -346,7 +346,7 @@ _config_vqa_vast = {
     'num_gpus': 4,
     'num_nodes': 1,
     'load_path': "/home/user/scl_prepare/glscl/GLSCL-100k.ckpt",
-    'num_workers': 8,
+    'num_workers': 16,
     'precision': 'bf16',
     'is_pretrain': False,
 
