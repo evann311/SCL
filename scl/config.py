@@ -340,7 +340,7 @@ _config_vqa_vast = {
     'test_only': False,
 
     # below params varies with the environment
-    'data_root': '/home/user/data',
+    'data_root': '/home/user/data/arrow-vqa2',
     'log_dir': "result",
     'per_gpu_batchsize': 36,  # you should define this manually with per_gpu_batch_size=#
     'num_gpus': 1,
