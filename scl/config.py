@@ -359,7 +359,7 @@ _config_vqa_vast = {
     'shift': 4,
 
     #
-    'roberta_path': "/workspace/scl_prepare/roberta-base",
+    'roberta_path': "/workspace/roberta-base",
 
     # use adapter
     'use_adapter': False,
