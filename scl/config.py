@@ -345,7 +345,7 @@ _config_vqa_vast = {
     'per_gpu_batchsize': 64,  # you should define this manually with per_gpu_batch_size=#
     'num_gpus': 4,
     'num_nodes': 1,
-    'load_path': "/workspace/scl_prepare/glscl/GLSCL-100k.ckpt",
+    'load_path': "/workspace/glscl/GLSCL-100k.ckpt",
     'num_workers': 8,
     'precision': 'bf16',
     'is_pretrain': False,
