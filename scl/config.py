@@ -289,7 +289,7 @@ _config_vqa_vast = {
         "con": 0,
         "scl": 0,
         },
-    'batch_size': 16,  # this is a desired batch size; pl trainer will accumulate gradients when per step batch is smaller.
+    'batch_size': 256,  # this is a desired batch size; pl trainer will accumulate gradients when per step batch is smaller.
 
     # Image setting
     'image_size': 384,
@@ -318,7 +318,7 @@ _config_vqa_vast = {
     'num_heads': 12,
 
     # mae transformer settings
-    'vit_path': "/workspace/clip-vit/ViT-B-16.pt",
+    'vit_path': "/home/user/clip-vit/ViT-B-16.pt",
     'mask_ratio': 0.6,
 
     # Optimizer Setting
@@ -340,14 +340,14 @@ _config_vqa_vast = {
     'test_only': False,
 
     # below params varies with the environment
-    'data_root': '/workspace/arrow-vqa2',
+    'data_root': '/home/user/arrow-vqa2',
     'log_dir': "result",
     'per_gpu_batchsize': 8,  # you should define this manually with per_gpu_batch_size=#
     'num_gpus': 1,
     'num_nodes': 1,
-    'load_path': "/workspace/glscl/GLSCL-100k.ckpt",
+    'load_path': "/home/user/glscl/GLSCL-100k.ckpt",
     'num_workers': 8,
-    'precision': '32',
+    'precision': 'bf16',
     'is_pretrain': False,
 
     # for retrieval
@@ -359,7 +359,7 @@ _config_vqa_vast = {
     'shift': 4,
 
     #
-    'roberta_path': "/workspace/roberta-base",
+    'roberta_path': "/home/user/roberta-base",
 
     # use adapter
     'use_adapter': False,
