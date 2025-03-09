@@ -318,7 +318,7 @@ _config_vqa_vast = {
     'num_heads': 12,
 
     # mae transformer settings
-    'vit_path': "/home/user/scl_prepare/clip-vit/ViT-B-16.pt",
+    'vit_path': "/workspace/clip-vit/ViT-B-16.pt",
     'mask_ratio': 0.6,
 
     # Optimizer Setting
@@ -340,12 +340,12 @@ _config_vqa_vast = {
     'test_only': False,
 
     # below params varies with the environment
-    'data_root': '/home/user/data/arrow-vqa2',
+    'data_root': '/workspace/arrow-vqa2',
     'log_dir': "result",
     'per_gpu_batchsize': 64,  # you should define this manually with per_gpu_batch_size=#
     'num_gpus': 4,
     'num_nodes': 1,
-    'load_path': "/home/user/scl_prepare/glscl/GLSCL-100k.ckpt",
+    'load_path': "/workspace/scl_prepare/glscl/GLSCL-100k.ckpt",
     'num_workers': 8,
     'precision': 'bf16',
     'is_pretrain': False,
@@ -359,7 +359,7 @@ _config_vqa_vast = {
     'shift': 4,
 
     #
-    'roberta_path': "/home/user/scl_prepare/roberta-base",
+    'roberta_path': "/workspace/scl_prepare/roberta-base",
 
     # use adapter
     'use_adapter': False,
