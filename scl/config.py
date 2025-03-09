@@ -342,11 +342,11 @@ _config_vqa_vast = {
     # below params varies with the environment
     'data_root': '/workspace/arrow-vqa2',
     'log_dir': "result",
-    'per_gpu_batchsize': 8,  # you should define this manually with per_gpu_batch_size=#
-    'num_gpus': 1,
+    'per_gpu_batchsize': 48,  # you should define this manually with per_gpu_batch_size=#
+    'num_gpus': 4,
     'num_nodes': 1,
     'load_path': "/workspace/glscl/GLSCL-100k.ckpt",
-    'num_workers': 8,
+    'num_workers': 16,
     'precision': 'bf16',
     'is_pretrain': False,
 
