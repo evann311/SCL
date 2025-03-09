@@ -1,6 +1,8 @@
 import os
 import copy
 import torch
+torch.set_float32_matmul_precision('high')
+
 import pytorch_lightning as pl
 from pytorch_lightning.callbacks import TQDMProgressBar
 
