@@ -347,7 +347,7 @@ _config_vqa_vast = {
     'num_nodes': 1,
     'load_path': "/workspace/glscl/GLSCL-100k.ckpt",
     'num_workers': 8,
-    'precision': 'bf16',
+    'precision': '32',
     'is_pretrain': False,
 
     # for retrieval
