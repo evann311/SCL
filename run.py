@@ -142,34 +142,33 @@ if __name__ == '__main__':
     )
 
     print("="*50)
-print("🔥 DEBUG INFO - LIGHTNING TRAINING CONFIG 🔥")
-print("="*50)
+    print("🔥 DEBUG INFO - LIGHTNING TRAINING CONFIG 🔥")
+    print("="*50)
 
-# 1. Kiểm tra số lượng mẫu & batch size
-print(f"Total training samples: {len(dm.train_dataloader().dataset)}")
-print(f"Per-GPU batch size: {_config['per_gpu_batchsize']}")
-print(f"Total batch size: {_config['batch_size']}")
+    # 1. Kiểm tra số lượng mẫu & batch size
+    print(f"Total training samples: {len(dm.train_dataloader().dataset)}")
+    print(f"Per-GPU batch size: {_config['per_gpu_batchsize']}")
+    print(f"Total batch size: {_config['batch_size']}")
 
-# 2. Kiểm tra số GPU, nodes, strategy
-print(f"Using {num_gpus} GPUs")
-print(f"Using { _config['num_nodes']} Nodes")
-print(f"Distributed Strategy: {trainer.strategy}")
+    # 2. Kiểm tra số GPU, nodes, strategy
+    print(f"Using {num_gpus} GPUs")
+    print(f"Using { _config['num_nodes']} Nodes")
+    print(f"Distributed Strategy: {trainer.strategy}")
 
-# 3. Kiểm tra số Step mỗi Epoch
-expected_steps_per_epoch = len(dm.train_dataloader().dataset) // _config['batch_size']
-print(f"🔥 Expected Steps Per Epoch: {expected_steps_per_epoch}")
+    # 3. Kiểm tra số Step mỗi Epoch
+    expected_steps_per_epoch = len(dm.train_dataloader().dataset) // _config['batch_size']
+    print(f"🔥 Expected Steps Per Epoch: {expected_steps_per_epoch}")
 
-# 4. Kiểm tra Gradient Accumulation
-print(f"Gradient Accumulation Steps: {grad_steps}")
+    # 4. Kiểm tra Gradient Accumulation
+    print(f"Gradient Accumulation Steps: {grad_steps}")
 
-# 5. Kiểm tra Max Steps
-print(f"Max Steps Configured: {max_steps}")
-print(f"Log Every N Steps: {trainer.log_every_n_steps}")
+    # 5. Kiểm tra Max Steps
+    print(f"Max Steps Configured: {max_steps}")
+    print(f"Log Every N Steps: {trainer.log_every_n_steps}")
 
-# 6. Kiểm tra Checkpoint Saving
-print(f"Checkpoint every {checkpoint_callback.every_n_train_steps} steps (if set)")
-
-print("="*50)
+    # 6. Kiểm tra Checkpoint Saving
+    print(f"Checkpoint every {checkpoint_callback.every_n_train_steps} steps (if set)")
+    print("="*50)
 
 
     if not _config["test_only"]:
