@@ -141,6 +141,9 @@ if __name__ == '__main__':
         # limit_val_batches=1
     )
 
+    trainer.save_hyperparameters()  # Lưu hyperparameters tự động
+    print(f"Hyperparameters: {trainer.hparams}")  # In ra
+
     if not _config["test_only"]:
         trainer.fit(model, datamodule=dm, ckpt_path=_config.get("resume_from", None))
     else:
