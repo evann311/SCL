@@ -236,11 +236,11 @@ _config_vqa_kg = {
     'decay_power': 1,
     'end_lr': 0,
     'learning_rate': 1e-4,
-    'val_check_interval': 1.0,
+    'val_check_interval': 0.25,
     'lr_mult_head': 50,
     'lr_mult_cross_modal': 10, # 5
     'max_epoch': 10,
-    'max_steps': 1000,
+    'max_steps': 13800,
     'warmup_steps': 0.1,
 
     # PL Trainer Setting
