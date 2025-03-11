@@ -377,6 +377,6 @@ class SCLTransformer(pl.LightningModule):
         ratio = trainable_params / total_params if total_params > 0 else 0
 
         print(f"Tổng số tham số của mô hình: {total_params:,}")
-        print(f"Tỉ lệ tham số Adapter so với mô hình: {ratio:.2%}")
+        print(f"Tỉ lệ tham số huấn luyện so với mô hình: {ratio:.2%}")
         print(f"Số tham số có thể huấn luyện: {self.count_trainable_parameters():,}")
         print("\n\n\n")
