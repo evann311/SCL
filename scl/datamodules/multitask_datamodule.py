@@ -46,6 +46,9 @@ class MTDataModule(LightningDataModule):
         if self.has_image:
             self.train_dataset = ConcatDataset([dm.train_dataset for dm in self.dms])
             self.val_dataset = ConcatDataset([dm.val_dataset for dm in self.dms])
+
+            print(f"Train Dataset Size: {len(self.train_dataset)}")
+            print(f"Validation Dataset Size: {len(self.val_dataset)}")
             # self.test_dataset = ConcatDataset([dm.test_dataset for dm in self.dms])            
             self.tokenizer = self.dms[0].tokenizer
             self.collate = functools.partial(
