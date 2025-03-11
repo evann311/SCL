@@ -135,6 +135,9 @@ class BaseDataModule(LightningDataModule):
             self.set_val_dataset()
             # self.set_test_dataset()
 
+            print(f"Train Dataset Size: {len(self.train_dataset)}")
+            print(f"Validation Dataset Size: {len(self.val_dataset)}")
+
             self.train_dataset.tokenizer = self.tokenizer
             self.val_dataset.tokenizer = self.tokenizer
             # self.test_dataset.tokenizer = self.tokenizer

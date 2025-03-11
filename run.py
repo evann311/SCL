@@ -72,7 +72,6 @@ if __name__ == '__main__':
     pl.seed_everything(_config["seed"])
 
     dm = MTDataModule(_config, dist=True)
-    dm.setup("fit")
 
     model = SCLTransformer(_config)
     exp_name = f'{_config["exp_name"]}'
