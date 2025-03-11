@@ -355,15 +355,24 @@ class BertSelfAttention(nn.Module):
 
 
 class BertSelfOutput(nn.Module):
-    def __init__(self, config):
+    def __init__(self, bert_config, config, use_adapter: bool = False):
         super().__init__()
-        self.dense = nn.Linear(config.hidden_size, config.hidden_size)
-        self.LayerNorm = nn.LayerNorm(config.hidden_size, eps=config.layer_norm_eps)
-        self.dropout = nn.Dropout(config.hidden_dropout_prob)
+        self.dense = nn.Linear(bert_config.hidden_size, bert_config.hidden_size)
+        self.LayerNorm = nn.LayerNorm(bert_config.hidden_size, eps=bert_config.layer_norm_eps)
+        self.dropout = nn.Dropout(bert_config.hidden_dropout_prob)
+
+        self.use_adapter = use_adapter
+        if self.use_adapter:
+            adapter_bottleneck_dim = config["adapter_bottleneck_dim"]
+            self.adapter = Adapter(bert_config.hidden_size, adapter_bottleneck_dim, use_adapter=True)
+        else:
+            self.adapter = None
 
     def forward(self, hidden_states, input_tensor):
         hidden_states = self.dense(hidden_states)
         hidden_states = self.dropout(hidden_states)
+        if self.adapter is not None:
+            hidden_states = self.adapter(hidden_states)
         hidden_states = self.LayerNorm(hidden_states + input_tensor)
         return hidden_states
 
@@ -394,16 +403,8 @@ class BertAttention(nn.Module):
     def __init__(self, bert_config, config, use_adapter: bool = False):
         super().__init__()
         self.self = BertSelfAttention(bert_config)
-        self.output = BertSelfOutput(bert_config)
+        self.output = BertSelfOutput(bert_config, config, use_adapter)
         self.pruned_heads = set()
-
-        self.use_adapter = use_adapter
-        if self.use_adapter:
-            adapter_bottleneck_dim = config["adapter_bottleneck_dim"]
-            self.adapter = Adapter(bert_config.hidden_size, adapter_bottleneck_dim, use_adapter=True)
-        else:
-            self.adapter = None
-
 
     def prune_heads(self, heads):
         if len(heads) == 0:
@@ -443,10 +444,6 @@ class BertAttention(nn.Module):
             output_attentions,
         )
         attention_output = self.output(self_outputs[0], hidden_states)
-
-        if self.adapter is not None:
-            attention_output = self.adapter(attention_output)
-
         outputs = (attention_output,) + self_outputs[1:]  # add attentions if we output them
         return outputs
 
@@ -467,15 +464,21 @@ class BertIntermediate(nn.Module):
 
 
 class BertOutput(nn.Module):
-    def __init__(self, config):
+    def __init__(self, bert_config, config, use_adapter: bool = False):
         super().__init__()
-        self.dense = nn.Linear(config.intermediate_size, config.hidden_size)
-        self.LayerNorm = nn.LayerNorm(config.hidden_size, eps=config.layer_norm_eps)
-        self.dropout = nn.Dropout(config.hidden_dropout_prob)
+        self.dense = nn.Linear(bert_config.intermediate_size, bert_config.hidden_size)
+        self.LayerNorm = nn.LayerNorm(bert_config.hidden_size, eps=bert_config.layer_norm_eps)
+        self.dropout = nn.Dropout(bert_config.hidden_dropout_prob)
+
+        if use_adapter:
+            adapter_bottleneck_dim = config["adapter_bottleneck_dim"]
+            self.adapter = Adapter(bert_config.hidden_size, adapter_bottleneck_dim, use_adapter=True)
 
     def forward(self, hidden_states, input_tensor):
         hidden_states = self.dense(hidden_states)
         hidden_states = self.dropout(hidden_states)
+        if self.adapter is not None:
+            hidden_states = self.adapter(hidden_states)
         hidden_states = self.LayerNorm(hidden_states + input_tensor)
         return hidden_states
 
@@ -490,7 +493,7 @@ class BertCrossLayer(nn.Module):
         self.add_cross_attention = bert_config.add_cross_attention
         self.crossattention = BertAttention(bert_config, config, True)
         self.intermediate = BertIntermediate(bert_config)
-        self.output = BertOutput(bert_config)
+        self.output = BertOutput(bert_config, config, True)
 
     def forward(
         self,
