@@ -161,6 +161,8 @@ class SCLTransformer(pl.LightningModule):
 
         self.val_vqa_loss_list = []
         self.val_vqa_score_list = []
+
+        self.print_parameter_statistics()
             
     # image
     def infer(
@@ -353,3 +355,28 @@ class SCLTransformer(pl.LightningModule):
 
     def configure_optimizers(self):
         return scl_utils.set_schedule(self)
+
+    def count_total_parameters(self):
+        adapter_param_ids = {id(p) for module in self.modules() if isinstance(module, Adapter) for p in module.parameters()}
+        return sum(p.numel() for p in self.parameters() if id(p) not in adapter_param_ids)
+
+
+    def count_trainable_parameters(self):
+        return sum(p.numel() for p in self.parameters() if p.requires_grad)
+
+    def count_adapter_parameters(self):
+        adapter_total = 0
+        for module in self.modules():
+            if isinstance(module, Adapter):
+                adapter_total += sum(p.numel() for p in module.parameters())
+        return adapter_total
+
+    def print_parameter_statistics(self):
+        total_params = self.count_total_parameters()
+        trainable_params = self.count_trainable_parameters()
+        ratio = trainable_params / total_params if total_params > 0 else 0
+
+        print(f"Tổng số tham số của mô hình: {total_params:,}")
+        print(f"Tỉ lệ tham số Adapter so với mô hình: {ratio:.2%}")
+        print(f"Số tham số có thể huấn luyện: {self.count_trainable_parameters():,}")
+        print("\n\n\n")
