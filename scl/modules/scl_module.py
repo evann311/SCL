@@ -304,9 +304,8 @@ class SCLTransformer(pl.LightningModule):
         scl_utils.set_task(self)
         output = self(batch)
 
-        print(batch.keys())
 
-        if batch_idx % 50 == 0 and self.global_rank == 0:
+        if self.global_rank == 0:
             print(f"[Batch {batch_idx}] QIDs: {batch['qid'][:5]}")
 
 
