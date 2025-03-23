@@ -133,11 +133,11 @@ class BaseDataModule(LightningDataModule):
         if not self.setup_flag:
             self.set_train_dataset()
             self.set_val_dataset()
-            # self.set_test_dataset()
+            self.set_test_dataset()
 
             self.train_dataset.tokenizer = self.tokenizer
             self.val_dataset.tokenizer = self.tokenizer
-            # self.test_dataset.tokenizer = self.tokenizer
+            self.test_dataset.tokenizer = self.tokenizer
 
             self.setup_flag = True
 

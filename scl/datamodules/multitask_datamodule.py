@@ -51,7 +51,7 @@ class MTDataModule(LightningDataModule):
             print(f"Train Dataset Size: {len(self.train_dataset)}")
             print(f"Validation Dataset Size: {len(self.val_dataset)}")
 
-            # self.test_dataset = ConcatDataset([dm.test_dataset for dm in self.dms])            
+            self.test_dataset = ConcatDataset([dm.test_dataset for dm in self.dms])            
             self.tokenizer = self.dms[0].tokenizer
             self.collate = functools.partial(
                 self.dms[0].train_dataset.collate, mlm_collator=self.dms[0].mlm_collator,
@@ -61,11 +61,11 @@ class MTDataModule(LightningDataModule):
 
                 self.train_sampler = DistributedSampler(self.train_dataset, shuffle=True)
                 self.val_sampler = DistributedSampler(self.val_dataset, shuffle=True)
-                # self.test_sampler = DistributedSampler(self.test_dataset, shuffle=False)
+                self.test_sampler = DistributedSampler(self.test_dataset, shuffle=False)
             else:
                 self.train_sampler = None
                 self.val_sampler = None
-                # self.test_sampler = None
+                self.test_sampler = None
 
         if self.has_video:
             self.train_video_dataset = ConcatDataset([dm.train_dataset for dm in self.video_dms])

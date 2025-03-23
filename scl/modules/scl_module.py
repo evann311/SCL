@@ -304,6 +304,11 @@ class SCLTransformer(pl.LightningModule):
         scl_utils.set_task(self)
         output = self(batch)
 
+        print(batch.keys())
+
+        # if batch_idx % 50 == 0:
+        #     print(batch["question_id"][:5])  
+
         total_loss = sum([v for k, v in output.items() if "loss" in k])
 
         return total_loss

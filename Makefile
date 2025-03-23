@@ -1,4 +1,5 @@
-cmt:
+all:
 	git add .
 	git commit -m "update"
-	git push origin adapter
+	git push origin text-encoder-full
+
