@@ -306,8 +306,9 @@ class SCLTransformer(pl.LightningModule):
 
         print(batch.keys())
 
-        # if batch_idx % 50 == 0:
-        #     print(batch["question_id"][:5])  
+        if batch_idx % 50 == 0 and self.global_rank == 0:
+            print(f"[Batch {batch_idx}] QIDs: {batch['qid'][:5]}")
+
 
         total_loss = sum([v for k, v in output.items() if "loss" in k])
 
