@@ -470,14 +470,15 @@ class BertOutput(nn.Module):
         self.LayerNorm = nn.LayerNorm(bert_config.hidden_size, eps=bert_config.layer_norm_eps)
         self.dropout = nn.Dropout(bert_config.hidden_dropout_prob)
 
-        if use_adapter:
+        self.use_adapter = use_adapter
+        if self.use_adapter:
             adapter_bottleneck_dim = config["adapter_bottleneck_dim"]
             self.adapter = Adapter(bert_config.hidden_size, adapter_bottleneck_dim, use_adapter=True)
 
     def forward(self, hidden_states, input_tensor):
         hidden_states = self.dense(hidden_states)
         hidden_states = self.dropout(hidden_states)
-        if self.adapter is not None:
+        if self.use_adapter:
             hidden_states = self.adapter(hidden_states)
         hidden_states = self.LayerNorm(hidden_states + input_tensor)
         return hidden_states
