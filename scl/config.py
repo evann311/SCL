@@ -326,9 +326,9 @@ _config_vqa_vast = {
     'weight_decay': 0.01,
     'decay_power': 1,
     'end_lr': 0,
-    'learning_rate': 2e-5,
+    'learning_rate': 5e-5,
     'val_check_interval': 0.2,
-    'lr_mult_head': 50,
+    'lr_mult_head': 5,
     'lr_mult_cross_modal': 10, # 5
     'max_epoch': 5,
     'max_steps': 16700,
@@ -342,8 +342,8 @@ _config_vqa_vast = {
     # below params varies with the environment
     'data_root': '/workspace/arrow-vqa2-full',
     'log_dir': "result",
-    'per_gpu_batchsize': 64,  # you should define this manually with per_gpu_batch_size=#
-    'num_gpus': 4,
+    'per_gpu_batchsize': 96,  # you should define this manually with per_gpu_batch_size=#
+    'num_gpus': 2,
     'num_nodes': 1,
     'load_path': "/workspace/glscl/GLSCL-100k.ckpt",
     'num_workers': 32,
