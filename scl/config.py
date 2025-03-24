@@ -335,7 +335,7 @@ _config_vqa_vast = {
     'warmup_steps': 0.1,
 
     # PL Trainer Setting
-    'resume_from': '/result/epoch=1-step=4664.ckpt', # load interrupted ckpt
+    'resume_from': None, # load interrupted ckpt
     'fast_dev_run': False, # for debug
     'test_only': False,
 
