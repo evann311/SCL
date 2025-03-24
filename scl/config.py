@@ -328,7 +328,7 @@ _config_vqa_vast = {
     'end_lr': 0,
     'learning_rate': 1e-4,
     'val_check_interval': 0.2,
-    'lr_mult_head': 5,
+    'lr_mult_head': 10,
     'lr_mult_cross_modal': 10, # 5
     'max_epoch': 5,
     'max_steps': 33333,
@@ -347,7 +347,7 @@ _config_vqa_vast = {
     'num_nodes': 1,
     'load_path': "/workspace/glscl/GLSCL-100k.ckpt",
     'num_workers': 32,
-    'precision': 'bf16-mixed',
+    'precision': 'fp16-mixed',
     'is_pretrain': False,
 
     # for retrieval
