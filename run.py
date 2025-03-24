@@ -97,6 +97,7 @@ if __name__ == '__main__':
             monitor="val/the_metric",
             mode="max",
             save_last=True,
+            every_n_epochs=1
         )
     logger = pl.loggers.TensorBoardLogger(
         _config["log_dir"],
