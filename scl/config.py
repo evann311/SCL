@@ -198,7 +198,7 @@ _config_vqa_kg = {
         "con": 0,
         "scl": 0,
         },
-    'batch_size': 128,  # this is a desired batch size; pl trainer will accumulate gradients when per step batch is smaller.
+    'batch_size': 64,  # this is a desired batch size; pl trainer will accumulate gradients when per step batch is smaller.
 
     # Image setting
     'image_size': 384,
@@ -249,14 +249,14 @@ _config_vqa_kg = {
     'test_only': False,
 
     # below params varies with the environment
-    'data_root': '/kaggle/input/arrow-vqa2',
+    'data_root': '/kaggle/input/arrow-vqa2-20k/arrow-vqa-20k',
     'log_dir': "result",
-    'per_gpu_batchsize': 8,  # you should define this manually with per_gpu_batch_size=#
+    'per_gpu_batchsize': 32,  # you should define this manually with per_gpu_batch_size=#
     'num_gpus': 2,
     'num_nodes': 1,
     'load_path': "/kaggle/input/glscl/pytorch/default/1/GLSCL-100k.ckpt",
     'num_workers': 8,
-    'precision': '32',
+    'precision': '16-mixed',
     'is_pretrain': False,
 
     # for retrieval
@@ -328,10 +328,11 @@ _config_vqa_vast = {
     'end_lr': 0,
     'learning_rate': 5e-5,
     'val_check_interval': 0.2,
+    'lr_adapter': 5,
     'lr_mult_head': 10,
     'lr_mult_cross_modal': 10, # 5
     'max_epoch': 5,
-    'max_steps': 33333,
+    'max_steps': 27000,
     'warmup_steps': 0.1,
 
     # PL Trainer Setting

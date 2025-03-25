@@ -316,6 +316,7 @@ def set_schedule(pl_module):
     wd = pl_module.hparams.config["weight_decay"]
     lr_mult_head = pl_module.hparams.config["lr_mult_head"]
     lr_mult_cross_modal = pl_module.hparams.config["lr_mult_cross_modal"]
+    lr_adapter = pl_module.hparams.config["lr_adapter"]
     end_lr = pl_module.hparams.config["end_lr"]
     decay_power = pl_module.hparams.config["decay_power"]
     optim_type = pl_module.hparams.config["optim_type"]
@@ -335,6 +336,7 @@ def set_schedule(pl_module):
     # head_names = ["vqa_classifier", "nlvr2_classifier", "snli_classifier", "mlm_score", "itm_score", "vision_proj", "language_proj"]
     head_names = ["vqa_classifier", "nlvr2_classifier", "snli_classifier", "mlm_score", "itm_score"]
     cross_modal_names = ['cross_modal']
+    adapter_names = ['adapter']
     
     optimizer_grouped_parameters = [
         {
@@ -402,6 +404,27 @@ def set_schedule(pl_module):
             ],
             "weight_decay": 0.0,
             "lr": lr * lr_mult_cross_modal,
+        },
+
+        {
+        "params": [
+                p
+                for n, p in pl_module.named_parameters()
+                if not any(nd in n for nd in no_decay)
+                and any(ad in n for ad in adapter_names)
+            ],
+            "weight_decay": wd,
+            "lr": lr * lr_adapter,  
+        },
+        {
+            "params": [
+                p
+                for n, p in pl_module.named_parameters()
+                if any(nd in n for nd in no_decay)
+                and any(ad in n for ad in adapter_names)
+            ],
+            "weight_decay": 0.0,
+            "lr": lr * lr_adapter,  
         },
     ]
 
