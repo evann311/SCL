@@ -83,10 +83,7 @@ if __name__ == '__main__':
     for i in tqdm(range(len(dataset))):
         try:
             item = dataset[i]
-            caption = item.get('text', None) or item.get('caption', None)
-            if caption is None or caption.strip() == "":
-                print(f"❌ Thiếu caption tại index {i}")
-                print(item)
+            print(item)
         except Exception as e:
             print(f"❌ Lỗi khi đọc sample {i}: {e}")
     
