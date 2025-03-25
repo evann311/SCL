@@ -10,6 +10,8 @@ from .clip_model import build_model, adapt_position_encoding
 # from .clip_model_video import build_model, adapt_position_encoding
 from .bert_model import BertCrossLayer, Adapter
 
+from .adapter import Adapter
+
 class SCLTransformer(pl.LightningModule):
     def __init__(self, config):
         super().__init__()
@@ -149,11 +151,10 @@ class SCLTransformer(pl.LightningModule):
 
         # ===================== freeze ======================
         for name, param in self.named_parameters():
-            if "vqa_classifier" in name or "text_transformer" in name:
+            if "vqa_classifier" in name or "adapter" in name:
                 param.requires_grad = True
             else:
                 param.requires_grad = False
-
 
         self.val_vqa_loss_list = []
         self.val_vqa_score_list = []
