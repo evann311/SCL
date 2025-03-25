@@ -365,7 +365,7 @@ class BertSelfOutput(nn.Module):
 
         self.use_adapter = use_adapter
         if self.use_adapter:
-            self.adapter = Adapter(bert_config.hidden_size, 64, use_adapter=True)
+            self.adapter = Adapter(bert_config.hidden_size, 64)
         else:
             self.adapter = None
 
@@ -450,7 +450,7 @@ class BertOutput(nn.Module):
 
         self.use_adapter = use_adapter
         if self.use_adapter:
-            self.adapter = Adapter(bert_config.hidden_size, 64, use_adapter=True)
+            self.adapter = Adapter(bert_config.hidden_size, 64)
 
     def forward(self, hidden_states, input_tensor):
         hidden_states = self.dense(hidden_states)
