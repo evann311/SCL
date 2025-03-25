@@ -78,7 +78,7 @@ if __name__ == '__main__':
     from tqdm import tqdm
 
     dm = MTDataModule(_config, dist=True)
-    dataset = dm.train_dataset
+    dataset = dm.train_dataloader
     for i in tqdm(range(len(dataset))):
         try:
             item = dataset[i]
