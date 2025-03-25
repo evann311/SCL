@@ -338,7 +338,8 @@ def set_schedule(pl_module):
     cross_modal_names = ['cross_modal']
     adapter_names = ['adapter']
     
-    optimizer_grouped_parameters = [
+        optimizer_grouped_parameters = [
+        # Group 1: Base parameters (không thuộc head, cross_modal, adapter) - không decay
         {
             "params": [
                 p
@@ -346,10 +347,12 @@ def set_schedule(pl_module):
                 if not any(nd in n for nd in no_decay)
                 and not any(bb in n for bb in head_names)
                 and not any(ht in n for ht in cross_modal_names)
+                and not any(ad in n for ad in adapter_names)
             ],
             "weight_decay": wd,
             "lr": lr,
         },
+        # Group 2: Base parameters - decay off
         {
             "params": [
                 p
@@ -357,10 +360,12 @@ def set_schedule(pl_module):
                 if any(nd in n for nd in no_decay)
                 and not any(bb in n for bb in head_names)
                 and not any(ht in n for ht in cross_modal_names)
+                and not any(ad in n for ad in adapter_names)
             ],
             "weight_decay": 0.0,
             "lr": lr,
         },
+        # Group 3: Head parameters - không decay (không thuộc cross_modal, adapter)
         {
             "params": [
                 p
@@ -368,21 +373,25 @@ def set_schedule(pl_module):
                 if not any(nd in n for nd in no_decay)
                 and any(bb in n for bb in head_names)
                 and not any(ht in n for ht in cross_modal_names)
+                and not any(ad in n for ad in adapter_names)
             ],
             "weight_decay": wd,
             "lr": lr * lr_mult_head,
         },
+        # Group 4: Head parameters - decay off
         {
             "params": [
                 p
                 for n, p in pl_module.named_parameters()
-                if any(nd in n for nd in no_decay) 
+                if any(nd in n for nd in no_decay)
                 and any(bb in n for bb in head_names)
                 and not any(ht in n for ht in cross_modal_names)
+                and not any(ad in n for ad in adapter_names)
             ],
             "weight_decay": 0.0,
             "lr": lr * lr_mult_head,
         },
+        # Group 5: Cross modal parameters - không decay (không thuộc adapter)
         {
             "params": [
                 p
@@ -390,32 +399,36 @@ def set_schedule(pl_module):
                 if not any(nd in n for nd in no_decay)
                 and not any(bb in n for bb in head_names)
                 and any(ht in n for ht in cross_modal_names)
+                and not any(ad in n for ad in adapter_names)
             ],
             "weight_decay": wd,
             "lr": lr * lr_mult_cross_modal,
         },
+        # Group 6: Cross modal parameters - decay off
         {
             "params": [
                 p
                 for n, p in pl_module.named_parameters()
-                if any(nd in n for nd in no_decay) 
+                if any(nd in n for nd in no_decay)
                 and not any(bb in n for bb in head_names)
                 and any(ht in n for ht in cross_modal_names)
+                and not any(ad in n for ad in adapter_names)
             ],
             "weight_decay": 0.0,
             "lr": lr * lr_mult_cross_modal,
         },
-
+        # Group 7: Adapter parameters - không decay
         {
-        "params": [
+            "params": [
                 p
                 for n, p in pl_module.named_parameters()
                 if not any(nd in n for nd in no_decay)
                 and any(ad in n for ad in adapter_names)
             ],
             "weight_decay": wd,
-            "lr": lr * lr_adapter,  
+            "lr": lr * lr_adapter,
         },
+        # Group 8: Adapter parameters - decay off
         {
             "params": [
                 p
@@ -424,7 +437,7 @@ def set_schedule(pl_module):
                 and any(ad in n for ad in adapter_names)
             ],
             "weight_decay": 0.0,
-            "lr": lr * lr_adapter,  
+            "lr": lr * lr_adapter,
         },
     ]
 
