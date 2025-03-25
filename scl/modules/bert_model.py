@@ -365,8 +365,7 @@ class BertSelfOutput(nn.Module):
 
         self.use_adapter = use_adapter
         if self.use_adapter:
-            adapter_bottleneck_dim = config["adapter_bottleneck_dim"]
-            self.adapter = Adapter(bert_config.hidden_size, adapter_bottleneck_dim, use_adapter=True)
+            self.adapter = Adapter(bert_config.hidden_size, 64, use_adapter=True)
         else:
             self.adapter = None
 
@@ -451,8 +450,7 @@ class BertOutput(nn.Module):
 
         self.use_adapter = use_adapter
         if self.use_adapter:
-            adapter_bottleneck_dim = config["adapter_bottleneck_dim"]
-            self.adapter = Adapter(bert_config.hidden_size, adapter_bottleneck_dim, use_adapter=True)
+            self.adapter = Adapter(bert_config.hidden_size, 64, use_adapter=True)
 
     def forward(self, hidden_states, input_tensor):
         hidden_states = self.dense(hidden_states)
