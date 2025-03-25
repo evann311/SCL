@@ -166,6 +166,24 @@ class BaseDataset(torch.utils.data.Dataset):
         return ret
 
     def collate(self, batch, mlm_collator):
+        valid_batch = list()
+        for sample in batch:
+            if "text" not in sample or sample["text"] is None:
+                print("‼️ Thiếu text trong sample")
+                continue
+            if "image" not in sample or sample["image"] is None:
+                print("‼️ Thiếu image trong sample")
+                continue
+            if isinstance(sample["text"], (tuple, list)) and sample["text"][0].strip() == "":
+                print("‼️ Text rỗng")
+                continue
+            valid_batch.append(sample)
+
+        if len(valid_batch) == 0:
+            raise ValueError("‼️ Tất cả sample trong batch đều lỗi.")
+
+        batch = valid_batch
+        batch_size = len(batch)
         batch_size = len(batch)
         keys = set([key for b in batch for key in b.keys()])
         dict_batch = {k: [dic[k] if k in dic else None for dic in batch] for k in keys}
