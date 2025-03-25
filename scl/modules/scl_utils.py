@@ -338,7 +338,7 @@ def set_schedule(pl_module):
     cross_modal_names = ['cross_modal']
     adapter_names = ['adapter']
     
-        optimizer_grouped_parameters = [
+    optimizer_grouped_parameters = [
         # Group 1: Base parameters (không thuộc head, cross_modal, adapter) - không decay
         {
             "params": [
