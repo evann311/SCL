@@ -88,6 +88,8 @@ BERT_PRETRAINED_MODEL_ARCHIVE_LIST = [
     # See all BERT models at https://huggingface.co/models?filter=bert
 ]
 
+from .adapter import Adapter
+
 
 def load_tf_weights_in_bert(model, config, tf_checkpoint_path):
     """Load tf checkpoints in a pytorch model."""
@@ -376,29 +378,6 @@ class BertSelfOutput(nn.Module):
         hidden_states = self.LayerNorm(hidden_states + input_tensor)
         return hidden_states
 
-class Adapter(nn.Module):
-    def __init__(self, d_model: int, bottleneck_dim: int, activation=nn.GELU(), use_adapter: bool = True):
-        super(Adapter, self).__init__()
-        self.use_adapter = use_adapter
-        self.down_proj = nn.Linear(d_model, bottleneck_dim)
-        self.activation = activation
-        self.up_proj = nn.Linear(bottleneck_dim, d_model)
-        nn.init.zeros_(self.up_proj.weight)
-        nn.init.zeros_(self.up_proj.bias)
-
-    def forward(self, x):
-        if not self.use_adapter:
-            return x
-        residual = x
-        x = self.down_proj(x)
-        x = self.activation(x)
-        x = self.up_proj(x)
-        return residual + x
-
-    def set_enabled(self, enabled: bool):
-        self.use_adapter = enabled
-
-
 class BertAttention(nn.Module):
     def __init__(self, bert_config, config, use_adapter: bool = False):
         super().__init__()
@@ -489,12 +468,12 @@ class BertCrossLayer(nn.Module):
         super().__init__()
         self.chunk_size_feed_forward = bert_config.chunk_size_feed_forward
         self.seq_len_dim = 1
-        self.attention = BertAttention(bert_config, config, False)
+        self.attention = BertAttention(bert_config, config, True)
         self.is_decoder = bert_config.is_decoder
         self.add_cross_attention = bert_config.add_cross_attention
-        self.crossattention = BertAttention(bert_config, config, False)
+        self.crossattention = BertAttention(bert_config, config, True)
         self.intermediate = BertIntermediate(bert_config)
-        self.output = BertOutput(bert_config, config, False)
+        self.output = BertOutput(bert_config, config, True)
 
     def forward(
         self,
