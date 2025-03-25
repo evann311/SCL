@@ -77,7 +77,7 @@ if __name__ == '__main__':
 
     from tqdm import tqdm
 
-    dm = MTDataModule(_config, dist=True)
+    dm = MTDataModule(_config, dist=False)
     dm.setup('fit')
     dataset = dm.train_dataset
     for i in tqdm(range(len(dataset))):
