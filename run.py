@@ -92,7 +92,7 @@ if __name__ == '__main__':
             every_n_train_steps=5000, # to save checkpoints each 5k steps according to val metrics
         )
     else:
-        checkpoint_callback_topk = pl.callbacks.ModelCheckpoint(
+        checkpoint_callback = pl.callbacks.ModelCheckpoint(
             save_top_k=1,
             verbose=True,
             monitor="val/the_metric",
@@ -107,7 +107,7 @@ if __name__ == '__main__':
     )
 
     lr_callback = pl.callbacks.LearningRateMonitor(logging_interval="step")
-    callbacks = [checkpoint_callback_topk, checkpoint_callback_end, lr_callback]
+    callbacks = [checkpoint_callback, lr_callback]
 
     num_gpus = (
         _config["num_gpus"]
