@@ -332,8 +332,8 @@ _config_vqa_vast = {
     'lr_adapter': 20,
     'lr_mult_head': 20,
     'lr_mult_cross_modal': 10, # 5
-    'max_epoch': 10,
-    'max_steps': 50000,
+    'max_epoch': 5,
+    'max_steps': 27000,
     'warmup_steps': 0.1,
 
     # PL Trainer Setting
