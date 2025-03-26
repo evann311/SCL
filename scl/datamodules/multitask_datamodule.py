@@ -95,6 +95,7 @@ class MTDataModule(LightningDataModule):
                 sampler=self.train_sampler,
                 num_workers=self.num_workers,
                 collate_fn=self.collate,
+                drop_last=True,
             )
             return loader
         if not self.has_image and self.has_video:

@@ -100,7 +100,7 @@ if __name__ == '__main__':
             verbose=True,
             monitor="val/the_metric",
             mode="max",
-            save_last=True,
+            save_on_train_epoch_end=True
         )
 
 

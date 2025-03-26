@@ -146,6 +146,7 @@ class BaseDataModule(LightningDataModule):
             self.train_dataset,
             batch_size=self.batch_size,
             shuffle=True,
+            drop_last=True,
             num_workers=self.num_workers,
             pin_memory=True,
             collate_fn=self.train_dataset.collate,
