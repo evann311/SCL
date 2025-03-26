@@ -91,16 +91,13 @@ if __name__ == '__main__':
             save_last=True,
             every_n_train_steps=5000, # to save checkpoints each 5k steps according to val metrics
         )
-        # checkpoint_callback = pl.callbacks.ModelCheckpoint(
-            # every_n_train_steps=500,
-       # )
     else:
-        checkpoint_callback = pl.callbacks.ModelCheckpoint(
+        checkpoint_callback_topk = pl.callbacks.ModelCheckpoint(
             save_top_k=1,
             verbose=True,
             monitor="val/the_metric",
             mode="max",
-            save_on_train_epoch_end=True
+            save_last=True,
         )
 
 
@@ -110,7 +107,7 @@ if __name__ == '__main__':
     )
 
     lr_callback = pl.callbacks.LearningRateMonitor(logging_interval="step")
-    callbacks = [checkpoint_callback, lr_callback]
+    callbacks = [checkpoint_callback_topk, checkpoint_callback_end, lr_callback]
 
     num_gpus = (
         _config["num_gpus"]
@@ -142,7 +139,7 @@ if __name__ == '__main__':
         enable_model_summary=True,
         fast_dev_run=_config["fast_dev_run"],
         val_check_interval=_config["val_check_interval"],
-        gradient_clip_val=1.0
+        check_val_every_n_epoch=None
         # limit_train_batches=5,
         # limit_val_batches=1
     )
