@@ -336,7 +336,7 @@ _config_vqa_vast = {
     'warmup_steps': 0.1,
 
     # PL Trainer Setting
-    'resume_from': 'result/finetune_vqa_randaug_seed0_from_GLSCL-100k/version_1/checkpoints/last.ckpt', # load interrupted ckpt
+    'resume_from': None, # load interrupted ckpt
     'fast_dev_run': False, # for debug
     'test_only': False,
 
