@@ -326,9 +326,9 @@ _config_vqa_vast = {
     'weight_decay': 0.01,
     'decay_power': 1,
     'end_lr': 0,
-    'learning_rate': 5e-3,
+    'learning_rate': 5e-5,
     'val_check_interval': 0.1,
-    'lr_mult_head': 5,
+    'lr_mult_head': 20,
     'lr_mult_cross_modal': 1, # 5
     'max_epoch': 5,
     'max_steps': None,

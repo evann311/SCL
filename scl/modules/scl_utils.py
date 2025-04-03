@@ -423,6 +423,9 @@ def set_schedule(pl_module):
     else:
         max_steps = pl_module.trainer.max_steps
 
+    print(max_steps)
+    print('\n\n\n\n')
+
     warmup_steps = pl_module.hparams.config["warmup_steps"]
     if isinstance(pl_module.hparams.config["warmup_steps"], float):
         warmup_steps = int(max_steps * warmup_steps)
