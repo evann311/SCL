@@ -100,7 +100,13 @@ if __name__ == '__main__':
             verbose=True,
             monitor="val/the_metric",
             mode="max",
-            save_last=True,
+            save_last=False,
+        )
+
+        last_checkpoint_callback = pl.callbacks.ModelCheckpoint(
+            save_top_k=0,  
+            verbose=True,
+            save_last=True,  
         )
 
 
@@ -110,7 +116,7 @@ if __name__ == '__main__':
     )
 
     lr_callback = pl.callbacks.LearningRateMonitor(logging_interval="step")
-    callbacks = [checkpoint_callback, lr_callback]
+    callbacks = [checkpoint_callback, lr_callback, last_checkpoint_callback]
 
     num_gpus = (
         _config["num_gpus"]
@@ -122,8 +128,6 @@ if __name__ == '__main__':
         _config["per_gpu_batchsize"] * num_gpus * _config["num_nodes"]
     )
 
-    max_steps = _config["max_steps"] if _config["max_steps"] is not None else None
-
     trainer = pl.Trainer(
         # plugins=[MyCluster(), MyDDPPlugin()], # for multi-machine ddp
         accelerator="gpu" if _config.get("num_gpus", 0) > 0 else "cpu",
@@ -133,12 +137,10 @@ if __name__ == '__main__':
         strategy=DDPStrategy(find_unused_parameters=False),
         benchmark=True,
         deterministic=True,
-        max_epochs=_config["max_epoch"] if max_steps is None else 1000,
-        max_steps=max_steps,
+        max_epochs=_config["max_epoch"],
         callbacks=callbacks,
         logger=logger,
         accumulate_grad_batches=grad_steps,
-        log_every_n_steps=10,
         enable_model_summary=True,
         fast_dev_run=_config["fast_dev_run"],
         val_check_interval=_config["val_check_interval"],

@@ -289,7 +289,7 @@ _config_vqa_vast = {
         "con": 0,
         "scl": 0,
         },
-    'batch_size': 96,  # this is a desired batch size; pl trainer will accumulate gradients when per step batch is smaller.
+    'batch_size': 64,  # this is a desired batch size; pl trainer will accumulate gradients when per step batch is smaller.
 
     # Image setting
     'image_size': 384,
@@ -331,7 +331,7 @@ _config_vqa_vast = {
     'lr_mult_head': 10,
     'lr_mult_cross_modal': 10, # 5
     'max_epoch': 5,
-    'max_steps': 33333,
+    'max_steps': None,
     'warmup_steps': 0.1,
 
     # PL Trainer Setting
@@ -342,7 +342,7 @@ _config_vqa_vast = {
     # below params varies with the environment
     'data_root': '/workspace/arrow-vqa2-full',
     'log_dir': "result",
-    'per_gpu_batchsize': 48,  # you should define this manually with per_gpu_batch_size=#
+    'per_gpu_batchsize': 32,  # you should define this manually with per_gpu_batch_size=#
     'num_gpus': 2,
     'num_nodes': 1,
     'load_path': "/workspace/glscl/GLSCL-100k.ckpt",
@@ -360,10 +360,6 @@ _config_vqa_vast = {
 
     #
     'roberta_path': "/workspace/roberta-base",
-
-    # use adapter
-    'use_adapter': False,
-    'adapter_bottleneck_dim': 64,
 }
 
 
