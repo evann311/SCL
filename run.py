@@ -134,7 +134,7 @@ if __name__ == '__main__':
         devices=_config.get("num_gpus", 1),
         num_nodes=_config["num_nodes"],
         precision=_config["precision"],
-        strategy=DDPStrategy(find_unused_parameters=False),
+        strategy=DDPStrategy(find_unused_parameters=True),
         benchmark=True,
         deterministic=True,
         max_epochs=_config["max_epoch"],
