@@ -328,8 +328,8 @@ _config_vqa_vast = {
     'end_lr': 0,
     'learning_rate': 5e-5,
     'val_check_interval': 0.1,
-    'lr_mult_head': 10,
-    'lr_mult_cross_modal': 10, # 5
+    'lr_mult_head': 5,
+    'lr_mult_cross_modal': 1, # 5
     'max_epoch': 5,
     'max_steps': None,
     'warmup_steps': 0.1,
