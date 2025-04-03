@@ -144,7 +144,6 @@ if __name__ == '__main__':
         enable_model_summary=True,
         fast_dev_run=_config["fast_dev_run"],
         val_check_interval=_config["val_check_interval"],
-        detect_anomaly= True,
         # limit_train_batches=5,
         # limit_val_batches=1
     )
