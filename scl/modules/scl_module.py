@@ -150,6 +150,7 @@ class SCLTransformer(pl.LightningModule):
             self.load_state_dict(state_dict, strict=False)
 
         # ===================== freeze ======================
+
         for name, param in self.named_parameters():
             if 'text_transformer' in name or 'vqa_classifier' in name:
                 param.requires_grad = True
