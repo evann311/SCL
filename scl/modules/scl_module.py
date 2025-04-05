@@ -11,6 +11,7 @@ from .clip_model import build_model, adapt_position_encoding
 from .bert_model import BertCrossLayer, Adapter
 
 from .adapter import Adapter
+from .roberta import build_roberta_model
 
 class SCLTransformer(pl.LightningModule):
     def __init__(self, config):
@@ -33,7 +34,7 @@ class SCLTransformer(pl.LightningModule):
         hs = self.hparams.config["hidden_size"]
 
         # ===================== Pretrain ===================== #
-        self.text_transformer = RobertaModel.from_pretrained(self.hparams.config["roberta_path"])
+        self.text_transformer = build_roberta_model(config)
         self.vision_transformer = build_model(config['vit_path'], resolution_after=config["image_size"])
 
 
@@ -152,7 +153,7 @@ class SCLTransformer(pl.LightningModule):
         # ===================== freeze ======================
 
         for name, param in self.named_parameters():
-            if 'text_transformer' in name or 'vqa_classifier' in name:
+            if 'adapter' in name or 'vqa_classifier' in name:
                 param.requires_grad = True
             else:
                 param.requires_grad = False
