@@ -38,7 +38,6 @@ class SCLTransformer(pl.LightningModule):
         self.text_transformer = build_roberta_model(config)
         self.vision_transformer = build_model(config['vit_path'], resolution_after=config["image_size"])
 
-
         # ===================== Cross Modal ===================== #
         self.cross_modal_text_transform = nn.Linear(config['hidden_size'], config['hidden_size'])
         self.cross_modal_text_transform.apply(objectives.init_weights) # 设置一些初始化参数，比如均值、标准差
