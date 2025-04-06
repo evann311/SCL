@@ -35,7 +35,7 @@ class SCLTransformer(pl.LightningModule):
         hs = self.hparams.config["hidden_size"]
 
         # ===================== Pretrain ===================== #
-        self.text_transformer = build_roberta_model(config)
+        self.text_transformer = RobertaModel.from_pretrained(config['roberta_path'])
         self.vision_transformer = build_model(config['vit_path'], resolution_after=config["image_size"])
 
 
@@ -154,7 +154,7 @@ class SCLTransformer(pl.LightningModule):
         # ===================== freeze ======================
 
         for name, param in self.named_parameters():
-            if 'lora' in name or 'vqa_classifier' in name:
+            if 'vqa_classifier' in name:
                 param.requires_grad = True
             else:
                 param.requires_grad = False
