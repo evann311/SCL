@@ -165,10 +165,10 @@ def build_roberta_model(config):
             alpha=alpha
         )
 
-        layer.intermediate = RobertaIntermediate( 
-            layer.intermediate, 
-            rank=rank, 
-            alpha=alpha
-        )
+        # layer.intermediate = RobertaIntermediate( 
+        #     layer.intermediate, 
+        #     rank=rank, 
+        #     alpha=alpha
+        # )
         
     return text_transformer

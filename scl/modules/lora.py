@@ -16,12 +16,8 @@ class LoRALayer(nn.Module):
 
         # Initialize weights
         nn.init.kaiming_uniform_(self.lora_A, a=math.sqrt(5))   
-        nn.init.kaiming_uniform_(self.lora_B, a=math.sqrt(5))
+        nn.init.zeros_(self.lora_B)  # Khởi tạo B bằng 0 để ổn định ban đầu
 
-        # Scale the weights
-        self.lora_A.data *= self.scaling
-        self.lora_B.data *= self.scaling
-        
     
     def forward(self, x):
         lora_output = (x @ self.lora_A) @ self.lora_B
