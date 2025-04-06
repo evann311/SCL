@@ -317,6 +317,7 @@ def set_schedule(pl_module):
     lr_mult_head = pl_module.hparams.config["lr_mult_head"]
     lr_mult_cross_modal = pl_module.hparams.config["lr_mult_cross_modal"]
     lr_adapter = pl_module.hparams.config["lr_adapter"]
+    lr_lora = pl_module.hparams.config["lr_lora"]
     end_lr = pl_module.hparams.config["end_lr"]
     decay_power = pl_module.hparams.config["decay_power"]
     optim_type = pl_module.hparams.config["optim_type"]
@@ -337,9 +338,10 @@ def set_schedule(pl_module):
     head_names = ["vqa_classifier", "nlvr2_classifier", "snli_classifier", "mlm_score", "itm_score"]
     cross_modal_names = ['cross_modal']
     adapter_names = ['adapter']
+    lora_names = ['lora']
     
     optimizer_grouped_parameters = [
-        # Group 1: Base parameters (không thuộc head, cross_modal, adapter) - không decay
+        # Group 1: Base parameters (không thuộc head, cross_modal, adapter, lora) - không decay
         {
             "params": [
                 p
@@ -348,6 +350,7 @@ def set_schedule(pl_module):
                 and not any(bb in n for bb in head_names)
                 and not any(ht in n for ht in cross_modal_names)
                 and not any(ad in n for ad in adapter_names)
+                and not any(lr in n for lr in lora_names)
             ],
             "weight_decay": wd,
             "lr": lr,
@@ -361,11 +364,12 @@ def set_schedule(pl_module):
                 and not any(bb in n for bb in head_names)
                 and not any(ht in n for ht in cross_modal_names)
                 and not any(ad in n for ad in adapter_names)
+                and not any(lr in n for lr in lora_names)
             ],
             "weight_decay": 0.0,
             "lr": lr,
         },
-        # Group 3: Head parameters - không decay (không thuộc cross_modal, adapter)
+        # Group 3: Head parameters - không decay (không thuộc cross_modal, adapter, lora)
         {
             "params": [
                 p
@@ -374,6 +378,7 @@ def set_schedule(pl_module):
                 and any(bb in n for bb in head_names)
                 and not any(ht in n for ht in cross_modal_names)
                 and not any(ad in n for ad in adapter_names)
+                and not any(lr in n for lr in lora_names)
             ],
             "weight_decay": wd,
             "lr": lr * lr_mult_head,
@@ -387,11 +392,12 @@ def set_schedule(pl_module):
                 and any(bb in n for bb in head_names)
                 and not any(ht in n for ht in cross_modal_names)
                 and not any(ad in n for ad in adapter_names)
+                and not any(lr in n for lr in lora_names)
             ],
             "weight_decay": 0.0,
             "lr": lr * lr_mult_head,
         },
-        # Group 5: Cross modal parameters - không decay (không thuộc adapter)
+        # Group 5: Cross modal parameters - không decay (không thuộc adapter, lora)
         {
             "params": [
                 p
@@ -400,6 +406,7 @@ def set_schedule(pl_module):
                 and not any(bb in n for bb in head_names)
                 and any(ht in n for ht in cross_modal_names)
                 and not any(ad in n for ad in adapter_names)
+                and not any(lr in n for lr in lora_names)
             ],
             "weight_decay": wd,
             "lr": lr * lr_mult_cross_modal,
@@ -413,6 +420,7 @@ def set_schedule(pl_module):
                 and not any(bb in n for bb in head_names)
                 and any(ht in n for ht in cross_modal_names)
                 and not any(ad in n for ad in adapter_names)
+                and not any(lr in n for lr in lora_names)
             ],
             "weight_decay": 0.0,
             "lr": lr * lr_mult_cross_modal,
@@ -424,6 +432,7 @@ def set_schedule(pl_module):
                 for n, p in pl_module.named_parameters()
                 if not any(nd in n for nd in no_decay)
                 and any(ad in n for ad in adapter_names)
+                and not any(lr in n for lr in lora_names)
             ],
             "weight_decay": wd,
             "lr": lr * lr_adapter,
@@ -435,11 +444,35 @@ def set_schedule(pl_module):
                 for n, p in pl_module.named_parameters()
                 if any(nd in n for nd in no_decay)
                 and any(ad in n for ad in adapter_names)
+                and not any(lr in n for lr in lora_names)
             ],
             "weight_decay": 0.0,
             "lr": lr * lr_adapter,
         },
+        # Group 9: Lora parameters - không decay
+        {
+            "params": [
+                p
+                for n, p in pl_module.named_parameters()
+                if not any(nd in n for nd in no_decay)
+                and any(lr in n for lr in lora_names)
+            ],
+            "weight_decay": wd,
+            "lr": lr * lr_lora,
+        },
+        # Group 10: Lora parameters - decay off
+        {
+            "params": [
+                p
+                for n, p in pl_module.named_parameters()
+                if any(nd in n for nd in no_decay)
+                and any(lr in n for lr in lora_names)
+            ],
+            "weight_decay": 0.0,
+            "lr": lr * lr_lora,
+        },
     ]
+
 
     if optim_type == "adamw":
         optimizer = AdamW(

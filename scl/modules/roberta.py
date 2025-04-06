@@ -15,6 +15,7 @@ class RobertaSelfOutput(nn.Module):
         hidden_states = self.dropout(hidden_states)
         hidden_states = self.adapter(hidden_states)
         hidden_states = self.LayerNorm(hidden_states + input_tensor)
+
         return hidden_states
 
 def build_roberta_model(config):

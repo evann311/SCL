@@ -11,7 +11,8 @@ from .clip_model import build_model, adapt_position_encoding
 from .bert_model import BertCrossLayer, Adapter
 
 from .adapter import Adapter
-from .roberta import build_roberta_model
+from .roberta_lora import build_roberta_model
+from .lora import LoRALayer
 
 class SCLTransformer(pl.LightningModule):
     def __init__(self, config):
@@ -153,7 +154,7 @@ class SCLTransformer(pl.LightningModule):
         # ===================== freeze ======================
 
         for name, param in self.named_parameters():
-            if 'adapter' in name or 'vqa_classifier' in name:
+            if 'lora' in name or 'vqa_classifier' in name:
                 param.requires_grad = True
             else:
                 param.requires_grad = False
@@ -362,8 +363,8 @@ class SCLTransformer(pl.LightningModule):
 
     def count_total_parameters(self):
         adapter_param_ids = {id(p) for module in self.modules() if isinstance(module, Adapter) for p in module.parameters()}
-        return sum(p.numel() for p in self.parameters() if id(p) not in adapter_param_ids)
-
+        lora_param_ids = {id(p) for module in self.modules() if isinstance(module, LoRALayer) for p in module.parameters()}
+        return sum(p.numel() for p in self.parameters() if id(p) not in adapter_param_ids and id(p) not in lora_param_ids)
 
     def count_trainable_parameters(self):
         return sum(p.numel() for p in self.parameters() if p.requires_grad)
