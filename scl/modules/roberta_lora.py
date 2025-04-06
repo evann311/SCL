@@ -48,7 +48,7 @@ class RobertaSelfAttention(nn.Module):
         past_key_value: Optional[Tuple[Tuple[torch.FloatTensor]]] = None,
         output_attentions: Optional[bool] = False,
     ) -> Tuple[torch.Tensor]:
-        mixed_query_layer = self.query_lora(self.query(hidden_states))
+        mixed_query_layer = self.query(hidden_states) + self.query_lora(self.query(hidden_states))
 
         # If this is instantiated as a cross-attention module, the keys
         # and values come from an encoder; the attention mask needs to be
@@ -61,17 +61,17 @@ class RobertaSelfAttention(nn.Module):
             value_layer = past_key_value[1]
             attention_mask = encoder_attention_mask
         elif is_cross_attention:
-            key_layer = self.transpose_for_scores(self.key_lora(self.key(encoder_hidden_states)))
-            value_layer = self.transpose_for_scores(self.value_lora(self.value(encoder_hidden_states)))
+            key_layer = self.transpose_for_scores(self.key(encoder_hidden_states) + self.key_lora(self.key(encoder_hidden_states)))
+            value_layer = self.transpose_for_scores(self.value(encoder_hidden_states) + self.value_lora(self.value(encoder_hidden_states)))
             attention_mask = encoder_attention_mask
         elif past_key_value is not None:
-            key_layer = self.transpose_for_scores(self.key_lora(self.key(hidden_states)))
-            value_layer = self.transpose_for_scores(self.value_lora(self.value(hidden_states)))
+            key_layer = self.transpose_for_scores(self.key(hidden_states) + self.key_lora(self.key(hidden_states)))
+            value_layer = self.transpose_for_scores(self.value(hidden_states) + self.value_lora(self.value(hidden_states)))
             key_layer = torch.cat([past_key_value[0], key_layer], dim=2)
             value_layer = torch.cat([past_key_value[1], value_layer], dim=2)
         else:
-            key_layer = self.transpose_for_scores(self.key_lora(self.key(hidden_states)))
-            value_layer = self.transpose_for_scores(self.value_lora(self.value(hidden_states)))
+            key_layer = self.transpose_for_scores(self.key(hidden_states) + self.key_lora(self.key(hidden_states)))
+            value_layer = self.transpose_for_scores(self.value(hidden_states) + self.value_lora(self.value(hidden_states)))
 
         query_layer = self.transpose_for_scores(mixed_query_layer)
 
@@ -145,12 +145,12 @@ class RobertaIntermediate(nn.Module):
         self.dense = roberta_intermediate.dense
         self.intermediate_act_fn = roberta_intermediate.intermediate_act_fn
 
-        self.intermediate_lora = LoRALayer(self.dense.in_features, self.dense.out_features, rank=rank, alpha=alpha)
+        self.intermediate_lora = LoRALayer(self.dense.out_features, self.dense.out_features, rank=rank, alpha=alpha)
 
     def forward(self, hidden_states: torch.Tensor) -> torch.Tensor:
         hidden_states = self.dense(hidden_states)
         hidden_states = self.intermediate_act_fn(hidden_states)
-        return self.intermediate_lora(hidden_states)
+        return hidden_states + self.intermediate_lora(hidden_states)
 
 def build_roberta_model(config):
     text_transformer = RobertaModel.from_pretrained(config['roberta_path'])
