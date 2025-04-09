@@ -1,5 +1,5 @@
 all:
 	git add .
 	git commit -m "update"
-	git push origin text-encoder-lora
+	git push origin fusion-encoder-lora
 
