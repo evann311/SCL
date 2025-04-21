@@ -153,7 +153,7 @@ if __name__ == '__main__':
         max_epochs=_config["max_epoch"],
         callbacks=callbacks,
         logger=logger,
-        profilter=profilter,
+        profiler=profilter,
         accumulate_grad_batches=grad_steps,
         enable_model_summary=True,
         fast_dev_run=_config["fast_dev_run"],
