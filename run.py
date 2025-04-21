@@ -15,6 +15,7 @@ from scl.modules import SCLTransformer
 from scl.datamodules.multitask_datamodule import MTDataModule
 
 from pytorch_lightning.plugins.environments import ClusterEnvironment
+from pytorch_lightning.profilers import PyTorchProfiler
 from pytorch_lightning.strategies import DDPStrategy
 
 import torch.distributed as dist
@@ -112,6 +113,21 @@ if __name__ == '__main__':
         name=f'{exp_name}_seed{_config["seed"]}_from_{_config["load_path"].split("/")[-1][:-5]}',
     )
 
+    profilter = PyTorchProfiler(
+        dirpath=os.path.join(_config["log_dir"], "profiler"),
+        filename=f"{exp_name}_seed{_config['seed']}",
+        schedule=torch.profiler.schedule(wait=1, warmup=1, active=5, repeat=1),
+        on_trace_ready=torch.profiler.tensorboard_trace_handler(
+            os.path.join(_config["log_dir"], "profiler"),
+            worker_name=None,
+        ),
+        profile_memory=True,
+        with_stack=True,
+        record_shapes=True,
+        with_flops=True,
+        with_modules=True,
+    )
+
     lr_callback = pl.callbacks.LearningRateMonitor(logging_interval="step")
     callbacks = [checkpoint_callback, lr_callback, last_checkpoint_callback]
 
@@ -137,6 +153,7 @@ if __name__ == '__main__':
         max_epochs=_config["max_epoch"],
         callbacks=callbacks,
         logger=logger,
+        profilter=profilter,
         accumulate_grad_batches=grad_steps,
         enable_model_summary=True,
         fast_dev_run=_config["fast_dev_run"],
