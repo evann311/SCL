@@ -122,7 +122,7 @@ if __name__ == '__main__':
             worker_name=None,
         ),
         profile_memory=True,
-        with_stack=True,
+        with_stack=False,
         record_shapes=True,
         with_flops=True,
         with_modules=True,
