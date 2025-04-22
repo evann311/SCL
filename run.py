@@ -113,14 +113,40 @@ if __name__ == '__main__':
         name=f'{exp_name}_seed{_config["seed"]}_from_{_config["load_path"].split("/")[-1][:-5]}',
     )
 
+
+    tb_handler_instance = torch.profiler.tensorboard_trace_handler(
+        dir_name=os.path.join(_config["log_dir"], "profiler"),
+        worker_name=None, #
+    )
+    
+    def wrapped_on_trace_ready(prof):
+        current_rank = getattr(trainer, 'global_rank', 'N/A') # Cố gắng lấy rank nếu trainer tồn tại
+        print(f"--- DEBUG: on_trace_ready called! Rank: {current_rank}. Attempting to save trace to {profiler_log_dir} ---")
+        try:
+            # Gọi handler gốc
+            tb_handler_instance(prof)
+            print(f"--- DEBUG: tensorboard_trace_handler finished successfully. Rank: {current_rank} ---")
+            # Kiểm tra ngay lập tức xem thư mục plugins/profile có được tạo không
+            expected_event_dir = os.path.join(_config["log_dir"], "plugins", "profile")
+            if os.path.exists(expected_event_dir):
+                print(f"--- DEBUG: Event dir FOUND: {expected_event_dir}. Contents: {os.listdir(expected_event_dir)}")
+                # Bạn có thể muốn kiểm tra sâu hơn vào thư mục con ngày/giờ
+            else:
+                print(f"--- DEBUG: Event dir NOT FOUND at {expected_event_dir} immediately after handler call.")
+
+        except Exception as e:
+            print(f"--- DEBUG: !!! ERROR within tensorboard_trace_handler on Rank {current_rank}: {e} !!! ---")
+            import traceback 
+
+            print(traceback.format_exc()) # In đầy đủ traceback của lỗi
+
+
     profilter = PyTorchProfiler(
         dirpath=os.path.join(_config["log_dir"], "profiler"),
         filename=f"{exp_name}_seed{_config['seed']}",
         schedule=torch.profiler.schedule(wait=1, warmup=1, active=5, repeat=1),
-        on_trace_ready=torch.profiler.tensorboard_trace_handler(
-            os.path.join(_config["log_dir"], "profiler"),
-            worker_name=None,
-        ),
+        on_trace_ready=wrapped_on_trace_ready, # SỬ DỤNG HÀM BỌC CỦA BẠN
+
         profile_memory=True,
         with_stack=False,
         record_shapes=True,
