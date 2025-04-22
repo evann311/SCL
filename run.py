@@ -126,31 +126,34 @@ if __name__ == '__main__':
     )
     
 
+
     def wrapped_on_trace_ready(profiler_instance):
         callback_rank = int(os.environ.get("RANK", os.environ.get("LOCAL_RANK", -1))) # -1 nếu không có DDP
-
         log.debug(f"--- wrapped_on_trace_ready called on RANK {callback_rank} ---")
 
         # <<< !!! CHỈ RANK 0 MỚI THỰC HIỆN VIỆC GHI FILE !!! >>>
         if callback_rank == 0 or callback_rank == -1: # -1 là trường hợp không DDP
             try:
-                # Xác định thư mục đích một cách rõ ràng
-                # Giả sử profiler_instance có dirpath như bạn đã cấu hình
-                # Hoặc lấy từ cấu hình chung nếu cần
-                if hasattr(profiler_instance, 'dirpath') and profiler_instance.dirpath:
-                    output_dir = Path(profiler_instance.dirpath)
-                    # Handler cần thư mục, không phải tên file cụ thể ban đầu
-                    tb_dir = output_dir # Sử dụng dirpath đã cung cấp cho Profiler
+                # --- Xác định thư mục đích ---
+                tb_dir = None
+                if hasattr(profiler_instance, 'dir_name') and profiler_instance.dir_name:
+                    # Ưu tiên dir_name nếu nó được cấu hình trực tiếp trong Profiler
+                    # PyTorch Profiler thường lưu vào dir_name/worker_name
+                    # TensorBoard Handler sẽ ghi vào thư mục được chỉ định cho nó
+                    tb_dir = Path(profiler_instance.dir_name)
+                    log.info(f"Rank {callback_rank}: Using dir_name from profiler instance: {str(tb_dir)}")
+                elif hasattr(profiler_instance, 'profile') and hasattr(profiler_instance.profile, 'dir_name') and profiler_instance.profile.dir_name:
+                    # Một số cấu hình có thể lồng profile object
+                    tb_dir = Path(profiler_instance.profile.dir_name)
+                    log.info(f"Rank {callback_rank}: Using dir_name from nested profiler.profile instance: {str(tb_dir)}")
                 else:
-                    # Nếu không lấy được từ profiler, sử dụng đường dẫn mặc định bạn mong muốn
-                    log.warning(f"Rank {callback_rank}: Could not get dirpath from profiler. Falling back to default.")
-
-                    from pathlib import Path
+                    # Nếu không lấy được từ profiler, sử dụng đường dẫn mặc định
+                    log.warning(f"Rank {callback_rank}: Could not get dir_name from profiler instance. Falling back to default './result/plugins/profile'.")
                     tb_dir = Path("./result/plugins/profile") # <<< Đảm bảo đây là nơi bạn muốn
 
                 log.info(f"Rank {callback_rank}: Target TensorBoard directory: {str(tb_dir)}")
 
-                # Đảm bảo thư mục tồn tại trước khi gọi handler
+                # --- Đảm bảo thư mục tồn tại và có quyền ghi ---
                 log.debug(f"Rank {callback_rank}: Ensuring directory exists: {str(tb_dir)}")
                 tb_dir.mkdir(parents=True, exist_ok=True)
 
@@ -164,41 +167,71 @@ if __name__ == '__main__':
                 except Exception as write_err:
                     log.error(f"Rank {callback_rank}: Write permission test FAILED in {str(tb_dir)}", exc_info=True)
                     # Có thể dừng ở đây nếu không có quyền ghi
+                    log.error(f"Rank {callback_rank}: Aborting trace processing due to write error.")
                     return # Không gọi handler nếu không ghi được
 
-                # Tạo handler và gọi nó
+                # --- Tạo và gọi TensorBoard Handler ---
                 log.info(f"Rank {callback_rank}: Creating TensorBoard handler for directory: {str(tb_dir)}")
-                # handler = torch.profiler.tensorboard_trace_handler(str(tb_dir), worker_name=f"rank_{callback_rank}") # Thêm worker_name có thể hữu ích
-                handler = torch.profiler.tensorboard_trace_handler(str(tb_dir)) # Bắt đầu đơn giản trước
-
+                # worker_name giúp phân biệt các file trace nếu nhiều worker ghi vào cùng thư mục (không cần thiết nếu chỉ rank 0 ghi)
+                # handler = torch.profiler.tensorboard_trace_handler(str(tb_dir), worker_name=f"rank_{callback_rank}")
+                handler = torch.profiler.tensorboard_trace_handler(str(tb_dir))
                 log.info(f"Rank {callback_rank}: Calling handler function...")
                 handler(profiler_instance) # Gọi handler gốc
                 log.info(f"Rank {callback_rank}: TensorBoard handler function finished successfully.")
 
-                # Kiểm tra lại file event NGAY LẬP TỨC
+                # --- Kiểm tra lại file kết quả ---
                 log.debug(f"Rank {callback_rank}: Checking for event files in {str(tb_dir)} immediately after handler call...")
-                event_files = list(tb_dir.glob("*.pt.trace.json")) # Profiler cũ tạo .json, TB handler tạo .tfevents
+                # Handler của TensorBoard tạo file .tfevents
                 tb_event_files = list(tb_dir.glob("*.tfevents.*"))
-                chrome_trace_files = list(tb_dir.glob(f"{profiler_instance.filename}.json")) # Kiểm tra file chrome trace
-
                 if tb_event_files:
-                    log.info(f"Rank {callback_rank}: Found TensorBoard event files: {tb_event_files}")
+                    log.info(f"Rank {callback_rank}: Found TensorBoard event files: {[str(f) for f in tb_event_files]}")
                 else:
-                    log.warning(f"Rank {callback_rank}: NO TensorBoard event files (*.tfevents.*) found in {str(tb_dir)}.")
+                    log.warning(f"Rank {callback_rank}: NO TensorBoard event files (*.tfevents.*) found in {str(tb_dir)} immediately after handler call.")
 
-                if chrome_trace_files:
-                    log.info(f"Rank {callback_rank}: Found Chrome trace files: {chrome_trace_files}")
+                # Profiler cũng có thể tự tạo file .pt.trace.json hoặc .json (tùy phiên bản và cách cấu hình)
+                # Việc này xảy ra *trước* khi on_trace_ready được gọi
+                native_trace_files = list(tb_dir.glob("*.pt.trace.json")) + list(tb_dir.glob("*.json"))
+                if native_trace_files:
+                    log.info(f"Rank {callback_rank}: Found native profiler trace files (json/pt.trace.json): {[str(f) for f in native_trace_files]}")
                 else:
-                    # File .json này nên được tạo bởi chính Profiler trước khi gọi on_trace_ready,
-                    # việc không tìm thấy nó có thể là một vấn đề khác.
-                    log.warning(f"Rank {callback_rank}: NO Chrome trace file ({profiler_instance.filename}.json) found in {str(tb_dir)}.")
+                    log.warning(f"Rank {callback_rank}: NO native profiler trace files (*.json or *.pt.trace.json) found in {str(tb_dir)}.")
+
+
+                # >>>>>>>>>> BẮT ĐẦU PHẦN ĐƯỢC COMMENT <<<<<<<<<<
+                # Đoạn code dưới đây gây lỗi AttributeError vì profiler_instance (hoặc đối tượng profile bên trong nó)
+                # không đảm bảo có thuộc tính 'filename' trong mọi trường hợp.
+                # Việc kiểm tra file chrome trace cụ thể dựa trên tên file động này không đáng tin cậy.
+                # Thay vào đó, chúng ta dựa vào việc tìm các file *.json hoặc *.pt.trace.json nói chung ở trên.
+                #
+                # chrome_trace_files = [
+                # try:
+                #     # Cố gắng truy cập filename một cách an toàn hơn, nhưng vẫn có thể thất bại
+                #     profile_obj_with_filename = getattr(profiler_instance, 'profile', profiler_instance) # Thử cả profiler_instance.profile
+                #     if hasattr(profile_obj_with_filename, 'filename') and profile_obj_with_filename.filename:
+                #         expected_chrome_filename = f"{profile_obj_with_filename.filename}.json"
+                #         log.debug(f"Rank {callback_rank}: Attempting to check for specific Chrome trace file: {expected_chrome_filename}")
+                #         chrome_trace_files = list(tb_dir.glob(expected_chrome_filename))
+                #         if chrome_trace_files:
+                #             log.info(f"Rank {callback_rank}: Found expected Chrome trace file: {[str(f) for f in chrome_trace_files]}")
+                #         else:
+                #             log.warning(f"Rank {callback_rank}: Expected Chrome trace file ({expected_chrome_filename}) NOT found in {str(tb_dir)}.")
+                #     else:
+                #          log.warning(f"Rank {callback_rank}: Profiler instance (or its .profile attribute) does not have a 'filename' attribute. Skipping specific Chrome trace file check.")
+                # except AttributeError:
+                #      log.warning(f"Rank {callback_rank}: Encountered AttributeError while trying to access profiler filename. Skipping specific Chrome trace file check.")
+                #
+                # if not chrome_trace_files:
+                #     # File .json này thường được tạo bởi chính Profiler *trước khi* gọi on_trace_ready.
+                #     # Việc không tìm thấy nó có thể là một vấn đề khác hoặc không phải là vấn đề (nếu chỉ dùng tfevents).
+                #     # Log này có thể hơi dư thừa sau khi đã kiểm tra *.json ở trên.
+                #     log.warning(f"Rank {callback_rank}: Could not confirm specific Chrome trace file based on internal filename attribute.")
+                # >>>>>>>>>> KẾT THÚC PHẦN ĐƯỢC COMMENT <<<<<<<<<<
 
 
             except Exception as e:
                 log.error(f"Rank {callback_rank}: Error during TensorBoard handler execution in wrapped_on_trace_ready", exc_info=True)
         else:
             log.debug(f"Rank {callback_rank}: Skipping TensorBoard file writing on non-zero rank.")
-
 
 
     profilter = PyTorchProfiler(
