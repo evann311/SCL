@@ -1,7 +1,6 @@
 import os
 import copy
 import torch
-import debug
 torch.set_float32_matmul_precision('high')
 torch.backends.cuda.matmul.allow_tf32 = True
 torch.backends.cudnn.allow_tf32 = True
@@ -22,6 +21,8 @@ from pytorch_lightning.profilers import PyTorchProfiler
 from pytorch_lightning.strategies import DDPStrategy
 
 import torch.distributed as dist
+
+rank = int(os.environ.get("RANK", os.environ.get("LOCAL_RANK", 0)))
 
 log_format = f"%(asctime)s - RANK {rank} - %(levelname)s - %(name)s - %(message)s"
 logging.basicConfig(level=logging.DEBUG, format=log_format)
