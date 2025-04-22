@@ -121,7 +121,7 @@ if __name__ == '__main__':
     
     def wrapped_on_trace_ready(prof):
         current_rank = getattr(trainer, 'global_rank', 'N/A') # Cố gắng lấy rank nếu trainer tồn tại
-        print(f"--- DEBUG: on_trace_ready called! Rank: {current_rank}. Attempting to save trace to {profiler_log_dir} ---")
+        print(f"--- DEBUG: on_trace_ready called! Rank: {current_rank}. Attempting to save trace to ---")
         try:
             # Gọi handler gốc
             tb_handler_instance(prof)
