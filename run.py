@@ -118,19 +118,17 @@ if __name__ == '__main__':
         _config["log_dir"],
         name=f'{exp_name}_seed{_config["seed"]}_from_{_config["load_path"].split("/")[-1][:-5]}',
     )
-
-
+    log_dir = logger.log_dir
 
     profilter = PyTorchProfiler(
-        dirpath=os.path.join(_config["log_dir"], "profiler"),
-        filename=f"{exp_name}_seed{_config['seed']}",
-        schedule=torch.profiler.schedule(wait=1, warmup=1, active=5, repeat=1),
+        dirpath=log_dir,
+        schedule=torch.profiler.schedule(wait=1, warmup=1, active=5),
         profile_memory=True,
         with_stack=False,
         record_shapes=True,
         with_flops=True,
         with_modules=True,
-        on_trace_ready=torch.profiler.tensorboard_trace_handler(os.path.join(_config["log_dir"], "profiler"))
+        on_trace_ready=torch.profiler.tensorboard_trace_handler(log_dir)
     )
 
     lr_callback = pl.callbacks.LearningRateMonitor(logging_interval="step")
