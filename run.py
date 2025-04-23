@@ -122,7 +122,7 @@ if __name__ == '__main__':
 
     profilter = PyTorchProfiler(
         dirpath=log_dir,
-        schedule=torch.profiler.schedule(wait=1, warmup=1, active=5),
+        schedule=torch.profiler.schedule(wait=2, warmup=2, active=6, repeat=1),
         profile_memory=True,
         with_stack=False,
         record_shapes=True,
@@ -154,7 +154,7 @@ if __name__ == '__main__':
         benchmark=True,
         deterministic=True,
         max_epochs=_config["max_epoch"],
-        max_step=100
+        max_step=100,
         callbacks=callbacks,
         logger=logger,
         profiler=profilter,
