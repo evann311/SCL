@@ -130,6 +130,7 @@ if __name__ == '__main__':
         record_shapes=True,
         with_flops=True,
         with_modules=True,
+        on_trace_ready=torch.profiler.tensorboard_trace_handler(os.path.join(_config["log_dir"], "profiler"))
     )
 
     lr_callback = pl.callbacks.LearningRateMonitor(logging_interval="step")
