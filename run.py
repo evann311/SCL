@@ -120,17 +120,11 @@ if __name__ == '__main__':
     )
 
 
-    tb_handler_instance = torch.profiler.tensorboard_trace_handler(
-        dir_name=os.path.join(_config["log_dir"], "profiler"),
-        worker_name=None, 
-    )
-    
 
     profilter = PyTorchProfiler(
         dirpath=os.path.join(_config["log_dir"], "profiler"),
         filename=f"{exp_name}_seed{_config['seed']}",
         schedule=torch.profiler.schedule(wait=1, warmup=1, active=5, repeat=1),
-        on_trace_ready=tb_handler_instance,
         profile_memory=True,
         with_stack=False,
         record_shapes=True,
