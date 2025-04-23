@@ -154,7 +154,7 @@ if __name__ == '__main__':
         benchmark=True,
         deterministic=True,
         max_epochs=_config["max_epoch"],
-        max_steps=100,
+        max_steps=150,
         callbacks=callbacks,
         logger=logger,
         profiler=profilter,
