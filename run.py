@@ -104,13 +104,7 @@ if __name__ == '__main__':
             verbose=True,
             monitor="val/the_metric",
             mode="max",
-            save_last=False,
-        )
-
-        last_checkpoint_callback = pl.callbacks.ModelCheckpoint(
-            save_top_k=0,  
-            verbose=True,
-            save_last=True,  
+            save_last=True,
         )
 
 
@@ -132,7 +126,7 @@ if __name__ == '__main__':
     )
 
     lr_callback = pl.callbacks.LearningRateMonitor(logging_interval="step")
-    callbacks = [checkpoint_callback, lr_callback, last_checkpoint_callback]
+    callbacks = [checkpoint_callback, lr_callback]
 
     num_gpus = (
         _config["num_gpus"]
