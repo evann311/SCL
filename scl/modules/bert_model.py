@@ -471,7 +471,7 @@ class BertCrossLayer(nn.Module):
         self.add_cross_attention = bert_config.add_cross_attention
         self.crossattention = BertAttention(bert_config, config, True)
         self.intermediate = BertIntermediate(bert_config)
-        self.output = BertOutput(bert_config, config, False)
+        self.output = BertOutput(bert_config, config, True)
 
     def forward(
         self,
