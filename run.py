@@ -13,7 +13,6 @@ from scl.config import config_dict
 
 from scl.modules import SCLTransformer
 from scl.datamodules.multitask_datamodule import MTDataModule
-import logging
 
 
 from pytorch_lightning.plugins.environments import ClusterEnvironment
@@ -21,14 +20,14 @@ from pytorch_lightning.profilers import PyTorchProfiler
 from pytorch_lightning.strategies import DDPStrategy
 
 import torch.distributed as dist
-
-rank = int(os.environ.get("RANK", os.environ.get("LOCAL_RANK", 0)))
-
-log_format = f"%(asctime)s - RANK {rank} - %(levelname)s - %(name)s - %(message)s"
-logging.basicConfig(level=logging.DEBUG, format=log_format)
-log = logging.getLogger(__name__) # Sử dụng 'log' thay vì 'logger'
-
 import argparse
+
+# import logging
+# rank = int(os.environ.get("RANK", os.environ.get("LOCAL_RANK", 0)))
+# log_format = f"%(asctime)s - RANK {rank} - %(levelname)s - %(name)s - %(message)s"
+# logging.basicConfig(level=logging.DEBUG, format=log_format)
+# log = logging.getLogger(__name__) # Sử dụng 'log' thay vì 'logger'
+
 
 class MyCluster(ClusterEnvironment):
 
@@ -112,18 +111,18 @@ if __name__ == '__main__':
         _config["log_dir"],
         name=f'{exp_name}_seed{_config["seed"]}_from_{_config["load_path"].split("/")[-1][:-5]}',
     )
-    log_dir = logger.log_dir
 
-    profilter = PyTorchProfiler(
-        dirpath=log_dir,
-        schedule=torch.profiler.schedule(wait=2, warmup=2, active=6, repeat=1),
-        profile_memory=True,
-        with_stack=False,
-        record_shapes=True,
-        with_flops=True,
-        with_modules=True,
-        on_trace_ready=torch.profiler.tensorboard_trace_handler(log_dir)
-    )
+    # log_dir = logger.log_dir
+    # profilter = PyTorchProfiler(
+    #     dirpath=log_dir,
+    #     schedule=torch.profiler.schedule(wait=2, warmup=2, active=6, repeat=1),
+    #     profile_memory=True,
+    #     with_stack=False,
+    #     record_shapes=True,
+    #     with_flops=True,
+    #     with_modules=True,
+    #     on_trace_ready=torch.profiler.tensorboard_trace_handler(log_dir)
+    # )
 
     lr_callback = pl.callbacks.LearningRateMonitor(logging_interval="step")
     callbacks = [checkpoint_callback, lr_callback]
