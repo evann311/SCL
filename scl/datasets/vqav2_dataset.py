@@ -24,6 +24,8 @@ class VQAv2Dataset(BaseDataset):
 
         if split == "test":
             self._truncate_test_samples()
+        
+        self.max_test_samples = 100
 
     def _truncate_test_samples(self):
         if hasattr(self, "index_mapper"):
