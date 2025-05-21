@@ -22,6 +22,16 @@ class VQAv2Dataset(BaseDataset):
             remove_duplicate=False,
         )
 
+        if split == "test":
+            self._truncate_test_samples()
+
+    def _truncate_test_samples(self):
+        if hasattr(self, "index_mapper"):
+            self.index_mapper = self.index_mapper[:100]
+        if hasattr(self, "table") and hasattr(self.table, "__len__"):
+            if len(self.table) > self.max_test_samples:
+                self.table = self.table.slice(0, 100)
+
     def __getitem__(self, index):
         image_tensor = self.get_image(index)["image"]
         text = self.get_text(index)["text"]
