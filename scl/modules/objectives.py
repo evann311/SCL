@@ -401,7 +401,7 @@ class NormSoftmaxLoss(nn.Module):
 
         return - loss_i - loss_j
 
-def compute_con(pl_module, batch):
+def compute_con(pl_module, batch): 
     phase = "train" if pl_module.training else "val"
 
     infer = pl_module.infer(batch, mask_text=False, contrast=True)
@@ -822,7 +822,8 @@ def arc_test_step(pl_module, batch, output):
 
 
 def vqa_test_wrapup(outs, model_name, log_dir):
-    # Chỉ gọi ở process chính, không cần phân biệt rank nữa
+    print(outs)
+    rank = torch.distributed.get_rank()
     qids, preds = list(), list()
     for out in outs:
         qids += out["qids"]
@@ -830,14 +831,24 @@ def vqa_test_wrapup(outs, model_name, log_dir):
 
     rets = list()
     for qid, pred in zip(qids, preds):
-        print(qid, pred)
         rets.append({"question_id": qid, "answer": pred})
-
-    # Đảm bảo thư mục log_dir tồn tại
-    os.makedirs(log_dir, exist_ok=True)
-    with open(os.path.join(log_dir, f"vqa_submit_{model_name}.json"), "w") as fp:
-        print(outs)
+    with open(f"vqa_submit_{rank}.json", "w") as fp:
         json.dump(rets, fp, indent=4)
+
+    torch.distributed.barrier()
+
+    if rank == 0:
+        jsons = list()
+        paths = list(glob.glob("vqa_submit_*.json"))
+        for path in paths:
+            with open(path, "r") as fp:
+                jsons += json.load(fp)
+        os.makedirs("result", exist_ok=True)
+        with open(os.path.join(log_dir, "vqa_submit_%s.json"%model_name), "w") as fp:
+            json.dump(jsons, fp, indent=4)
+
+    torch.distributed.barrier()
+    os.remove(f"vqa_submit_{rank}.json")
 
 
 def arc_test_wrapup(outs, caplen, model_name):
