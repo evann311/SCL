@@ -836,6 +836,7 @@ def vqa_test_wrapup(outs, model_name, log_dir):
     os.makedirs(log_dir, exist_ok=True)
     # Ghi trực tiếp ra file kết quả duy nhất
     with open(os.path.join(log_dir, f"vqa_submit_{model_name}.json"), "w") as fp:
+        print(rets)
         json.dump(rets, fp, indent=4)
 
 
