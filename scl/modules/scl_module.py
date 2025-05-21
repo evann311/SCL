@@ -352,6 +352,7 @@ class SCLTransformer(pl.LightningModule):
         return ret
 
     def on_test_epoch_end(self, outs=None):
+        print("on_test_epoch_end")
         print(outs)
         if outs is None:
             return
