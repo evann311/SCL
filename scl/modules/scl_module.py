@@ -347,6 +347,8 @@ class SCLTransformer(pl.LightningModule):
 
         if self.hparams.config["loss_names"]["vqa"] > 0:
             ret.update(objectives.vqa_test_step(self, batch, output))
+        
+        print(ret)
 
         return ret
 
