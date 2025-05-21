@@ -340,7 +340,7 @@ _config_vqa_vast = {
     # PL Trainer Setting
     'resume_from': '/home/user/SCL/result/finetune_vqa_randaug_seed0_from_GLSCL-100k/version_1/checkpoints/last.ckpt', # load interrupted ckpt
     'fast_dev_run': False, # for debug
-    'test_only': True,
+    'test_only': False,
 
     # below params varies with the environment
     'data_root': '/workspace/arrow-vqa2-full',
