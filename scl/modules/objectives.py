@@ -837,6 +837,7 @@ def vqa_test_wrapup(outs, model_name, log_dir):
     torch.distributed.barrier()
 
     if rank == 0:
+        print(outs)
         jsons = list()
         paths = list(glob.glob("vqa_submit_*.json"))
         for path in paths:
