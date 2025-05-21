@@ -352,6 +352,7 @@ class SCLTransformer(pl.LightningModule):
         return ret
 
     def on_test_epoch_end(self, outs=None):
+        print(outs)
         if outs is None:
             return
         model_name = self.hparams.config["load_path"].split("/")[-1][:-5]

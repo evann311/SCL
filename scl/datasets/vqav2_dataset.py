@@ -22,7 +22,7 @@ class VQAv2Dataset(BaseDataset):
             remove_duplicate=False,
         )
 
-        self.max_test_samples = 100
+        self.max_test_samples = 1000
         if split == "test":
             self._truncate_test_samples()
         
