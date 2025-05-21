@@ -830,12 +830,12 @@ def vqa_test_wrapup(outs, model_name, log_dir):
 
     rets = list()
     for qid, pred in zip(qids, preds):
+        print(qid, pred)
         rets.append({"question_id": qid, "answer": pred})
 
     # Đảm bảo thư mục log_dir tồn tại
     os.makedirs(log_dir, exist_ok=True)
     with open(os.path.join(log_dir, f"vqa_submit_{model_name}.json"), "w") as fp:
-        print(rets)
         print(outs)
         json.dump(rets, fp, indent=4)
 
