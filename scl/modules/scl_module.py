@@ -337,7 +337,6 @@ class SCLTransformer(pl.LightningModule):
         scl_utils.epoch_wrapup(self)
 
     def test_step(self, batch, batch_idx):
-        print(ret)
         scl_utils.set_task(self)
         # zero-shot
         if "irtr" in self.current_tasks:
@@ -349,7 +348,7 @@ class SCLTransformer(pl.LightningModule):
         if self.hparams.config["loss_names"]["vqa"] > 0:
             ret.update(objectives.vqa_test_step(self, batch, output))
         
-
+        print(ret)
         return ret
 
     def on_test_epoch_end(self, outs):
