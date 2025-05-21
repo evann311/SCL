@@ -27,10 +27,16 @@ class VQAv2Dataset(BaseDataset):
 
     def _truncate_test_samples(self):
         if hasattr(self, "index_mapper"):
-            self.index_mapper = self.index_mapper[:100]
+            if isinstance(self.index_mapper, dict):
+                # Lấy 100 phần tử đầu tiên
+                items = list(self.index_mapper.items())[:self.max_test_samples]
+                self.index_mapper = dict(items)
+            else:
+                # Nếu là list hoặc tuple
+                self.index_mapper = self.index_mapper[:self.max_test_samples]
         if hasattr(self, "table") and hasattr(self.table, "__len__"):
             if len(self.table) > self.max_test_samples:
-                self.table = self.table.slice(0, 100)
+                self.table = self.table.slice(0, self.max_test_samples)
 
     def __getitem__(self, index):
         image_tensor = self.get_image(index)["image"]
