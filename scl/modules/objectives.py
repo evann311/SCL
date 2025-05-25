@@ -822,8 +822,8 @@ def arc_test_step(pl_module, batch, output):
 
 
 def vqa_test_wrapup(outs, model_name, log_dir):
-    print(outs)
     rank = torch.distributed.get_rank()
+    print(outs)
     qids, preds = list(), list()
     for out in outs:
         qids += out["qids"]
