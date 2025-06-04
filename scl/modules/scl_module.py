@@ -153,10 +153,7 @@ class SCLTransformer(pl.LightningModule):
         # ===================== freeze ======================
 
         for name, param in self.named_parameters():
-            if 'adapter' in name or 'vqa_classifier' in name:
                 param.requires_grad = True
-            else:
-                param.requires_grad = False
 
         self.val_vqa_loss_list = []
         self.val_vqa_score_list = []
