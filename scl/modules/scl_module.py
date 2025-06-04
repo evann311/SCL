@@ -153,7 +153,11 @@ class SCLTransformer(pl.LightningModule):
         # ===================== freeze ======================
 
         for name, param in self.named_parameters():
-            if "vision_transformer" in name or "text_transformer" or "vqa_classifier" in name:
+            if 'text_transformer' in name or \
+                'cross_modal_text_layers' in name or 'cross_modal_image_layers' in name or \
+                'cross_modal_text_transform' in name or 'cross_modal_image_transform' in name or \
+                'cross_modal_text_pooler' in name or 'cross_modal_image_pooler' in name or \
+                'token_type_embeddings' in name or 'vqa_classifier' in name:
                 param.requires_grad = True
             else:
                 param.requires_grad = False
