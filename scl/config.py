@@ -320,7 +320,7 @@ _config_vqa_distill = {
     'num_heads': 12,
 
     # mae transformer settings
-    'vit_path': "/kaggle/input/clip-vit/pytorch/default/1/ViT-B-16.pt",
+    'vit_path': "/workspace/clip-vit/ViT-B-16.pt",
     'mask_ratio': 0.6,
 
     # Optimizer Setting
@@ -338,12 +338,12 @@ _config_vqa_distill = {
     'warmup_steps': 0.1,
 
     # PL Trainer Setting
-    'resume_from': "/kaggle/input/fusion-adapter-cross/other/default/1/last.ckpt", 
+    'resume_from': "/workspace/checkpoints/last.ckpt", 
     'fast_dev_run': False, # for debug
     'test_only': True,  # Set to True for inference only
 
     # below params varies with the environment
-    'data_root': '/kaggle/input/arrow-vqa2',
+    'data_root': '/workspace/arrow-vqa2-full',
     'log_dir': "result",
     'per_gpu_batchsize': 256,  # you should define this manually with per_gpu_batch_size=#
     'num_gpus': 1,
@@ -362,7 +362,7 @@ _config_vqa_distill = {
     'shift': 4,
 
     #
-    'roberta_path': "/kaggle/input/roberta-base/pytorch/default/1",
+    'roberta_path': "/workspace/roberta-base",
 
     # use adapter
     'use_adapter': False,
