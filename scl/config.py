@@ -291,7 +291,7 @@ _config_vqa_distill = {
         "con": 0,
         "scl": 0,
         },
-    'batch_size': 1024,  # this is a desired batch size; pl trainer will accumulate gradients when per step batch is smaller.
+    'batch_size': 384,  # this is a desired batch size; pl trainer will accumulate gradients when per step batch is smaller.
 
     # Image setting
     'image_size': 384,
@@ -345,7 +345,7 @@ _config_vqa_distill = {
     # below params varies with the environment
     'data_root': '/workspace/arrow-vqa2-full',
     'log_dir': "result",
-    'per_gpu_batchsize': 1024,  # you should define this manually with per_gpu_batch_size=#
+    'per_gpu_batchsize': 384,  # you should define this manually with per_gpu_batch_size=#
     'num_gpus': 1,
     'num_nodes': 1,
     'load_path': "",  # Will use resume_from instead
