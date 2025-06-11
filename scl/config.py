@@ -291,7 +291,7 @@ _config_vqa_distill = {
         "con": 0,
         "scl": 0,
         },
-    'batch_size': 64,  # this is a desired batch size; pl trainer will accumulate gradients when per step batch is smaller.
+    'batch_size': 256,  # this is a desired batch size; pl trainer will accumulate gradients when per step batch is smaller.
 
     # Image setting
     'image_size': 384,
@@ -345,8 +345,8 @@ _config_vqa_distill = {
     # below params varies with the environment
     'data_root': '/kaggle/input/arrow-vqa2',
     'log_dir': "result",
-    'per_gpu_batchsize': 32,  # you should define this manually with per_gpu_batch_size=#
-    'num_gpus': 2,
+    'per_gpu_batchsize': 256,  # you should define this manually with per_gpu_batch_size=#
+    'num_gpus': 1,
     'num_nodes': 1,
     'load_path': "",  # Will use resume_from instead
     'num_workers': 8,
