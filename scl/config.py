@@ -343,7 +343,7 @@ _config_vqa_distill = {
     'test_only': True,  # Set to True for inference only
 
     # below params varies with the environment
-    'data_root': '/kaggle/input/arrow-vqa2-20k/arrow-vqa2-20k',
+    'data_root': '/kaggle/input/arrow-vqa2',
     'log_dir': "result",
     'per_gpu_batchsize': 16,  # you should define this manually with per_gpu_batch_size=#
     'num_gpus': 2,
