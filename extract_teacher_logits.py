@@ -71,6 +71,7 @@ def extract_teacher_logits(config_name, output_dir="./teacher_outputs"):
     # Storage for logits and metadata
     all_logits = []
     all_qids = []
+    save_counter = 0
     
     print("Extracting teacher logits from training set...")
     
@@ -102,53 +103,73 @@ def extract_teacher_logits(config_name, output_dir="./teacher_outputs"):
                 else:
                     raise ValueError("qid not found in batch")
                 
-                # Print progress every 100 batches
-                if batch_idx % 100 == 0:
-                    print(f"Processed {batch_idx + 1} batches...")
+                # Save every 100 batches
+                if (batch_idx + 1) % 100 == 0:
+                    # Concatenate current batch of logits
+                    batch_logits = np.concatenate(all_logits, axis=0)
+                    print(f"Saving chunk {save_counter}, logits shape: {batch_logits.shape}")
+                    
+                    # Combine logits and qids into samples for this chunk
+                    samples = []
+                    for i, (qid, logits) in enumerate(zip(all_qids, batch_logits)):
+                        samples.append({
+                            "qid": qid,
+                            "logits": logits.tolist()
+                        })
+                    
+                    # Save chunk file
+                    chunk_path = os.path.join(output_dir, f"teacher_samples_train_chunk_{save_counter:04d}.json")
+                    with open(chunk_path, 'w') as f:
+                        json.dump(samples, f, indent=2)
+                    print(f"Saved chunk {save_counter} to {chunk_path}")
+                    
+                    # Reset for next chunk
+                    all_logits = []
+                    all_qids = []
+                    save_counter += 1
                     
             except Exception as e:
                 print(f"Error processing batch {batch_idx}: {e}")
                 continue
     
-    # Concatenate all logits
+    # Save remaining data if any
     if all_logits:
-        all_logits = np.concatenate(all_logits, axis=0)
-        print(f"Extracted logits shape: {all_logits.shape}")
+        batch_logits = np.concatenate(all_logits, axis=0)
+        print(f"Saving final chunk {save_counter}, logits shape: {batch_logits.shape}")
         
-        # Combine logits and qids into samples
+        # Combine logits and qids into samples for final chunk
         samples = []
-        for i, (qid, logits) in enumerate(zip(all_qids, all_logits)):
+        for i, (qid, logits) in enumerate(zip(all_qids, batch_logits)):
             samples.append({
                 "qid": qid,
-                "logits": logits.tolist()  # Convert to list for JSON serialization
+                "logits": logits.tolist()
             })
         
-        # Save combined samples
-        samples_path = os.path.join(output_dir, "teacher_samples_train.json")
-        with open(samples_path, 'w') as f:
+        # Save final chunk file
+        chunk_path = os.path.join(output_dir, f"teacher_samples_train_chunk_{save_counter:04d}.json")
+        with open(chunk_path, 'w') as f:
             json.dump(samples, f, indent=2)
-        print(f"Saved teacher samples to {samples_path}")
-        
-        # Save metadata
-        metadata = {
-            "num_samples": len(all_qids),
-            "logits_shape": all_logits.shape,
-            "config_name": config_name,
-            "checkpoint_path": checkpoint_path,
-            "dataset": "vqa_train"
-        }
-        
-        metadata_path = os.path.join(output_dir, "extraction_metadata.json")
-        with open(metadata_path, 'w') as f:
-            json.dump(metadata, f, indent=2)
-        print(f"Saved metadata to {metadata_path}")
-        
-        print(f"\nSuccessfully extracted teacher outputs:")
-        print(f"- Samples: {len(samples)} -> {samples_path}")
-        print(f"- Metadata: {metadata_path}")
-        
-    else:
-        print("No logits extracted. Please check your data and model.")
+        print(f"Saved final chunk {save_counter} to {chunk_path}")
+        save_counter += 1
+    
+    # Save metadata about all chunks
+    metadata = {
+        "total_chunks": save_counter,
+        "samples_per_chunk": "~100 batches each",
+        "config_name": config_name,
+        "checkpoint_path": checkpoint_path,
+        "dataset": "vqa_train"
+    }
+    
+    metadata_path = os.path.join(output_dir, "extraction_metadata.json")
+    with open(metadata_path, 'w') as f:
+        json.dump(metadata, f, indent=2)
+    print(f"Saved metadata to {metadata_path}")
+    
+    print(f"\nSuccessfully extracted teacher outputs:")
+    print(f"- Total chunks: {save_counter}")
+    print(f"- Files: teacher_samples_train_chunk_XXXX.json")
+    print(f"- Metadata: {metadata_path}")
 
 
 def main():
