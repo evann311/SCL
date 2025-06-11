@@ -104,7 +104,7 @@ def extract_teacher_logits(config_name, output_dir="./teacher_outputs"):
                     raise ValueError("qid not found in batch")
                 
                 # Save every 100 batches
-                if (batch_idx + 1) % 100 == 0:
+                if (batch_idx + 1) % 10 == 0:
                     # Concatenate current batch of logits
                     batch_logits = np.concatenate(all_logits, axis=0)
                     print(f"Saving chunk {save_counter}, logits shape: {batch_logits.shape}")
