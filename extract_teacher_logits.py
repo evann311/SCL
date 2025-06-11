@@ -71,7 +71,6 @@ def extract_teacher_logits(config_name, output_dir="./teacher_outputs"):
     # Storage for logits and metadata
     all_logits = []
     all_qids = []
-    saved_batch_count = 0
     
     print("Extracting teacher logits from training set...")
     
@@ -103,26 +102,6 @@ def extract_teacher_logits(config_name, output_dir="./teacher_outputs"):
                 else:
                     raise ValueError("qid not found in batch")
                 
-                # Save after every 10 batches
-                if (batch_idx + 1) % 10 == 0:
-                    if all_logits:
-                        batch_logits = np.concatenate(all_logits, axis=0)
-                        
-                        # Save using compressed numpy format
-                        samples_path = os.path.join(output_dir, f"teacher_samples_train_batch_{saved_batch_count:05d}.npz")
-                        np.savez_compressed(
-                            samples_path,
-                            logits=batch_logits,
-                            qids=np.array(all_qids, dtype=object)
-                        )
-                        
-                        print(f"Saved batch {saved_batch_count}: {len(all_qids)} samples -> {samples_path}")
-                        
-                        # Reset storage for next batch
-                        all_logits = []
-                        all_qids = []
-                        saved_batch_count += 1
-                
                 # Print progress every 100 batches
                 if (batch_idx + 1) % 100 == 0:
                     print(f"Processed {batch_idx + 1} batches...")
@@ -131,38 +110,41 @@ def extract_teacher_logits(config_name, output_dir="./teacher_outputs"):
                 print(f"Error processing batch {batch_idx}: {e}")
                 continue
     
-    # Save any remaining data
+    # Save all data at the end
     if all_logits:
-        batch_logits = np.concatenate(all_logits, axis=0)
+        all_logits = np.concatenate(all_logits, axis=0)
+        print(f"Extracted logits shape: {all_logits.shape}")
         
         # Save using compressed numpy format
-        samples_path = os.path.join(output_dir, f"teacher_samples_train_batch_{saved_batch_count:05d}.npz")
+        samples_path = os.path.join(output_dir, "teacher_samples_train.npz")
         np.savez_compressed(
             samples_path,
-            logits=batch_logits,
+            logits=all_logits,
             qids=np.array(all_qids, dtype=object)
         )
-        print(f"Saved final batch {saved_batch_count}: {len(all_qids)} samples -> {samples_path}")
-        saved_batch_count += 1
-    
-    # Save metadata
-    metadata = {
-        "total_saved_batches": saved_batch_count,
-        "config_name": config_name,
-        "checkpoint_path": checkpoint_path,
-        "dataset": "vqa_train",
-        "format": "npz_compressed",
-        "save_frequency": "every_10_batches"
-    }
-    
-    metadata_path = os.path.join(output_dir, "extraction_metadata.json")
-    with open(metadata_path, 'w') as f:
-        json.dump(metadata, f, indent=2)
-    print(f"Saved metadata to {metadata_path}")
-    
-    print(f"\nSuccessfully extracted teacher outputs:")
-    print(f"- Total saved batches: {saved_batch_count}")
-    print(f"- Metadata: {metadata_path}")
+        print(f"Saved teacher samples to {samples_path}")
+        
+        # Save metadata
+        metadata = {
+            "num_samples": len(all_qids),
+            "logits_shape": list(all_logits.shape),
+            "config_name": config_name,
+            "checkpoint_path": checkpoint_path,
+            "dataset": "vqa_train",
+            "format": "npz_compressed"
+        }
+        
+        metadata_path = os.path.join(output_dir, "extraction_metadata.json")
+        with open(metadata_path, 'w') as f:
+            json.dump(metadata, f, indent=2)
+        print(f"Saved metadata to {metadata_path}")
+        
+        print(f"\nSuccessfully extracted teacher outputs:")
+        print(f"- Samples: {len(all_qids)} -> {samples_path}")
+        print(f"- Metadata: {metadata_path}")
+        
+    else:
+        print("No logits extracted. Please check your data and model.")
 
 
 def main():
