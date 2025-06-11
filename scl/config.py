@@ -276,6 +276,99 @@ _config_vqa_kg = {
     'adapter_bottleneck_dim': 64,
 }
 
+# VQA2.0
+_config_vqa_distill = {
+    'exp_name': "vqa_distill_extract_logits",
+    'seed': 0,
+    'datasets': ["vqa"], 
+    'loss_names': {
+        "itm": 0,
+        "mlm": 0,
+        "vqa": 1,
+        "nlvr2": 0,
+        "irtr": 0,
+        "mae": 0,
+        "con": 0,
+        "scl": 0,
+        },
+    'batch_size': 32,  # this is a desired batch size; pl trainer will accumulate gradients when per step batch is smaller.
+
+    # Image setting
+    'image_size': 384,
+    'draw_false_image': 0,
+    'image_only': False,
+    'vit': 'mae_vit_base_patch16',
+    'patch_size': 16,
+    'train_transform_keys': ["clip_randaug"],
+    'val_transform_keys': ["clip_test"],
+
+    # Text Setting
+    'tokenizer': "roberta-base",
+    'vocab_size': 50265,
+    'max_text_len': 50,
+    'vqav2_label_size': 3129,
+    'mlm_prob': 0.15,
+    'draw_false_text': 0,
+    'whole_word_masking': True,
+
+    # Transformer Setting 
+    'num_layers': 12,
+    'num_top_layer': 6,
+    'mlp_ratio': 4,
+    'drop_rate': 0.1,
+    'hidden_size': 768,
+    'num_heads': 12,
+
+    # mae transformer settings
+    'vit_path': "/kaggle/input/clip-vit/pytorch/default/1/ViT-B-16.pt",
+    'mask_ratio': 0.6,
+
+    # Optimizer Setting
+    'optim_type': "adamw",
+    'weight_decay': 0.01,
+    'decay_power': 1,
+    'end_lr': 0,
+    'learning_rate': 5e-5,
+    'val_check_interval': 1000,
+    'lr_adapter': 5,
+    'lr_mult_head': 10,
+    'lr_mult_cross_modal': 10, # 5
+    'max_epoch': 10,
+    'max_steps': 13800,
+    'warmup_steps': 0.1,
+
+    # PL Trainer Setting
+    'resume_from': "", # load interrupted ckpt - USER FILL THIS
+    'fast_dev_run': False, # for debug
+    'test_only': True,  # Set to True for inference only
+
+    # below params varies with the environment
+    'data_root': '/kaggle/input/arrow-vqa2-20k/arrow-vqa2-20k',
+    'log_dir': "result",
+    'per_gpu_batchsize': 16,  # you should define this manually with per_gpu_batch_size=#
+    'num_gpus': 2,
+    'num_nodes': 1,
+    'load_path': "",  # Will use resume_from instead
+    'num_workers': 8,
+    'precision': '16-mixed',
+    'is_pretrain': False,
+
+    # for retrieval
+    'get_recall_metric': False,
+    'candidate_N': 128,
+    
+    # contrast
+    'negative_scale': 1/200,
+    'shift': 4,
+
+    #
+    'roberta_path': "/kaggle/input/roberta-base/pytorch/default/1",
+
+    # use adapter
+    'use_adapter': False,
+    'adapter_bottleneck_dim': 64,
+}
+
 _config_vqa_vast = {
     'exp_name': "finetune_vqa_randaug",
     'seed': 0,
@@ -721,4 +814,5 @@ config_dict = {
     'f30k': _config_f30k,
     'coco': _config_coco,
     'lsmdc': _config_lsmdc,
+    'vqa_distill': _config_vqa_distill,
 }
