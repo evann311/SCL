@@ -3,9 +3,11 @@ import numpy as np
 import json
 import os
 import argparse
+import functools
 from tqdm import tqdm
 import pytorch_lightning as pl
 from pytorch_lightning import Trainer
+from torch.utils.data import DataLoader
 
 from scl.config import config_dict
 from scl.modules import SCLTransformer
@@ -52,8 +54,19 @@ def extract_teacher_logits(config_name, output_dir="./teacher_outputs"):
     dm = _datamodules["vqa"](config)
     dm.setup("fit")
     
-    # Use train dataset for extracting teacher logits
-    train_loader = dm.train_dataloader()
+    # Use train dataset for extracting teacher logits - create custom dataloader with mlm_collator
+    train_loader = DataLoader(
+        dm.train_dataset,
+        batch_size=dm.batch_size,
+        shuffle=False,  # Don't need shuffle for extraction
+        drop_last=False,
+        num_workers=dm.num_workers,
+        pin_memory=True,
+        collate_fn=functools.partial(
+            dm.train_dataset.collate,
+            mlm_collator=dm.mlm_collator
+        ),
+    )
     
     # Storage for logits and metadata
     all_logits = []
