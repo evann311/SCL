@@ -338,7 +338,7 @@ _config_vqa_distill = {
     'warmup_steps': 0.1,
 
     # PL Trainer Setting
-    'resume_from': "", # load interrupted ckpt - USER FILL THIS
+    'resume_from': "/kaggle/input/fusion-adapter-cross/other/default/1/last.ckpt", 
     'fast_dev_run': False, # for debug
     'test_only': True,  # Set to True for inference only
 
