@@ -8,10 +8,8 @@ from transformers import RobertaConfig, RobertaModel
 from scl.modules import heads, objectives, scl_utils
 from .clip_model import build_model, adapt_position_encoding 
 # from .clip_model_video import build_model, adapt_position_encoding
-from .bert_model import BertCrossLayer, Adapter
+from .bert_model import BertCrossLayer
 
-from .adapter import Adapter
-from .roberta_lora import build_roberta_model
 from .lora import LoRALayer
 
 class SCLTransformer(pl.LightningModule):
@@ -362,19 +360,11 @@ class SCLTransformer(pl.LightningModule):
         return scl_utils.set_schedule(self)
 
     def count_total_parameters(self):
-        adapter_param_ids = {id(p) for module in self.modules() if isinstance(module, Adapter) for p in module.parameters()}
         lora_param_ids = {id(p) for module in self.modules() if isinstance(module, LoRALayer) for p in module.parameters()}
-        return sum(p.numel() for p in self.parameters() if id(p) not in adapter_param_ids and id(p) not in lora_param_ids)
+        return sum(p.numel() for p in self.parameters() if id(p) not in lora_param_ids)
 
     def count_trainable_parameters(self):
         return sum(p.numel() for p in self.parameters() if p.requires_grad)
-
-    def count_adapter_parameters(self):
-        adapter_total = 0
-        for module in self.modules():
-            if isinstance(module, Adapter):
-                adapter_total += sum(p.numel() for p in module.parameters())
-        return adapter_total
 
     def print_parameter_statistics(self):
         total_params = self.count_total_parameters()
