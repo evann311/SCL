@@ -88,8 +88,7 @@ BERT_PRETRAINED_MODEL_ARCHIVE_LIST = [
     # See all BERT models at https://huggingface.co/models?filter=bert
 ]
 
-from .adapter import Adapter
-
+from .lora import LoRALayer
 
 def load_tf_weights_in_bert(model, config, tf_checkpoint_path):
     """Load tf checkpoints in a pytorch model."""
@@ -213,7 +212,7 @@ class BertEmbeddings(nn.Module):
 
 
 class BertSelfAttention(nn.Module):
-    def __init__(self, config):
+    def __init__(self, config, use_lora: bool = False):
         super().__init__()
         if config.hidden_size % config.num_attention_heads != 0 and not hasattr(config, "embedding_size"):
             raise ValueError(
@@ -236,6 +235,13 @@ class BertSelfAttention(nn.Module):
             self.distance_embedding = nn.Embedding(2 * config.max_position_embeddings - 1, self.attention_head_size)
 
         self.is_decoder = config.is_decoder
+
+        ## Add LoRA layers
+        self.use_lora = use_lora
+        if self.use_lora:
+            self.query_lora = LoRALayer(config.hidden_size, config.hidden_size, rank=8, alpha=16)
+            self.key_lora = LoRALayer(config.hidden_size, config.hidden_size, rank=8, alpha=16)
+            self.value_lora = LoRALayer(config.hidden_size, config.hidden_size, rank=8, alpha=16)
 
     def save_attn_gradients(self, attn_gradients):
         self.attn_gradients = attn_gradients
@@ -266,7 +272,10 @@ class BertSelfAttention(nn.Module):
         past_key_value=None,
         output_attentions=False,
     ):
-        mixed_query_layer = self.query(hidden_states)
+        if self.use_lora:
+            mixed_query_layer = self.query(hidden_states) + self.query_lora(hidden_states)
+        else:
+            mixed_query_layer = self.query(hidden_states)
 
         # If this is instantiated as a cross-attention module, the keys
         # and values come from an encoder; the attention mask needs to be
@@ -279,17 +288,29 @@ class BertSelfAttention(nn.Module):
             value_layer = past_key_value[1]
             attention_mask = encoder_attention_mask
         elif is_cross_attention:
-            key_layer = self.transpose_for_scores(self.key(encoder_hidden_states))
-            value_layer = self.transpose_for_scores(self.value(encoder_hidden_states))
+            if self.use_lora:
+                key_layer = self.transpose_for_scores(self.key(encoder_hidden_states) + self.key_lora(encoder_hidden_states))
+                value_layer = self.transpose_for_scores(self.value(encoder_hidden_states) + self.value_lora(encoder_hidden_states))
+            else:
+                key_layer = self.transpose_for_scores(self.key(encoder_hidden_states))
+                value_layer = self.transpose_for_scores(self.value(encoder_hidden_states))
             attention_mask = encoder_attention_mask
         elif past_key_value is not None:
-            key_layer = self.transpose_for_scores(self.key(hidden_states))
-            value_layer = self.transpose_for_scores(self.value(hidden_states))
+            if self.use_lora:
+                key_layer = self.transpose_for_scores(self.key(hidden_states) + self.key_lora(hidden_states))
+                value_layer = self.transpose_for_scores(self.value(hidden_states) + self.value_lora(hidden_states))
+            else:
+                key_layer = self.transpose_for_scores(self.key(hidden_states))
+                value_layer = self.transpose_for_scores(self.value(hidden_states))
             key_layer = torch.cat([past_key_value[0], key_layer], dim=2)
             value_layer = torch.cat([past_key_value[1], value_layer], dim=2)
         else:
-            key_layer = self.transpose_for_scores(self.key(hidden_states))
-            value_layer = self.transpose_for_scores(self.value(hidden_states))
+            if self.use_lora:
+                key_layer = self.transpose_for_scores(self.key(hidden_states) + self.key_lora(hidden_states))
+                value_layer = self.transpose_for_scores(self.value(hidden_states) + self.value_lora(hidden_states))
+            else:
+                key_layer = self.transpose_for_scores(self.key(hidden_states))
+                value_layer = self.transpose_for_scores(self.value(hidden_states))
 
         query_layer = self.transpose_for_scores(mixed_query_layer)
 
@@ -357,17 +378,12 @@ class BertSelfAttention(nn.Module):
 
 
 class BertSelfOutput(nn.Module):
-    def __init__(self, bert_config, config, use_adapter: bool = False):
+    def __init__(self, bert_config, config):
         super().__init__()
         self.dense = nn.Linear(bert_config.hidden_size, bert_config.hidden_size)
         self.LayerNorm = nn.LayerNorm(bert_config.hidden_size, eps=bert_config.layer_norm_eps)
         self.dropout = nn.Dropout(bert_config.hidden_dropout_prob)
 
-        self.use_adapter = use_adapter
-        if self.use_adapter:
-            self.adapter = Adapter(bert_config.hidden_size, 64)
-        else:
-            self.adapter = None
 
     def forward(self, hidden_states, input_tensor):
         hidden_states = self.dense(hidden_states)
@@ -378,10 +394,10 @@ class BertSelfOutput(nn.Module):
         return hidden_states
 
 class BertAttention(nn.Module):
-    def __init__(self, bert_config, config, use_adapter: bool = False):
+    def __init__(self, bert_config, config, use_lora: bool = False):
         super().__init__()
-        self.self = BertSelfAttention(bert_config)
-        self.output = BertSelfOutput(bert_config, config, use_adapter)
+        self.self = BertSelfAttention(bert_config, use_lora=use_lora)
+        self.output = BertSelfOutput(bert_config, config)
         self.pruned_heads = set()
 
     def prune_heads(self, heads):
@@ -442,21 +458,15 @@ class BertIntermediate(nn.Module):
 
 
 class BertOutput(nn.Module):
-    def __init__(self, bert_config, config, use_adapter: bool = False):
+    def __init__(self, bert_config, config):
         super().__init__()
         self.dense = nn.Linear(bert_config.intermediate_size, bert_config.hidden_size)
         self.LayerNorm = nn.LayerNorm(bert_config.hidden_size, eps=bert_config.layer_norm_eps)
         self.dropout = nn.Dropout(bert_config.hidden_dropout_prob)
 
-        self.use_adapter = use_adapter
-        if self.use_adapter:
-            self.adapter = Adapter(bert_config.hidden_size, 64)
-
     def forward(self, hidden_states, input_tensor):
         hidden_states = self.dense(hidden_states)
         hidden_states = self.dropout(hidden_states)
-        if self.use_adapter:
-            hidden_states = self.adapter(hidden_states)
         hidden_states = self.LayerNorm(hidden_states + input_tensor)
         return hidden_states
 
@@ -466,12 +476,12 @@ class BertCrossLayer(nn.Module):
         super().__init__()
         self.chunk_size_feed_forward = bert_config.chunk_size_feed_forward
         self.seq_len_dim = 1
-        self.attention = BertAttention(bert_config, config, False)
+        self.attention = BertAttention(bert_config, config, True)
         self.is_decoder = bert_config.is_decoder
         self.add_cross_attention = bert_config.add_cross_attention
         self.crossattention = BertAttention(bert_config, config, False)
         self.intermediate = BertIntermediate(bert_config)
-        self.output = BertOutput(bert_config, config, False)
+        self.output = BertOutput(bert_config, config)
 
     def forward(
         self,

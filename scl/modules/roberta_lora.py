@@ -48,7 +48,7 @@ class RobertaSelfAttention(nn.Module):
         past_key_value: Optional[Tuple[Tuple[torch.FloatTensor]]] = None,
         output_attentions: Optional[bool] = False,
     ) -> Tuple[torch.Tensor]:
-        mixed_query_layer = self.query(hidden_states) + self.query_lora(self.query(hidden_states))
+        mixed_query_layer = self.query(hidden_states) + self.query_lora(hidden_states)
 
         # If this is instantiated as a cross-attention module, the keys
         # and values come from an encoder; the attention mask needs to be
@@ -61,8 +61,8 @@ class RobertaSelfAttention(nn.Module):
             value_layer = past_key_value[1]
             attention_mask = encoder_attention_mask
         elif is_cross_attention:
-            key_layer = self.transpose_for_scores(self.key(encoder_hidden_states) + self.key_lora(self.key(encoder_hidden_states)))
-            value_layer = self.transpose_for_scores(self.value(encoder_hidden_states) + self.value_lora(self.value(encoder_hidden_states)))
+            key_layer = self.transpose_for_scores(self.key(encoder_hidden_states))
+            value_layer = self.transpose_for_scores(self.value(encoder_hidden_states))
             attention_mask = encoder_attention_mask
         elif past_key_value is not None:
             key_layer = self.transpose_for_scores(self.key(hidden_states) + self.key_lora(self.key(hidden_states)))
