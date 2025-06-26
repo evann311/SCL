@@ -239,9 +239,9 @@ class BertSelfAttention(nn.Module):
         ## Add LoRA layers
         self.use_lora = use_lora
         if self.use_lora:
-            self.query_lora = LoRALayer(config.hidden_size, config.hidden_size, rank=4, alpha=8)
-            self.key_lora = LoRALayer(config.hidden_size, config.hidden_size, rank=4, alpha=8)
-            self.value_lora = LoRALayer(config.hidden_size, config.hidden_size, rank=4, alpha=8)
+            self.query_lora = LoRALayer(config.hidden_size, config.hidden_size, rank=8, alpha=16)
+            self.key_lora = LoRALayer(config.hidden_size, config.hidden_size, rank=8, alpha=16)
+            self.value_lora = LoRALayer(config.hidden_size, config.hidden_size, rank=8, alpha=16)
 
     def save_attn_gradients(self, attn_gradients):
         self.attn_gradients = attn_gradients
