@@ -318,6 +318,7 @@ class SCLTransformer(pl.LightningModule):
         device = torch.cuda.current_device()
         allocated = torch.cuda.memory_allocated(device) / (1024 ** 3)
         reserved = torch.cuda.memory_reserved(device) / (1024 ** 3)
+        print(f"GPU {device} allocated: {allocated}GB, reserved: {reserved}GB")
         if self.logger is not None and hasattr(self.logger, "experiment"):
             self.logger.experiment.add_scalar(f"gpu_{device}/allocated_GB", allocated, global_step)
             self.logger.experiment.add_scalar(f"gpu_{device}/reserved_GB", reserved, global_step)
