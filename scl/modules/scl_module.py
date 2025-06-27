@@ -313,11 +313,23 @@ class SCLTransformer(pl.LightningModule):
         output = self(batch)
         total_loss = sum([v for k, v in output.items() if "loss" in k])
 
+        allocated = torch.cuda.memory_allocated() / (1024 ** 3)
+        reserved = torch.cuda.memory_reserved() / (1024 ** 3)
+        vram_tensor = torch.tensor([allocated, reserved], device=self.device)
+
+        # Tạo nơi chứa dữ liệu từ tất cả GPUs
+        world_size = torch.distributed.get_world_size()
+        gathered = [torch.zeros_like(vram_tensor) for _ in range(world_size)]
+
+        # Gom dữ liệu từ tất cả GPU
+        torch.distributed.all_gather(gathered, vram_tensor)
+
+        # Chỉ rank 0 log vào TensorBoard
         if self.global_rank == 0:
-            for device in range(torch.cuda.device_count()):
-                allocated = torch.cuda.memory_allocated(device) / (1024 ** 3)
-                reserved = torch.cuda.memory_reserved(device) / (1024 ** 3)
-                print(f"GPU {device} allocated: {allocated}GB, reserved: {reserved}GB")
+            for rank, v in enumerate(gathered):
+                self.logger.experiment.add_scalar(f"gpu_{rank}/allocated_GB", v[0].item(), self.global_step)
+                self.logger.experiment.add_scalar(f"gpu_{rank}/reserved_GB", v[1].item(), self.global_step)
+
 
 
         return total_loss
