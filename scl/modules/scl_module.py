@@ -314,7 +314,7 @@ class SCLTransformer(pl.LightningModule):
         total_loss = sum([v for k, v in output.items() if "loss" in k])
 
         current_device = torch.cuda.current_device()
-
+        print(f"Current device: {current_device}")
 
         gpu_ram_allocated = torch.cuda.memory_allocated(current_device) / (1024 ** 3)  # Convert to GB
         gpu_ram_reserved = torch.cuda.memory_reserved(current_device) / (1024 ** 3)  # Convert to GB
