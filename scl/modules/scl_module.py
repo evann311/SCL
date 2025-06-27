@@ -50,13 +50,13 @@ class SCLTransformer(pl.LightningModule):
 
         # ===================== Cross Modal Attention ===================== #
         self.cross_modal_image_layers = nn.ModuleList([
-            BertCrossLayer(bert_config, config, use_lora=(i >= config['num_top_layer']//2)) 
+            BertCrossLayer(bert_config, config, use_adapter=(i >= config['num_top_layer']//2)) 
             for i in range(config['num_top_layer'])
         ])
         self.cross_modal_image_layers.apply(objectives.init_weights)
 
         self.cross_modal_text_layers = nn.ModuleList([
-            BertCrossLayer(bert_config, config, use_lora=(i >= config['num_top_layer']//2)) 
+            BertCrossLayer(bert_config, config, use_adapter=(i >= config['num_top_layer']//2)) 
             for i in range(config['num_top_layer'])
         ])
         self.cross_modal_text_layers.apply(objectives.init_weights)
