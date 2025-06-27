@@ -1,4 +1,4 @@
 all:
 	git add .
 	git commit -m "update"
-	git push origin fusion-encoder-lora-full-12head
+	git push origin fusion-encoder-lora-full-3head
