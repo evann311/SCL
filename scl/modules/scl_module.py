@@ -313,11 +313,13 @@ class SCLTransformer(pl.LightningModule):
         output = self(batch)
         total_loss = sum([v for k, v in output.items() if "loss" in k])
 
-        for i in range(torch.cuda.device_count()):
-            gpu_ram_allocated = torch.cuda.memory_allocated(i) / (1024 ** 3)  # Convert to GB
-            gpu_ram_reserved = torch.cuda.memory_reserved(i) / (1024 ** 3)  # Convert to GB
-            self.log(f"gpu_ram_allocated_gpu_{i}", gpu_ram_allocated, prog_bar=True, on_step=True, on_epoch=True, logger=True)
-            self.log(f"gpu_ram_reserved_gpu_{i}", gpu_ram_reserved, prog_bar=True, on_step=True, on_epoch=True, logger=True)
+        current_device = torch.cuda.current_device()
+
+
+        gpu_ram_allocated = torch.cuda.memory_allocated(current_device) / (1024 ** 3)  # Convert to GB
+        gpu_ram_reserved = torch.cuda.memory_reserved(current_device) / (1024 ** 3)  # Convert to GB
+        self.log(f"gpu_ram_allocated_gpu_{current_device}", gpu_ram_allocated, prog_bar=True, on_step=True, on_epoch=True, logger=True, rank_zero_only=True)
+        self.log(f"gpu_ram_reserved_gpu_{current_device}", gpu_ram_reserved, prog_bar=True, on_step=True, on_epoch=True, logger=True, rank_zero_only=True)
 
         return total_loss
 
