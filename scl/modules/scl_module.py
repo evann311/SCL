@@ -313,13 +313,12 @@ class SCLTransformer(pl.LightningModule):
         output = self(batch)
         total_loss = sum([v for k, v in output.items() if "loss" in k])
 
-        current_device = torch.cuda.current_device()
-        print(f"Current device: {current_device}")
+        global_step = self.global_step
 
-        gpu_ram_allocated = torch.cuda.memory_allocated(current_device) / (1024 ** 3)  # Convert to GB
-        gpu_ram_reserved = torch.cuda.memory_reserved(current_device) / (1024 ** 3)  # Convert to GB
-        self.log(f"gpu_ram_allocated_gpu_{current_device}", gpu_ram_allocated, prog_bar=True, on_step=True, on_epoch=True, logger=True, rank_zero_only=True)
-        self.log(f"gpu_ram_reserved_gpu_{current_device}", gpu_ram_reserved, prog_bar=True, on_step=True, on_epoch=True, logger=True, rank_zero_only=True)
+        if self.logger is not None and hasattr(self.logger, "experiment"):
+            self.logger.experiment.add_scalar(f"gpu_{device}/allocated_GB", allocated, global_step)
+            self.logger.experiment.add_scalar(f"gpu_{device}/reserved_GB", reserved, global_step)
+
 
         return total_loss
 
