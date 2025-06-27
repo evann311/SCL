@@ -319,7 +319,7 @@ _config_vqa_vast = {
     'num_heads': 12,
 
     # mae transformer settings
-    'vit_path': "/workspace/clip-vit/ViT-B-16.pt",
+    'vit_path': "/workspace/clip-vit1/ViT-B-16.pt",
     'mask_ratio': 0.6,
 
     # Optimizer Setting
