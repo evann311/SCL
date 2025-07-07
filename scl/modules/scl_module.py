@@ -308,11 +308,22 @@ class SCLTransformer(pl.LightningModule):
         output = self(batch)
         total_loss = sum([v for k, v in output.items() if "loss" in k])
 
-        for i in range(torch.cuda.device_count()):
-            gpu_ram_allocated = torch.cuda.memory_allocated(i) / (1024 ** 3)  # Convert to GB
-            gpu_ram_reserved = torch.cuda.memory_reserved(i) / (1024 ** 3)  # Convert to GB
-            self.log(f"gpu_ram_allocated_gpu_{i}", gpu_ram_allocated, prog_bar=True, on_step=True, on_epoch=True, logger=True)
-            self.log(f"gpu_ram_reserved_gpu_{i}", gpu_ram_reserved, prog_bar=True, on_step=True, on_epoch=True, logger=True)
+        allocated = torch.cuda.memory_allocated() / (1024 ** 3)
+        reserved = torch.cuda.memory_reserved() / (1024 ** 3)
+        vram_tensor = torch.tensor([allocated, reserved], device=self.device)
+
+        # Tạo nơi chứa dữ liệu từ tất cả GPUs
+        world_size = torch.distributed.get_world_size()
+        gathered = [torch.zeros_like(vram_tensor) for _ in range(world_size)]
+
+        # Gom dữ liệu từ tất cả GPU
+        torch.distributed.all_gather(gathered, vram_tensor)
+
+        # Chỉ rank 0 log vào TensorBoard
+        if self.global_rank == 0:
+            for rank, v in enumerate(gathered):
+                self.logger.experiment.add_scalar(f"gpu_{rank}/allocated_GB", v[0].item(), self.global_step)
+                self.logger.experiment.add_scalar(f"gpu_{rank}/reserved_GB", v[1].item(), self.global_step)
 
         return total_loss
 
