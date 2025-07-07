@@ -12,7 +12,7 @@ class VQAv2Dataset(BaseDataset):
         elif split == "val":
             names = ["vqav2_rest_val"]
         elif split == "test":
-            names = ["vqav2_test"]  # vqav2_test-dev for test-dev
+            names = ["vqav2"]  # vqav2_test-dev for test-dev
 
         super().__init__(
             *args,
