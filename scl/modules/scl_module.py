@@ -35,7 +35,7 @@ class SCLTransformer(pl.LightningModule):
         hs = self.hparams.config["hidden_size"]
 
         # ===================== Pretrain ===================== #
-        self.text_transformer = RobertaModel.from_pretrained(config['roberta_path'])
+        self.text_transformer = RobertaModel.from_pretrained("roberta-base")
         self.vision_transformer = build_model(config['vit_path'], resolution_after=config["image_size"])
 
         # ===================== Cross Modal ===================== #
