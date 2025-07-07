@@ -24,7 +24,7 @@ class RobertaOutput(nn.Module):
 
 
 def build_roberta_model(config):
-    text_transformer = RobertaModel.from_pretrained(config['roberta_path'])
+    text_transformer = RobertaModel.from_pretrained('roberta-base')
     
     rank = config.get('lora_rank', 8)
     alpha = config.get('lora_alpha', 16)
