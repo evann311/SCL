@@ -34,7 +34,7 @@ class SCLTransformer(pl.LightningModule):
 
         # ===================== Pretrain ===================== #
         # self.text_transformer = build_roberta_model(config)
-        self.text_transformer = RobertaModel.from_pretrained(config['roberta_path'])
+        self.text_transformer = RobertaModel.from_pretrained("roberta-base")
         self.vision_transformer = build_model(config['vit_path'], resolution_after=config["image_size"])
 
         # ===================== Cross Modal ===================== #
@@ -165,6 +165,8 @@ class SCLTransformer(pl.LightningModule):
 
         self.val_vqa_loss_list = []
         self.val_vqa_score_list = []
+
+        self.test_vqa_results = []
 
         self.print_parameter_statistics()
             
@@ -365,14 +367,15 @@ class SCLTransformer(pl.LightningModule):
 
         if self.hparams.config["loss_names"]["vqa"] > 0:
             ret.update(objectives.vqa_test_step(self, batch, output))
-
+        
+        self.test_vqa_results.append(ret)
         return ret
 
-    def on_test_epoch_end(self, outs):
+    def on_test_epoch_end(self, outs=None):
         model_name = self.hparams.config["load_path"].split("/")[-1][:-5]
 
         if self.hparams.config["loss_names"]["vqa"] > 0:
-            objectives.vqa_test_wrapup(outs, model_name, self.hparams.config["log_dir"])
+            objectives.vqa_test_wrapup(self.test_vqa_results, model_name, self.hparams.config["log_dir"])
         scl_utils.epoch_wrapup(self)
 
     def configure_optimizers(self):
