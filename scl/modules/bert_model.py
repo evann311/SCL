@@ -456,14 +456,21 @@ class BertIntermediate(nn.Module):
 
 
 class BertOutput(nn.Module):
-    def __init__(self, bert_config, config):
+    def __init__(self, bert_config, config, use_lora: bool = False):
         super().__init__()
         self.dense = nn.Linear(bert_config.intermediate_size, bert_config.hidden_size)
         self.LayerNorm = nn.LayerNorm(bert_config.hidden_size, eps=bert_config.layer_norm_eps)
         self.dropout = nn.Dropout(bert_config.hidden_dropout_prob)
 
+        self.use_lora = use_lora
+        if self.use_lora:
+            self.lora_layer = LoRALayer(self.dense.in_features, self.dense.out_features, rank=8, alpha=16)
+
     def forward(self, hidden_states, input_tensor):
-        hidden_states = self.dense(hidden_states)
+        if self.use_lora:
+            hidden_states = self.dense(hidden_states) + self.lora_layer(hidden_states)
+        else:
+            hidden_states = self.dense(hidden_states)
         hidden_states = self.dropout(hidden_states)
         hidden_states = self.LayerNorm(hidden_states + input_tensor)
         return hidden_states
@@ -474,12 +481,12 @@ class BertCrossLayer(nn.Module):
         super().__init__()
         self.chunk_size_feed_forward = bert_config.chunk_size_feed_forward
         self.seq_len_dim = 1
-        self.attention = BertAttention(bert_config, config, True)
+        self.attention = BertAttention(bert_config, config, False)
         self.is_decoder = bert_config.is_decoder
         self.add_cross_attention = bert_config.add_cross_attention
         self.crossattention = BertAttention(bert_config, config, False)
         self.intermediate = BertIntermediate(bert_config)
-        self.output = BertOutput(bert_config, config)
+        self.output = BertOutput(bert_config, config, True)
 
     def forward(
         self,
