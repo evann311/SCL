@@ -33,7 +33,7 @@ class RobertaOutput(nn.Module):
         return hidden_states
 
 def build_roberta_model(config):
-    text_transformer = RobertaModel.from_pretrained(config['roberta_path'])
+    text_transformer = RobertaModel.from_pretrained("roberta-base")
 
     for layer in text_transformer.encoder.layer:
         layer.output = RobertaOutput(layer.output, 64)
