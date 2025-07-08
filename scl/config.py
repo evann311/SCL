@@ -290,7 +290,7 @@ _config_vqa_vast = {
         "con": 0,
         "scl": 0,
         },
-    'batch_size': 32,  # this is a desired batch size; pl trainer will accumulate gradients when per step batch is smaller.
+    'batch_size': 512,  # this is a desired batch size; pl trainer will accumulate gradients when per step batch is smaller.
 
     # Image setting
     'image_size': 384,
@@ -339,15 +339,15 @@ _config_vqa_vast = {
     # PL Trainer Setting
     'resume_from': None, # load interrupted ckpt
     'fast_dev_run': False, # for debug
-    'test_only': False,
+    'test_only': True,
 
     # below params varies with the environment
     'data_root': '/workspace/arrow-vqa2-full',
     'log_dir': "result",
-    'per_gpu_batchsize': 16,  # you should define this manually with per_gpu_batch_size=#
+    'per_gpu_batchsize': 256,  # you should define this manually with per_gpu_batch_size=#
     'num_gpus': 2,
     'num_nodes': 1,
-    'load_path': "/workspace/glscl/GLSCL-100k.ckpt",
+    'load_path': "/workspace/last.ckpt",
     'num_workers': 32,
     'precision': '16-mixed',
     'is_pretrain': False,
