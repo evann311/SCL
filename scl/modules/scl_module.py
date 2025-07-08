@@ -161,6 +161,8 @@ class SCLTransformer(pl.LightningModule):
         self.val_vqa_loss_list = []
         self.val_vqa_score_list = []
 
+        self.test_vqa_results = []
+
         self.print_parameter_statistics()
 
     # image
