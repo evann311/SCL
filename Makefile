@@ -1,5 +1,5 @@
 all:
 	git add .
 	git commit -m "update"
-	git push origin text-fusion-full
+	git push origin text-fusion-full-test
 
