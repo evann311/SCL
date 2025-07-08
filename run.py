@@ -145,7 +145,7 @@ if __name__ == '__main__':
         precision=_config["precision"],
         strategy=DDPStrategy(find_unused_parameters=True),
         benchmark=True,
-        deterministic=False,
+        deterministic=True,
         max_epochs=_config["max_epoch"],
         callbacks=callbacks,
         logger=logger,
