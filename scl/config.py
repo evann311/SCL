@@ -345,7 +345,7 @@ _config_vqa_vast = {
     # below params varies with the environment
     'data_root': '/workspace/arrow-vqa2-full',
     'log_dir': "result",
-    'per_gpu_batchsize': 480,  # you should define this manually with per_gpu_batch_size=#
+    'per_gpu_batchsize': 400,  # you should define this manually with per_gpu_batch_size=#
     'num_gpus': 2,
     'num_nodes': 1,
     'load_path': "/last.ckpt",
