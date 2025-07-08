@@ -348,7 +348,7 @@ _config_vqa_vast = {
     'num_gpus': 2,
     'num_nodes': 1,
     'load_path': "/workspace/last.ckpt",
-    'num_workers': 32,
+    'num_workers': 16,
     'precision': '16-mixed',
     'is_pretrain': False,
 
