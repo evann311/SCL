@@ -34,7 +34,7 @@ class SCLTransformer(pl.LightningModule):
 
         # ===================== Pretrain ===================== #
         # self.text_transformer = build_roberta_model(config)
-        self.text_transformer = RobertaModel.from_pretrained(config['roberta_path'])
+        self.text_transformer = RobertaModel.from_pretrained("roberta-base")
         self.vision_transformer = build_model(config['vit_path'], resolution_after=config["image_size"])
 
         # ===================== Cross Modal ===================== #
@@ -49,13 +49,13 @@ class SCLTransformer(pl.LightningModule):
 
         # ===================== Cross Modal Attention ===================== #
         self.cross_modal_image_layers = nn.ModuleList([
-            BertCrossLayer(bert_config, config, use_lora=(i >= config['num_top_layer']//2)) 
+            BertCrossLayer(bert_config, config, use_lora=(i >= 2)) 
             for i in range(config['num_top_layer'])
         ])
         self.cross_modal_image_layers.apply(objectives.init_weights)
 
         self.cross_modal_text_layers = nn.ModuleList([
-            BertCrossLayer(bert_config, config, use_lora=(i >= config['num_top_layer']//2)) 
+            BertCrossLayer(bert_config, config, use_lora=(i >= 2)) 
             for i in range(config['num_top_layer'])
         ])
         self.cross_modal_text_layers.apply(objectives.init_weights)
