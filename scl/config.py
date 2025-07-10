@@ -348,7 +348,7 @@ _config_vqa_vast = {
     'per_gpu_batchsize': 256,  # you should define this manually with per_gpu_batch_size=#
     'num_gpus': 8,
     'num_nodes': 1,
-    'load_path': "/result/fusion-encoder-lora-output-test/checkpoints/last.ckpt",
+    'load_path': "/result/fusion-encoder-lora-output/checkpoints/last.ckpt",
     'num_workers': 32,
     'precision': '16-mixed',
     'is_pretrain': False,
