@@ -346,7 +346,7 @@ _config_vqa_vast = {
     'data_root': '/workspace/arrow-vqa2-full',
     'log_dir': "result",
     'per_gpu_batchsize': 128,  # you should define this manually with per_gpu_batch_size=#
-    'num_gpus': 2,
+    'num_gpus': 4,
     'num_nodes': 1,
     'load_path': "/result/fusion-encoder-adapter-4block/checkpoints/last.ckpt",
     'num_workers': 32,
