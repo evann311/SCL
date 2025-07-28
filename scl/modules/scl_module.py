@@ -33,7 +33,7 @@ class SCLTransformer(pl.LightningModule):
         hs = self.hparams.config["hidden_size"]
 
         # ===================== Pretrain ===================== #
-        self.text_transformer = RobertaModel.from_pretrained(self.hparams.config["roberta_path"])
+        self.text_transformer = RobertaModel.from_pretrained('roberta-base')
         self.vision_transformer = build_model(config['vit_path'], resolution_after=config["image_size"])
 
 
@@ -150,9 +150,8 @@ class SCLTransformer(pl.LightningModule):
             self.load_state_dict(state_dict, strict=False)
 
         # ===================== freeze ======================
-
         for name, param in self.named_parameters():
-            if 'text_transformer' in name or 'vqa_classifier' in name:
+            if 'vision_transformer' in name or 'vqa_classifier' in name:
                 param.requires_grad = True
             else:
                 param.requires_grad = False
@@ -305,13 +304,10 @@ class SCLTransformer(pl.LightningModule):
     def training_step(self, batch, batch_idx):
         scl_utils.set_task(self)
         output = self(batch)
-        total_loss = sum([v for k, v in output.items() if "loss" in k])
 
-        for i in range(torch.cuda.device_count()):
-            gpu_ram_allocated = torch.cuda.memory_allocated(i) / (1024 ** 3)  # Convert to GB
-            gpu_ram_reserved = torch.cuda.memory_reserved(i) / (1024 ** 3)  # Convert to GB
-            self.log(f"gpu_ram_allocated_gpu_{i}", gpu_ram_allocated, prog_bar=True, on_step=True, on_epoch=True, logger=True)
-            self.log(f"gpu_ram_reserved_gpu_{i}", gpu_ram_reserved, prog_bar=True, on_step=True, on_epoch=True, logger=True)
+        
+
+        total_loss = sum([v for k, v in output.items() if "loss" in k])
 
         return total_loss
 
