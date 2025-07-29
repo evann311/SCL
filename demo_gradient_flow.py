@@ -128,6 +128,7 @@ def main():
     
     # Điều chỉnh batch size cho demo nếu cần
     if args.task == 'vqa_vast':
+        _config['batch_size'] = 16
         _config['per_gpu_batchsize'] = min(_config['per_gpu_batchsize'], 16)  # Giảm batch size cho demo
     
     pl.seed_everything(_config["seed"])
