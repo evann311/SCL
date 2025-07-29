@@ -3,274 +3,391 @@ import numpy as np
 import matplotlib.pyplot as plt
 import os
 
-def analyze_cosine_results():
-    """Phân tích kết quả cosine analysis từ file JSON đã lưu"""
+def analyze_encoder_comparison():
+    """Phân tích và so sánh kết quả từ các encoder experiments riêng biệt"""
     
-    # Tìm thư mục kết quả mới nhất
-    results_dirs = [d for d in os.listdir('.') if d.startswith('cosine_analysis_vqa_vast_')]
-    if not results_dirs:
-        # Fallback to gradient_analysis directories
-        results_dirs = [d for d in os.listdir('.') if d.startswith('gradient_analysis_vqa_vast_')]
-        if not results_dirs:
-            print("❌ Không tìm thấy kết quả analysis!")
-            return
+    print("🔍 Searching for encoder experiment results...")
     
-    # Sắp xếp theo thời gian (mới nhất đầu tiên)
-    results_dirs.sort(reverse=True)
-    latest_dir = results_dirs[0]
+    # Tìm tất cả thư mục kết quả encoder experiments
+    encoder_dirs = {}
     
-    print(f"📁 Analyzing results from: {latest_dir}")
+    # Tìm các thư mục với pattern encoder_comparison_* hoặc cosine_analysis_*
+    all_dirs = [d for d in os.listdir('.') if os.path.isdir(d)]
     
-    # Load dữ liệu cosine
-    cosine_summary_file = os.path.join(latest_dir, 'cosine_summary.json')
-    cosine_step_file = os.path.join(latest_dir, 'cosine_step_results.json')
+    for directory in all_dirs:
+        # Check for individual encoder results
+        for encoder_type in ['text', 'image', 'cross']:
+            summary_file = os.path.join(directory, f'cosine_summary_{encoder_type}.json')
+            step_file = os.path.join(directory, f'cosine_step_results_{encoder_type}.json')
+            
+            if os.path.exists(summary_file) and os.path.exists(step_file):
+                if encoder_type not in encoder_dirs:
+                    encoder_dirs[encoder_type] = []
+                encoder_dirs[encoder_type].append({
+                    'dir': directory,
+                    'summary_file': summary_file,
+                    'step_file': step_file
+                })
     
-    if not os.path.exists(cosine_summary_file):
-        print(f"❌ File not found: {cosine_summary_file}")
+    if not encoder_dirs:
+        print("❌ Không tìm thấy kết quả encoder experiments!")
+        print("💡 Hãy chạy gradient_analysis.py trước để tạo dữ liệu")
         return
     
-    if not os.path.exists(cosine_step_file):
-        print(f"❌ File not found: {cosine_step_file}")
-        return
+    print(f"📁 Found experiments for encoders: {list(encoder_dirs.keys())}")
     
-    with open(cosine_summary_file, 'r') as f:
-        summary = json.load(f)
+    # Load data từ experiment mới nhất của mỗi encoder
+    encoder_results = {}
     
-    with open(cosine_step_file, 'r') as f:
-        step_data = json.load(f)
-    
-    print(f"📊 Loaded cosine analysis data")
-    
-    # Phân tích cosine similarity
-    print(f"\n🔬 === COSINE SIMILARITY ANALYSIS RESULTS ===")
-    
-    # Summary statistics
-    for encoder_type in ['text_encoder', 'image_encoder', 'cross_modal']:
-        if encoder_type in summary:
-            stats = summary[encoder_type]
-            print(f"\n📊 {encoder_type.replace('_', ' ').title()}:")
-            print(f"  Mean Cosine: {stats['mean_cosine']:.4f} ± {stats['std_cosine']:.4f}")
-            print(f"  Final Cosine: {stats['final_cosine']:.4f}")
-            print(f"  Range: [{stats['min_cosine']:.4f}, {stats['max_cosine']:.4f}]")
-            print(f"  Measurements: {stats['total_measurements']}")
-            
-            # Interpret cosine values
-            mean_cosine = stats['mean_cosine']
-            final_cosine = stats['final_cosine']
-            
-            print(f"  📈 Analysis:")
-            if mean_cosine > 0.5:
-                print(f"    ✅ GOOD: High consistency, stable learning")
-            elif mean_cosine > 0.2:
-                print(f"    ⚠️ MODERATE: Some consistency, gradual learning")
-            elif mean_cosine > 0.0:
-                print(f"    ❌ LOW: Weak consistency, unstable learning")
-            else:
-                print(f"    🚨 CRITICAL: Negative consistency, diverging!")
-            
-            if final_cosine > 0.7:
-                print(f"    ✅ Converged well")
-            elif final_cosine > 0.3:
-                print(f"    ⚠️ Still converging")
-            elif final_cosine > 0.0:
-                print(f"    ❌ Poor convergence")
-            else:
-                print(f"    🚨 Diverging at end!")
-    
-    # Comparative analysis
-    print(f"\n⚖️ COMPARATIVE ANALYSIS:")
-    
-    text_stats = summary.get('text_encoder', {})
-    image_stats = summary.get('image_encoder', {})
-    cross_stats = summary.get('cross_modal', {})
-    
-    if text_stats and image_stats:
-        text_cosine = text_stats['mean_cosine']
-        image_cosine = image_stats['mean_cosine']
+    for encoder_type, experiments in encoder_dirs.items():
+        # Sắp xếp theo thời gian, lấy mới nhất
+        experiments.sort(key=lambda x: x['dir'], reverse=True)
+        latest_exp = experiments[0]
         
-        if abs(text_cosine - image_cosine) < 0.1:
-            print(f"  ✅ Text and Image encoders have similar consistency")
-        elif text_cosine > image_cosine:
-            ratio = text_cosine / (image_cosine + 1e-8)
-            print(f"  ⚠️ Text encoder more stable (ratio: {ratio:.2f}x)")
-            if ratio > 3:
-                print(f"    → Consider reducing text LR or increasing image LR")
-        else:
-            ratio = image_cosine / (text_cosine + 1e-8)
-            print(f"  ⚠️ Image encoder more stable (ratio: {ratio:.2f}x)")
-            if ratio > 3:
-                print(f"    → Consider reducing image LR or increasing text LR")
-    
-    # Trend analysis
-    print(f"\n📈 TREND ANALYSIS:")
-    
-    # Extract trends from step data
-    text_trends = []
-    image_trends = []
-    cross_trends = []
-    steps = []
-    
-    for step_info in step_data:
-        if 'step' in step_info:
-            steps.append(step_info['step'])
-            text_trends.append(step_info.get('text_avg_cosine', 0))
-            image_trends.append(step_info.get('image_avg_cosine', 0))
-            cross_trends.append(step_info.get('cross_avg_cosine', 0))
-    
-    if len(steps) > 10:
-        # Calculate trends
-        text_trend = np.polyfit(steps[-100:], text_trends[-100:], 1)[0] if len(steps) >= 100 else np.polyfit(steps, text_trends, 1)[0]
-        image_trend = np.polyfit(steps[-100:], image_trends[-100:], 1)[0] if len(steps) >= 100 else np.polyfit(steps, image_trends, 1)[0]
-        cross_trend = np.polyfit(steps[-100:], cross_trends[-100:], 1)[0] if len(steps) >= 100 else np.polyfit(steps, cross_trends, 1)[0]
+        print(f"📊 Loading {encoder_type} encoder data from: {latest_exp['dir']}")
         
-        print(f"  Text Encoder Trend: {'📈 Improving' if text_trend > 0.0001 else '📉 Declining' if text_trend < -0.0001 else '➡️ Stable'}")
-        print(f"  Image Encoder Trend: {'📈 Improving' if image_trend > 0.0001 else '📉 Declining' if image_trend < -0.0001 else '➡️ Stable'}")
-        print(f"  Cross-Modal Trend: {'📈 Improving' if cross_trend > 0.0001 else '📉 Declining' if cross_trend < -0.0001 else '➡️ Stable'}")
+        with open(latest_exp['summary_file'], 'r') as f:
+            summary = json.load(f)
+        
+        with open(latest_exp['step_file'], 'r') as f:
+            step_data = json.load(f)
+        
+        encoder_results[encoder_type] = {
+            'summary': summary,
+            'steps': step_data,
+            'dir': latest_exp['dir']
+        }
     
-    # Plot trends
-    plt.figure(figsize=(15, 10))
+    print(f"\n🔬 === ENCODER COMPARISON ANALYSIS ===")
     
-    # Plot 1: Cosine similarity over time
-    plt.subplot(2, 2, 1)
-    if steps and text_trends:
-        plt.plot(steps, text_trends, label='Text Encoder', alpha=0.7, linewidth=2)
-    if steps and image_trends:
-        plt.plot(steps, image_trends, label='Image Encoder', alpha=0.7, linewidth=2)
-    if steps and cross_trends:
-        plt.plot(steps, cross_trends, label='Cross-Modal', alpha=0.7, linewidth=2)
+    # Create comprehensive comparison plots
+    fig, axes = plt.subplots(3, 3, figsize=(20, 15))
+    fig.suptitle('Encoder Performance Comparison', fontsize=16, fontweight='bold')
     
-    plt.axhline(y=0, color='red', linestyle='--', alpha=0.5, label='Zero Line')
-    plt.axhline(y=0.3, color='green', linestyle='--', alpha=0.5, label='Good Threshold')
-    plt.xlabel('Training Steps')
-    plt.ylabel('Average Cosine Similarity')
-    plt.title('Cosine Similarity Trends')
-    plt.legend()
-    plt.grid(True, alpha=0.3)
+    colors = {'text': 'blue', 'image': 'green', 'cross': 'red'}
+    encoder_names = {'text': 'Text Encoder', 'image': 'Image Encoder', 'cross': 'Cross-Modal'}
     
-    # Plot 2: Distribution of cosine values
-    plt.subplot(2, 2, 2)
-    all_text_cosines = [stats['mean_cosine']] if 'text_encoder' in summary else []
-    all_image_cosines = [stats['mean_cosine']] if 'image_encoder' in summary else []
-    all_cross_cosines = [stats['mean_cosine']] if 'cross_modal' in summary else []
-    
-    if text_trends:
-        plt.hist(text_trends, bins=30, alpha=0.7, label='Text Encoder', density=True)
-    if image_trends:
-        plt.hist(image_trends, bins=30, alpha=0.7, label='Image Encoder', density=True)
-    if cross_trends:
-        plt.hist(cross_trends, bins=30, alpha=0.7, label='Cross-Modal', density=True)
-    
-    plt.axvline(x=0, color='red', linestyle='--', alpha=0.5)
-    plt.axvline(x=0.3, color='green', linestyle='--', alpha=0.5)
-    plt.xlabel('Cosine Similarity')
-    plt.ylabel('Density')
-    plt.title('Cosine Similarity Distribution')
-    plt.legend()
-    
-    # Plot 3: Final vs Initial comparison
-    plt.subplot(2, 2, 3)
+    # Plot 1: Final cosine comparison for target encoders
+    ax = axes[0, 0]
     encoders = []
-    initial_cosines = []
     final_cosines = []
+    colors_list = []
     
-    for encoder_type in ['text_encoder', 'image_encoder', 'cross_modal']:
-        if encoder_type in summary:
-            encoders.append(encoder_type.replace('_', ' ').title())
-            # Get initial cosine (average of first 10 steps)
-            encoder_steps = [step for step in step_data[:10] if f'{encoder_type.split("_")[0]}_avg_cosine' in step]
-            if encoder_steps:
-                initial_avg = np.mean([step[f'{encoder_type.split("_")[0]}_avg_cosine'] for step in encoder_steps])
-                initial_cosines.append(initial_avg)
-            else:
-                initial_cosines.append(0)
-            final_cosines.append(summary[encoder_type]['final_cosine'])
+    for encoder_type, data in encoder_results.items():
+        summary = data['summary']
+        target_encoder_key = f'{encoder_type}_encoder'
+        
+        if target_encoder_key in summary:
+            encoders.append(encoder_names[encoder_type])
+            final_cosines.append(summary[target_encoder_key]['final_cosine'])
+            colors_list.append(colors[encoder_type])
     
-    if encoders:
-        x = np.arange(len(encoders))
-        width = 0.35
-        
-        plt.bar(x - width/2, initial_cosines, width, label='Initial (first 10 steps)', alpha=0.7)
-        plt.bar(x + width/2, final_cosines, width, label='Final', alpha=0.7)
-        
-        plt.xlabel('Encoders')
-        plt.ylabel('Cosine Similarity')
-        plt.title('Initial vs Final Cosine Similarity')
-        plt.xticks(x, encoders, rotation=45)
-        plt.legend()
-        plt.axhline(y=0, color='red', linestyle='--', alpha=0.5)
+    bars = ax.bar(encoders, final_cosines, color=colors_list, alpha=0.7)
+    ax.set_ylabel('Final Cosine Similarity')
+    ax.set_title('Final Cosine Similarity - Target Encoders')
+    ax.axhline(y=0.3, color='orange', linestyle='--', alpha=0.7, label='Good Threshold')
+    ax.axhline(y=0.0, color='red', linestyle='--', alpha=0.5, label='Zero Line')
+    ax.legend()
+    ax.grid(True, alpha=0.3)
     
-    # Plot 4: Convergence progress
-    plt.subplot(2, 2, 4)
-    if len(steps) > 50:
-        # Calculate rolling average
-        window = min(50, len(steps) // 10)
-        
-        if text_trends:
-            text_rolling = np.convolve(text_trends, np.ones(window)/window, mode='valid')
-            plt.plot(steps[window-1:], text_rolling, label='Text (smoothed)', linewidth=2)
-        
-        if image_trends:
-            image_rolling = np.convolve(image_trends, np.ones(window)/window, mode='valid')
-            plt.plot(steps[window-1:], image_rolling, label='Image (smoothed)', linewidth=2)
-        
-        if cross_trends:
-            cross_rolling = np.convolve(cross_trends, np.ones(window)/window, mode='valid')
-            plt.plot(steps[window-1:], cross_rolling, label='Cross-Modal (smoothed)', linewidth=2)
+    # Add value labels on bars
+    for bar, value in zip(bars, final_cosines):
+        ax.text(bar.get_x() + bar.get_width()/2, bar.get_height() + 0.01, 
+                f'{value:.3f}', ha='center', va='bottom', fontweight='bold')
     
-    plt.axhline(y=0.5, color='green', linestyle='--', alpha=0.5, label='Target Convergence')
-    plt.xlabel('Training Steps')
-    plt.ylabel('Smoothed Cosine Similarity')
-    plt.title('Convergence Progress (Smoothed)')
-    plt.legend()
-    plt.grid(True, alpha=0.3)
+    # Plot 2: Mean cosine comparison for target encoders
+    ax = axes[0, 1]
+    mean_cosines = []
+    
+    for encoder_type, data in encoder_results.items():
+        summary = data['summary']
+        target_encoder_key = f'{encoder_type}_encoder'
+        
+        if target_encoder_key in summary:
+            mean_cosines.append(summary[target_encoder_key]['mean_cosine'])
+    
+    bars = ax.bar(encoders, mean_cosines, color=colors_list, alpha=0.7)
+    ax.set_ylabel('Mean Cosine Similarity')
+    ax.set_title('Mean Cosine Similarity - Target Encoders')
+    ax.axhline(y=0.3, color='orange', linestyle='--', alpha=0.7)
+    ax.axhline(y=0.0, color='red', linestyle='--', alpha=0.5)
+    ax.grid(True, alpha=0.3)
+    
+    for bar, value in zip(bars, mean_cosines):
+        ax.text(bar.get_x() + bar.get_width()/2, bar.get_height() + 0.01, 
+                f'{value:.3f}', ha='center', va='bottom', fontweight='bold')
+    
+    # Plot 3: VQA Head performance comparison
+    ax = axes[0, 2]
+    vqa_final_cosines = []
+    vqa_mean_cosines = []
+    
+    for encoder_type, data in encoder_results.items():
+        summary = data['summary']
+        
+        if 'vqa_head' in summary:
+            vqa_final_cosines.append(summary['vqa_head']['final_cosine'])
+            vqa_mean_cosines.append(summary['vqa_head']['mean_cosine'])
+    
+    x = np.arange(len(encoders))
+    width = 0.35
+    
+    bars1 = ax.bar(x - width/2, vqa_final_cosines, width, label='Final', alpha=0.7)
+    bars2 = ax.bar(x + width/2, vqa_mean_cosines, width, label='Mean', alpha=0.7)
+    
+    ax.set_ylabel('VQA Head Cosine Similarity')
+    ax.set_title('VQA Head Performance Across Experiments')
+    ax.set_xticks(x)
+    ax.set_xticklabels(encoders)
+    ax.legend()
+    ax.grid(True, alpha=0.3)
+    
+    # Plot 4-6: Individual encoder trends
+    for i, (encoder_type, data) in enumerate(encoder_results.items()):
+        ax = axes[1, i]
+        
+        steps_data = data['steps']
+        steps = [step['step'] for step in steps_data if 'step' in step]
+        
+        # Target encoder trend
+        target_key = f'{encoder_type}_avg_cosine'
+        target_cosines = [step.get(target_key, 0) for step in steps_data]
+        
+        # VQA head trend
+        vqa_cosines = [step.get('vqa_avg_cosine', 0) for step in steps_data]
+        
+        if steps and target_cosines:
+            ax.plot(steps, target_cosines, label=f'{encoder_names[encoder_type]}', 
+                   color=colors[encoder_type], linewidth=2, alpha=0.8)
+        
+        if steps and vqa_cosines:
+            ax.plot(steps, vqa_cosines, label='VQA Head', 
+                   color='purple', linewidth=2, alpha=0.6, linestyle='--')
+        
+        ax.axhline(y=0, color='red', linestyle='--', alpha=0.5)
+        ax.axhline(y=0.3, color='green', linestyle='--', alpha=0.5)
+        ax.set_xlabel('Training Steps')
+        ax.set_ylabel('Cosine Similarity')
+        ax.set_title(f'{encoder_names[encoder_type]} Experiment')
+        ax.legend()
+        ax.grid(True, alpha=0.3)
+    
+    # Plot 7: Combined trend comparison (smoothed)
+    ax = axes[2, 0]
+    
+    for encoder_type, data in encoder_results.items():
+        steps_data = data['steps']
+        steps = [step['step'] for step in steps_data if 'step' in step]
+        target_key = f'{encoder_type}_avg_cosine'
+        target_cosines = [step.get(target_key, 0) for step in steps_data]
+        
+        if len(steps) > 20:
+            # Apply smoothing
+            window = min(20, len(steps) // 5)
+            smoothed = np.convolve(target_cosines, np.ones(window)/window, mode='valid')
+            smoothed_steps = steps[window-1:]
+            
+            ax.plot(smoothed_steps, smoothed, label=encoder_names[encoder_type], 
+                   color=colors[encoder_type], linewidth=3, alpha=0.8)
+    
+    ax.axhline(y=0, color='red', linestyle='--', alpha=0.5)
+    ax.axhline(y=0.3, color='green', linestyle='--', alpha=0.5, label='Good Threshold')
+    ax.set_xlabel('Training Steps')
+    ax.set_ylabel('Smoothed Cosine Similarity')
+    ax.set_title('Encoder Performance Comparison (Smoothed)')
+    ax.legend()
+    ax.grid(True, alpha=0.3)
+    
+    # Plot 8: Convergence rate comparison
+    ax = axes[2, 1]
+    
+    convergence_rates = []
+    for encoder_type, data in encoder_results.items():
+        steps_data = data['steps']
+        target_key = f'{encoder_type}_avg_cosine'
+        target_cosines = [step.get(target_key, 0) for step in steps_data]
+        
+        if len(target_cosines) > 50:
+            # Calculate trend in last 50% of training
+            mid_point = len(target_cosines) // 2
+            trend = np.polyfit(range(mid_point, len(target_cosines)), 
+                             target_cosines[mid_point:], 1)[0]
+            convergence_rates.append(trend)
+        else:
+            convergence_rates.append(0)
+    
+    bars = ax.bar(encoders, convergence_rates, color=colors_list, alpha=0.7)
+    ax.set_ylabel('Convergence Rate (slope)')
+    ax.set_title('Convergence Rate Comparison')
+    ax.axhline(y=0, color='red', linestyle='--', alpha=0.5)
+    ax.grid(True, alpha=0.3)
+    
+    for bar, value in zip(bars, convergence_rates):
+        ax.text(bar.get_x() + bar.get_width()/2, 
+                bar.get_height() + (0.0001 if value >= 0 else -0.0002), 
+                f'{value:.4f}', ha='center', 
+                va='bottom' if value >= 0 else 'top', fontweight='bold')
+    
+    # Plot 9: Stability comparison (standard deviation)
+    ax = axes[2, 2]
+    
+    stability_scores = []
+    for encoder_type, data in encoder_results.items():
+        summary = data['summary']
+        target_encoder_key = f'{encoder_type}_encoder'
+        
+        if target_encoder_key in summary:
+            std_cosine = summary[target_encoder_key]['std_cosine']
+            # Lower std = higher stability
+            stability_score = 1 / (1 + std_cosine)  # Normalize to 0-1
+            stability_scores.append(stability_score)
+    
+    bars = ax.bar(encoders, stability_scores, color=colors_list, alpha=0.7)
+    ax.set_ylabel('Stability Score (1/(1+std))')
+    ax.set_title('Training Stability Comparison')
+    ax.grid(True, alpha=0.3)
+    
+    for bar, value in zip(bars, stability_scores):
+        ax.text(bar.get_x() + bar.get_width()/2, bar.get_height() + 0.01, 
+                f'{value:.3f}', ha='center', va='bottom', fontweight='bold')
     
     plt.tight_layout()
     
-    # Save plot
-    plot_path = os.path.join(latest_dir, 'cosine_analysis_plots.png')
+    # Save comparison plot
+    comparison_dir = "encoder_comparison_analysis"
+    os.makedirs(comparison_dir, exist_ok=True)
+    
+    plot_path = os.path.join(comparison_dir, 'encoder_comparison_detailed.png')
     plt.savefig(plot_path, dpi=300, bbox_inches='tight')
-    print(f"\n📈 Analysis plots saved to: {plot_path}")
+    print(f"\n📈 Detailed comparison plots saved to: {plot_path}")
     
     plt.show()
     
-    # Recommendations
-    print(f"\n💡 ACTIONABLE RECOMMENDATIONS:")
+    # Print detailed comparison summary
+    print(f"\n📊 DETAILED ENCODER COMPARISON SUMMARY:")
+    print(f"{'='*80}")
     
-    overall_performance = "good"
+    print(f"{'Encoder':<15} {'Final':<8} {'Mean':<8} {'Std':<8} {'Min':<8} {'Max':<8} {'VQA Final':<10}")
+    print(f"{'-'*80}")
     
-    for encoder_type in ['text_encoder', 'image_encoder', 'cross_modal']:
-        if encoder_type in summary:
-            stats = summary[encoder_type]
-            mean_cosine = stats['mean_cosine']
-            final_cosine = stats['final_cosine']
+    best_encoder = None
+    best_score = -1
+    
+    for encoder_type, data in encoder_results.items():
+        summary = data['summary']
+        target_encoder_key = f'{encoder_type}_encoder'
+        
+        if target_encoder_key in summary:
+            stats = summary[target_encoder_key]
+            vqa_stats = summary.get('vqa_head', {})
             
-            if mean_cosine < 0.1 or final_cosine < 0.1:
-                overall_performance = "poor"
-                break
-            elif mean_cosine < 0.3 or final_cosine < 0.3:
-                overall_performance = "moderate"
+            final_cosine = stats['final_cosine']
+            mean_cosine = stats['mean_cosine']
+            std_cosine = stats['std_cosine']
+            min_cosine = stats['min_cosine']
+            max_cosine = stats['max_cosine']
+            vqa_final = vqa_stats.get('final_cosine', 0)
+            
+            # Calculate combined score (higher is better)
+            combined_score = (final_cosine + mean_cosine + vqa_final) / 3 - std_cosine/2
+            
+            print(f"{encoder_names[encoder_type]:<15} {final_cosine:<8.4f} {mean_cosine:<8.4f} {std_cosine:<8.4f} {min_cosine:<8.4f} {max_cosine:<8.4f} {vqa_final:<10.4f}")
+            
+            if combined_score > best_score:
+                best_score = combined_score
+                best_encoder = encoder_type
     
-    if overall_performance == "poor":
-        print(f"  🚨 CRITICAL ISSUES DETECTED:")
-        print(f"     • Reduce learning rate by 50%")
-        print(f"     • Add gradient clipping (max_norm=1.0)")
-        print(f"     • Increase warmup steps to 30% of training")
-        print(f"     • Consider smaller batch size")
-    elif overall_performance == "moderate":
-        print(f"  ⚠️ MODERATE ISSUES:")
-        print(f"     • Reduce learning rate by 20%")
-        print(f"     • Add gradient clipping (max_norm=2.0)")
-        print(f"     • Increase warmup steps to 20% of training")
-    else:
-        print(f"  ✅ TRAINING APPEARS STABLE:")
-        print(f"     • Continue with current settings")
-        print(f"     • Monitor for any degradation")
+    print(f"\n🏆 PERFORMANCE RANKING:")
     
-    print(f"\n📋 GENERAL RECOMMENDATIONS:")
-    print(f"     • Target cosine similarity > 0.3 for stable learning")
-    print(f"     • Monitor for negative cosine values (indicates divergence)")
-    print(f"     • Aim for final cosine > 0.5 for good convergence")
+    # Calculate performance scores for ranking
+    performance_scores = {}
+    for encoder_type, data in encoder_results.items():
+        summary = data['summary']
+        target_encoder_key = f'{encoder_type}_encoder'
+        
+        if target_encoder_key in summary:
+            stats = summary[target_encoder_key]
+            vqa_stats = summary.get('vqa_head', {})
+            
+            # Multi-criteria scoring
+            final_score = stats['final_cosine']
+            mean_score = stats['mean_cosine']
+            stability_score = 1 / (1 + stats['std_cosine'])
+            vqa_score = vqa_stats.get('final_cosine', 0)
+            
+            # Weighted combined score
+            combined_score = (final_score * 0.3 + mean_score * 0.3 + 
+                            stability_score * 0.2 + vqa_score * 0.2)
+            
+            performance_scores[encoder_type] = combined_score
+    
+    # Sort by performance
+    ranked_encoders = sorted(performance_scores.items(), key=lambda x: x[1], reverse=True)
+    
+    for i, (encoder_type, score) in enumerate(ranked_encoders):
+        medal = ["🥇", "🥈", "🥉"][i] if i < 3 else f"{i+1}."
+        print(f"  {medal} {encoder_names[encoder_type]}: {score:.4f}")
+    
+    print(f"\n💡 ACTIONABLE INSIGHTS:")
+    
+    if best_encoder:
+        print(f"  🎯 BEST PERFORMER: {encoder_names[best_encoder]}")
+        
+        best_data = encoder_results[best_encoder]
+        best_summary = best_data['summary']
+        best_target_key = f'{best_encoder}_encoder'
+        
+        if best_target_key in best_summary:
+            best_final = best_summary[best_target_key]['final_cosine']
+            
+            if best_final > 0.5:
+                print(f"  ✅ Excellent convergence! Consider using {best_encoder} encoder as primary")
+            elif best_final > 0.3:
+                print(f"  📈 Good performance. {best_encoder} encoder shows most promise")
+            else:
+                print(f"  ⚠️ Best performer still needs improvement. Focus on {best_encoder} encoder")
+    
+    # Specific recommendations for each encoder
+    print(f"\n🔧 ENCODER-SPECIFIC RECOMMENDATIONS:")
+    
+    for encoder_type, data in encoder_results.items():
+        summary = data['summary']
+        target_encoder_key = f'{encoder_type}_encoder'
+        
+        if target_encoder_key in summary:
+            stats = summary[target_encoder_key]
+            final_cosine = stats['final_cosine']
+            mean_cosine = stats['mean_cosine']
+            std_cosine = stats['std_cosine']
+            
+            print(f"\n  {encoder_names[encoder_type]}:")
+            
+            if final_cosine < 0.1:
+                print(f"    🚨 CRITICAL: Reduce LR by 70%, add gradient clipping")
+            elif final_cosine < 0.3:
+                print(f"    ⚠️ MODERATE: Reduce LR by 30%, increase warmup")
+            else:
+                print(f"    ✅ GOOD: Maintain current settings")
+            
+            if std_cosine > 0.3:
+                print(f"    📊 High variance detected: Add gradient clipping, increase batch size")
+            
+            if mean_cosine < 0:
+                print(f"    🔄 Negative trend: Reduce LR significantly, check data quality")
+    
+    # Save summary to file
+    summary_path = os.path.join(comparison_dir, 'encoder_comparison_summary.json')
+    with open(summary_path, 'w') as f:
+        json.dump({
+            'performance_scores': performance_scores,
+            'ranking': [(enc, score) for enc, score in ranked_encoders],
+            'best_encoder': best_encoder,
+            'analysis_timestamp': str(np.datetime64('now'))
+        }, f, indent=2)
+    
+    print(f"\n📁 Summary saved to: {summary_path}")
+    print(f"📁 Results from: {[data['dir'] for data in encoder_results.values()]}")
 
 
 if __name__ == "__main__":
-    analyze_cosine_results() 
+    analyze_encoder_comparison() 
