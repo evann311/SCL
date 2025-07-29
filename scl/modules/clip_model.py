@@ -9,6 +9,7 @@ from torch import nn
 
 from .mae_transformer import Block
 from scl.modules import objectives
+from .lora import LoRALayer  # Import LoRA layer
 
 class LayerNorm(nn.LayerNorm):
     """Subclass torch's LayerNorm to handle fp16."""
@@ -25,7 +26,7 @@ class QuickGELU(nn.Module):
 
 
 class ResidualAttentionBlock(nn.Module):
-    def __init__(self, d_model: int, n_head: int, attn_mask: torch.Tensor = None):
+    def __init__(self, d_model: int, n_head: int, attn_mask: torch.Tensor = None, lora_rank: int = 8, lora_alpha: int = 16):
         super().__init__()
 
         self.attn = nn.MultiheadAttention(d_model, n_head)
@@ -37,12 +38,23 @@ class ResidualAttentionBlock(nn.Module):
         ]))
         self.ln_2 = LayerNorm(d_model)
         self.attn_mask = attn_mask
+        
+        # Thêm LoRA cho Q, K, V
+        self.lora_q = LoRALayer(d_model, d_model, rank=lora_rank, alpha=lora_alpha)
+        self.lora_k = LoRALayer(d_model, d_model, rank=lora_rank, alpha=lora_alpha)
+        self.lora_v = LoRALayer(d_model, d_model, rank=lora_rank, alpha=lora_alpha)
 
     def attention(self, x: torch.Tensor, x_mask:torch.Tensor):
         if x_mask is not None:
             x_mask = x_mask.to(dtype=torch.bool, device=x.device)
         self.attn_mask = self.attn_mask.to(dtype=x.dtype, device=x.device) if self.attn_mask is not None else None
-        return self.attn(x, x, x, need_weights=False, attn_mask=self.attn_mask, key_padding_mask=x_mask)[0]
+        
+        # Áp dụng LoRA cho Q, K, V
+        q = x + self.lora_q(x)
+        k = x + self.lora_k(x) 
+        v = x + self.lora_v(x)
+        
+        return self.attn(q, k, v, need_weights=False, attn_mask=self.attn_mask, key_padding_mask=x_mask)[0]
 
     def forward(self, x: torch.Tensor, x_mask:torch.Tensor=None):
         x = x + self.attention(self.ln_1(x), x_mask)
@@ -51,11 +63,11 @@ class ResidualAttentionBlock(nn.Module):
 
 
 class Transformer(nn.Module):
-    def __init__(self, width: int, layers: int, heads: int, attn_mask: torch.Tensor = None):
+    def __init__(self, width: int, layers: int, heads: int, attn_mask: torch.Tensor = None, lora_rank: int = 8, lora_alpha: int = 16):
         super().__init__()
         self.width = width
         self.layers = layers
-        self.resblocks = nn.Sequential(*[ResidualAttentionBlock(width, heads, attn_mask) for _ in range(layers-1)])
+        self.resblocks = nn.Sequential(*[ResidualAttentionBlock(width, heads, attn_mask, lora_rank, lora_alpha) for _ in range(layers-1)])
 
     def forward(self, x: torch.Tensor, x_mask: torch.Tensor=None):
         def create_custom_forward(module):
@@ -69,7 +81,7 @@ class Transformer(nn.Module):
 
 
 class VisualTransformer(nn.Module):
-    def __init__(self, input_resolution: int, patch_size: int, width: int, layers: int, heads: int, output_dim: int, resolution_after: int):
+    def __init__(self, input_resolution: int, patch_size: int, width: int, layers: int, heads: int, output_dim: int, resolution_after: int, lora_rank: int = 8, lora_alpha: int = 16):
         super().__init__()
         
         self.conv1 = nn.Conv2d(in_channels=3, out_channels=width, kernel_size=patch_size, stride=patch_size, bias=False)
@@ -80,7 +92,7 @@ class VisualTransformer(nn.Module):
         self.positional_embedding = nn.Parameter(scale * torch.randn((resolution_after // patch_size) ** 2 + 1, width))
         self.ln_pre = LayerNorm(width)
 
-        self.transformer = Transformer(width, layers, heads)
+        self.transformer = Transformer(width, layers, heads, lora_rank=lora_rank, lora_alpha=lora_alpha)
         self.ln_post = LayerNorm(width)
 
     def forward(self, x: torch.Tensor, x_mask):
@@ -202,6 +214,8 @@ class CLIP(nn.Module):
                  decoder_num_heads=16,
                  mlp_ratio=4., 
                  norm_layer=nn.LayerNorm,
+                 lora_rank: int = 8,
+                 lora_alpha: int = 16,
                  ): # embed_dim 没用
         super().__init__()
 
@@ -218,6 +232,8 @@ class CLIP(nn.Module):
             heads=vision_heads,
             output_dim=embed_dim,
             resolution_after=resolution_after,
+            lora_rank=lora_rank,
+            lora_alpha=lora_alpha,
         )
 
         # vision decoder
@@ -400,7 +416,7 @@ def adapt_position_encoding(model, patch_size=16, after=384,
     return model
 
 
-def build_model(name, resolution_after=224):  
+def build_model(name, resolution_after=224, lora_rank=8, lora_alpha=16):  
     if os.path.isfile(name):
         model_path = name
     elif name in _MODELS:
@@ -436,6 +452,8 @@ def build_model(name, resolution_after=224):
         image_resolution, vision_layers, vision_width, vision_patch_size,
         context_length, vocab_size, transformer_width, transformer_heads, transformer_layers,
         resolution_after,
+        lora_rank=lora_rank,
+        lora_alpha=lora_alpha,
     )
 
     for key in ["input_resolution", "context_length", "vocab_size"]:
