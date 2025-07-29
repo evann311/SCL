@@ -67,11 +67,12 @@ def analyze_encoder_comparison():
     colors = {'text': 'blue', 'image': 'green', 'cross': 'red'}
     encoder_names = {'text': 'Text Encoder', 'image': 'Image Encoder', 'cross': 'Cross-Modal'}
     
-    # Plot 1: Final cosine comparison for target encoders
-    ax = axes[0, 0]
+    # Create consistent lists for all plots
     encoders = []
-    final_cosines = []
+    encoder_types_list = []
     colors_list = []
+    final_cosines = []
+    mean_cosines = []
     
     for encoder_type, data in encoder_results.items():
         summary = data['summary']
@@ -79,8 +80,13 @@ def analyze_encoder_comparison():
         
         if target_encoder_key in summary:
             encoders.append(encoder_names[encoder_type])
-            final_cosines.append(summary[target_encoder_key]['final_cosine'])
+            encoder_types_list.append(encoder_type)
             colors_list.append(colors[encoder_type])
+            final_cosines.append(summary[target_encoder_key]['final_cosine'])
+            mean_cosines.append(summary[target_encoder_key]['mean_cosine'])
+    
+    # Plot 1: Final cosine comparison for target encoders
+    ax = axes[0, 0]
     
     bars = ax.bar(encoders, final_cosines, color=colors_list, alpha=0.7)
     ax.set_ylabel('Final Cosine Similarity')
@@ -97,15 +103,6 @@ def analyze_encoder_comparison():
     
     # Plot 2: Mean cosine comparison for target encoders
     ax = axes[0, 1]
-    mean_cosines = []
-    
-    for encoder_type, data in encoder_results.items():
-        summary = data['summary']
-        target_encoder_key = f'{encoder_type}_encoder'
-        
-        if target_encoder_key in summary:
-            mean_cosines.append(summary[target_encoder_key]['mean_cosine'])
-    
     bars = ax.bar(encoders, mean_cosines, color=colors_list, alpha=0.7)
     ax.set_ylabel('Mean Cosine Similarity')
     ax.set_title('Mean Cosine Similarity - Target Encoders')
@@ -208,7 +205,8 @@ def analyze_encoder_comparison():
     ax = axes[2, 1]
     
     convergence_rates = []
-    for encoder_type, data in encoder_results.items():
+    for encoder_type in encoder_types_list:
+        data = encoder_results[encoder_type]
         steps_data = data['steps']
         target_key = f'{encoder_type}_avg_cosine'
         target_cosines = [step.get(target_key, 0) for step in steps_data]
@@ -238,8 +236,8 @@ def analyze_encoder_comparison():
     ax = axes[2, 2]
     
     stability_scores = []
-    for encoder_type, data in encoder_results.items():
-        summary = data['summary']
+    for encoder_type in encoder_types_list:
+        summary = encoder_results[encoder_type]['summary']
         target_encoder_key = f'{encoder_type}_encoder'
         
         if target_encoder_key in summary:
