@@ -566,7 +566,7 @@ def main():
     _config["val_check_interval"] = 100
     _config["log_every_n_steps"] = 10
     
-    _config["batch_size"] = 64
+    _config["batch_size"] = 32
     _config["per_gpu_batchsize"] = 32
     
     print(f"🚀 Starting Gradient Analysis with config: {config_name}")
