@@ -315,7 +315,7 @@ def freeze_all_except_target(model, target_encoder):
     return model
 
 
-def run_single_encoder_experiment(config_name, target_encoder, max_steps=500):
+def run_single_encoder_experiment(config_name, target_encoder, max_steps=100):
     """Chạy experiment cho một encoder cụ thể"""
     
     print(f"\n{'='*60}")
