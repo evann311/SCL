@@ -33,7 +33,7 @@ class SCLTransformer(pl.LightningModule):
 
         # ===================== Pretrain ===================== #
         self.text_transformer = RobertaModel.from_pretrained('roberta-base')
-        self.vision_transformer = build_model(config['vit_path'], resolution_after=config["image_size"], use_lora=True, lora_rank=8, lora_alpha=16)
+        self.vision_transformer = build_model(config['vit_path'], resolution_after=config["image_size"], lora_rank=8, lora_alpha=16)
 
 
         # ===================== Cross Modal ===================== #
@@ -150,7 +150,7 @@ class SCLTransformer(pl.LightningModule):
 
         # ===================== freeze ======================
         for name, param in self.named_parameters():
-            if 'vision_transformer.visual' in name or 'vqa_classifier' in name:
+            if 'lora' in name or 'vqa_classifier' in name:
                 param.requires_grad = True
             else:
                 param.requires_grad = False
