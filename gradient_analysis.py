@@ -586,10 +586,10 @@ def main():
     _config = copy.deepcopy(config_dict[config_name])
     
     # Modify config for analysis
-    _config["max_steps"] = 2000 # Reduce steps for analysis
-    
+    _config["max_steps"] = 200 # Reduce steps for analysis
+
     _config["val_check_interval"] = 200
-    _config["log_every_n_steps"] = 5
+    _config["log_every_n_steps"] = 1
     
     # Configure for 2 GPU setup
     _config["num_gpus"] = 1
@@ -620,7 +620,7 @@ def main():
     # Create gradient analysis callback
     gradient_callback = GradientAnalysisCallback(
         save_dir=f"gradient_analysis_{config_name}_{datetime.now().strftime('%Y%m%d_%H%M%S')}",
-        log_every_n_steps=5
+        log_every_n_steps=1
     )
     
     # Setup trainer
