@@ -71,9 +71,9 @@ def analyze_encoder_comparison():
         print(f"  {encoder_type.upper()}: {data['experiment_dir']}")
     
     # Create the single plot
-    plt.figure(figsize=(12, 8))
+    plt.figure(figsize=(12, 6))
     
-    linestyles = {'text': '-', 'image': '--', 'cross': ':'}
+    colors = {'text': 'blue', 'image': 'green', 'cross': 'red'}
     
     for encoder_type, data in encoder_results.items():
         step_data = data['step_data']
@@ -131,15 +131,15 @@ def analyze_encoder_comparison():
                 smoothed = cosines
                 smoothed_steps = steps
             
-            # Plot smoothed line with different linestyles
+            # Plot smoothed line
             plt.plot(smoothed_steps, smoothed, 
-                    linestyle=linestyles.get(encoder_type, '-'), 
-                    color='darkblue',
+                    color=colors.get(encoder_type, 'black'), 
                     linewidth=2, 
                     label=f'{encoder_type.title()} Encoder')
             
             print(f"✅ Plotted {encoder_type} encoder with {len(smoothed)} smoothed points")
     
+    # Add good threshold line
     plt.axhline(y=0.0, color='red', linestyle='--', alpha=0.3, label='Zero Line')
     
     plt.xlabel('Training Steps')
