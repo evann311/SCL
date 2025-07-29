@@ -566,6 +566,9 @@ def main():
     _config["val_check_interval"] = 20
     _config["log_every_n_steps"] = 2
     
+    # Configure for 2 GPU setup
+    _config["num_gpus"] = 2
+    _config["num_nodes"] = 1
     _config["batch_size"] = 32
     _config["per_gpu_batchsize"] = 16
     
@@ -602,6 +605,13 @@ def main():
         version=f"unfrozen_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
     )
     
+    # Setup strategy for multi-GPU or single GPU
+    if _config.get("num_gpus", 1) > 1:
+        from pytorch_lightning.strategies import DDPStrategy
+        strategy = DDPStrategy(find_unused_parameters=True)
+    else:
+        strategy = "auto"
+    
     trainer = pl.Trainer(
         accelerator="gpu" if _config.get("num_gpus", 0) > 0 else "cpu",
         devices=_config.get("num_gpus", 1),
@@ -611,7 +621,8 @@ def main():
         log_every_n_steps=_config["log_every_n_steps"],
         enable_model_summary=True,
         deterministic=True,
-        precision=_config.get("precision", 32)
+        precision=_config.get("precision", 32),
+        strategy=strategy
     )
     
     print(f"\n🎯 Training model for gradient analysis...")
