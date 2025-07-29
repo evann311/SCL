@@ -285,6 +285,7 @@ _config_vqa_vast = {
         "mlm": 0,
         "vqa": 1,
         "nlvr2": 0,
+        
         "irtr": 0,
         "mae": 0,
         "con": 0,
