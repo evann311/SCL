@@ -271,12 +271,10 @@ def unfreeze_all_parameters(model):
     
     for name, param in model.named_parameters():
         total_params += 1
-        if not param.requires_grad:
-            param.requires_grad = True
-            unfrozen_params += 1
+        param.requires_grad = False
 
         if "vision_transformer" in name:
-            param.requires_grad = False
+            param.requires_grad = True
     
     print(f"🔓 Unfrozen {unfrozen_params} out of {total_params} parameters")
     print(f"📊 Total trainable parameters: {sum(p.numel() for p in model.parameters() if p.requires_grad):,}")
