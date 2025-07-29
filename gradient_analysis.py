@@ -592,10 +592,10 @@ def main():
     _config["log_every_n_steps"] = 1
     
     # Configure for 2 GPU setup
-    _config["num_gpus"] = 1
+    _config["num_gpus"] = 2
     _config["num_nodes"] = 1
     _config["batch_size"] = 64
-    _config["per_gpu_batchsize"] = 64
+    _config["per_gpu_batchsize"] = 32
     
     print(f"🚀 Starting Gradient Analysis with config: {config_name}")
     print(f"📊 Analysis will run for {_config['max_steps']} steps")
