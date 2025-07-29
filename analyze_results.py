@@ -121,6 +121,7 @@ def analyze_encoder_comparison():
     ax = axes[0, 2]
     vqa_final_cosines = []
     vqa_mean_cosines = []
+    vqa_encoders = []
     
     for encoder_type, data in encoder_results.items():
         summary = data['summary']
@@ -128,19 +129,24 @@ def analyze_encoder_comparison():
         if 'vqa_head' in summary:
             vqa_final_cosines.append(summary['vqa_head']['final_cosine'])
             vqa_mean_cosines.append(summary['vqa_head']['mean_cosine'])
+            vqa_encoders.append(encoder_names[encoder_type])
     
-    x = np.arange(len(encoders))
-    width = 0.35
+    if vqa_encoders:  # Only plot if we have VQA data
+        x_vqa = np.arange(len(vqa_encoders))
+        width = 0.35
+        
+        bars1 = ax.bar(x_vqa - width/2, vqa_final_cosines, width, label='Final', alpha=0.7)
+        bars2 = ax.bar(x_vqa + width/2, vqa_mean_cosines, width, label='Mean', alpha=0.7)
+        
+        ax.set_xticks(x_vqa)
+        ax.set_xticklabels(vqa_encoders)
     
-    bars1 = ax.bar(x - width/2, vqa_final_cosines, width, label='Final', alpha=0.7)
-    bars2 = ax.bar(x + width/2, vqa_mean_cosines, width, label='Mean', alpha=0.7)
-    
-    ax.set_ylabel('VQA Head Cosine Similarity')
-    ax.set_title('VQA Head Performance Across Experiments')
-    ax.set_xticks(x)
-    ax.set_xticklabels(encoders)
-    ax.legend()
-    ax.grid(True, alpha=0.3)
+        ax.set_ylabel('VQA Head Cosine Similarity')
+        ax.set_title('VQA Head Performance Across Experiments')
+        ax.legend()
+        ax.grid(True, alpha=0.3)
+    else:
+        ax.text(0.5, 0.5, 'No VQA Head Data', ha='center', va='center', transform=ax.transAxes)
     
     # Plot 4-6: Individual encoder trends
     for i, (encoder_type, data) in enumerate(encoder_results.items()):
