@@ -35,6 +35,7 @@ def analyze_gradient_results():
     # Thu thập L2 norms (loại bỏ inf/nan)
     text_l2_norms = []
     image_l2_norms = []
+    fusion_l2_norms = []
     
     for metric_name, values in stats.get('text_encoder', {}).items():
         if 'l2_norm' in metric_name and values:
@@ -48,6 +49,12 @@ def analyze_gradient_results():
             clean_values = [v for v in values if np.isfinite(v) and v > 0 and v < 1e10]
             image_l2_norms.extend(clean_values)
     
+    for metric_name, values in stats.get('cross_modal', {}).items():
+        if 'l2_norm' in metric_name and values:
+            # Lọc các giá trị hợp lệ
+            clean_values = [v for v in values if np.isfinite(v) and v > 0 and v < 1e10]
+            fusion_l2_norms.extend(clean_values)
+    
     if text_l2_norms and image_l2_norms:
         # Tính thống kê
         text_mean = np.mean(text_l2_norms)
@@ -58,7 +65,13 @@ def analyze_gradient_results():
         image_std = np.std(image_l2_norms)
         image_median = np.median(image_l2_norms)
         
+        fusion_mean = np.mean(fusion_l2_norms) if fusion_l2_norms else 0
+        fusion_std = np.std(fusion_l2_norms) if fusion_l2_norms else 0
+        fusion_median = np.median(fusion_l2_norms) if fusion_l2_norms else 0
+        
         ratio = text_mean / image_mean if image_mean > 0 else float('inf')
+        fusion_text_ratio = fusion_mean / text_mean if text_mean > 0 else float('inf')
+        fusion_image_ratio = fusion_mean / image_mean if image_mean > 0 else float('inf')
         
         print(f"\n📊 GRADIENT MAGNITUDE COMPARISON:")
         print(f"  🔤 Text Encoder:")
@@ -73,9 +86,21 @@ def analyze_gradient_results():
         print(f"     Median L2 Norm: {image_median:.6f}")
         print(f"     Total samples:  {len(image_l2_norms)}")
         
+        if fusion_l2_norms:
+            print(f"  🔄 Fusion Encoder (Cross-Modal):")
+            print(f"     Mean L2 Norm:   {fusion_mean:.6f}")
+            print(f"     Std L2 Norm:    {fusion_std:.6f}")
+            print(f"     Median L2 Norm: {fusion_median:.6f}")
+            print(f"     Total samples:  {len(fusion_l2_norms)}")
+        
         print(f"\n⚖️ COMPARISON:")
         print(f"  Text/Image Ratio (Mean):   {ratio:.3f}")
         print(f"  Text/Image Ratio (Median): {text_median/image_median:.3f}")
+        
+        if fusion_l2_norms:
+            print(f"  Fusion/Text Ratio (Mean):  {fusion_text_ratio:.3f}")
+            print(f"  Fusion/Image Ratio (Mean): {fusion_image_ratio:.3f}")
+            print(f"  Fusion Position: {'Balanced' if 0.5 < fusion_text_ratio < 2.0 and 0.5 < fusion_image_ratio < 2.0 else 'Imbalanced'}")
         
         # Phân tích và đưa ra kết luận
         print(f"\n💡 ANALYSIS & INSIGHTS:")
@@ -99,11 +124,16 @@ def analyze_gradient_results():
             print("     → Good balance between text and image learning")
         
         # Vẽ biểu đồ so sánh đơn giản
-        plt.figure(figsize=(15, 5))
+        plt.figure(figsize=(18, 6))
         
-        # Plot 1: Box plot comparison
+        # Plot 1: Box plot comparison (bao gồm fusion)
         plt.subplot(1, 3, 1)
-        plt.boxplot([text_l2_norms, image_l2_norms], labels=['Text Encoder', 'Image Encoder'])
+        if fusion_l2_norms:
+            plt.boxplot([text_l2_norms, image_l2_norms, fusion_l2_norms], 
+                       tick_labels=['Text Encoder', 'Image Encoder', 'Fusion Encoder'])
+        else:
+            plt.boxplot([text_l2_norms, image_l2_norms], 
+                       tick_labels=['Text Encoder', 'Image Encoder'])
         plt.ylabel('L2 Norm')
         plt.title('Gradient Magnitude Distribution')
         plt.yscale('log')
@@ -112,6 +142,8 @@ def analyze_gradient_results():
         plt.subplot(1, 3, 2)
         plt.hist(text_l2_norms, bins=30, alpha=0.7, label='Text Encoder', color='blue', density=True)
         plt.hist(image_l2_norms, bins=30, alpha=0.7, label='Image Encoder', color='green', density=True)
+        if fusion_l2_norms:
+            plt.hist(fusion_l2_norms, bins=30, alpha=0.7, label='Fusion Encoder', color='red', density=True)
         plt.xlabel('L2 Norm')
         plt.ylabel('Density')
         plt.title('Gradient Distribution Comparison')
@@ -159,7 +191,7 @@ def analyze_consistency(stats):
     
     print(f"\n🎯 GRADIENT CONSISTENCY ANALYSIS:")
     
-    for encoder_type in ['text_encoder', 'image_encoder']:
+    for encoder_type in ['text_encoder', 'image_encoder', 'cross_modal']:
         cosine_values = []
         
         for metric_name, values in stats.get(encoder_type, {}).items():
@@ -172,7 +204,13 @@ def analyze_consistency(stats):
             mean_cosine = np.mean(cosine_values)
             std_cosine = np.std(cosine_values)
             
-            encoder_name = "Text Encoder" if encoder_type == 'text_encoder' else "Image Encoder"
+            encoder_names = {
+                'text_encoder': 'Text Encoder',
+                'image_encoder': 'Image Encoder', 
+                'cross_modal': 'Fusion Encoder (Cross-Modal)'
+            }
+            encoder_name = encoder_names.get(encoder_type, encoder_type)
+            
             print(f"  {encoder_name}:")
             print(f"    Average Cosine Similarity: {mean_cosine:.4f} ± {std_cosine:.4f}")
             print(f"    Total measurements: {len(cosine_values)}")

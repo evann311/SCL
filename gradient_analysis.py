@@ -126,7 +126,7 @@ class GradientAnalysisCallback(Callback):
         self._calculate_cosine_similarity(image_grads, 'image_encoder')
         
     def _analyze_cross_modal_gradients(self, pl_module):
-        """Phân tích gradient của cross-modal layers"""
+        """Phân tích gradient của cross-modal layers (Fusion Encoder)"""
         cross_grads = {}
         
         # Cross-modal text layers
@@ -155,6 +155,30 @@ class GradientAnalysisCallback(Callback):
                     grad_std = grad.std().item()
                     
                     key = f"cross_image_layer_{i}_{name}"
+                    self.gradient_stats['cross_modal'][f'{key}_l2_norm'].append(l2_norm)
+                    self.gradient_stats['cross_modal'][f'{key}_mean'].append(grad_mean)
+                    self.gradient_stats['cross_modal'][f'{key}_std'].append(grad_std)
+                    
+                    cross_grads[key] = grad.flatten()
+        
+        # Cross-modal transforms và poolers
+        cross_modal_components = [
+            ('cross_modal_text_transform', pl_module.cross_modal_text_transform),
+            ('cross_modal_image_transform', pl_module.cross_modal_image_transform),
+            ('cross_modal_text_pooler', pl_module.cross_modal_text_pooler),
+            ('cross_modal_image_pooler', pl_module.cross_modal_image_pooler),
+            ('token_type_embeddings', pl_module.token_type_embeddings)
+        ]
+        
+        for comp_name, component in cross_modal_components:
+            for name, param in component.named_parameters():
+                if param.grad is not None:
+                    grad = param.grad.detach()
+                    l2_norm = torch.norm(grad).item()
+                    grad_mean = grad.mean().item()
+                    grad_std = grad.std().item()
+                    
+                    key = f"{comp_name}_{name}"
                     self.gradient_stats['cross_modal'][f'{key}_l2_norm'].append(l2_norm)
                     self.gradient_stats['cross_modal'][f'{key}_mean'].append(grad_mean)
                     self.gradient_stats['cross_modal'][f'{key}_std'].append(grad_std)
