@@ -20,37 +20,56 @@ def analyze_encoder_comparison():
     
     print(f"🔍 Found {len(experiment_dirs)} experiment directories")
     
-    # Collect results from all experiments
-    encoder_results = {}
+    # Find the most recent experiment for each encoder type
+    encoder_experiments = {'text': [], 'image': [], 'cross': []}
     
     for exp_dir in experiment_dirs:
-        print(f"📁 Processing: {exp_dir}")
+        print(f"📁 Checking: {exp_dir}")
         
-        # Look for individual encoder files
+        # Check which encoder types are available in this directory
         for encoder_type in ['text', 'image', 'cross']:
             summary_file = exp_dir / f'cosine_summary_{encoder_type}.json'
             step_file = exp_dir / f'cosine_step_results_{encoder_type}.json'
             
             if summary_file.exists() and step_file.exists():
-                try:
-                    with open(summary_file, 'r') as f:
-                        summary = json.load(f)
-                    with open(step_file, 'r') as f:
-                        step_data = json.load(f)
-                    
-                    encoder_results[encoder_type] = {
-                        'summary': summary,
-                        'step_data': step_data
-                    }
-                    print(f"  ✅ Loaded {encoder_type} encoder data")
-                except Exception as e:
-                    print(f"  ❌ Error loading {encoder_type}: {e}")
-            else:
-                print(f"  ⚠️  Missing files for {encoder_type} encoder")
+                encoder_experiments[encoder_type].append(exp_dir)
+                print(f"  ✅ Found {encoder_type} encoder data")
+    
+    # Load data from the most recent experiment for each encoder
+    encoder_results = {}
+    
+    for encoder_type, exp_dirs in encoder_experiments.items():
+        if exp_dirs:
+            # Sort by directory name (which includes timestamp) and get the most recent
+            latest_dir = sorted(exp_dirs, reverse=True)[0]
+            
+            summary_file = latest_dir / f'cosine_summary_{encoder_type}.json'
+            step_file = latest_dir / f'cosine_step_results_{encoder_type}.json'
+            
+            print(f"📊 Loading LATEST {encoder_type} encoder from: {latest_dir}")
+            
+            try:
+                with open(summary_file, 'r') as f:
+                    summary = json.load(f)
+                with open(step_file, 'r') as f:
+                    step_data = json.load(f)
+                
+                encoder_results[encoder_type] = {
+                    'summary': summary,
+                    'step_data': step_data,
+                    'experiment_dir': latest_dir
+                }
+                print(f"  ✅ Successfully loaded {encoder_type} encoder data")
+            except Exception as e:
+                print(f"  ❌ Error loading {encoder_type}: {e}")
+        else:
+            print(f"  ⚠️  No experiments found for {encoder_type} encoder")
     
     if not encoder_results:
         print("❌ No encoder results found!")
         return
+    
+    print(f"\n🎯 Loaded {len(encoder_results)} encoders for comparison")
     
     # Create the single plot
     plt.figure(figsize=(12, 6))
@@ -68,6 +87,8 @@ def analyze_encoder_comparison():
             if 'step' in step_info and 'cosine_similarity' in step_info:
                 steps.append(step_info['step'])
                 cosines.append(step_info['cosine_similarity'])
+        
+        print(f"📈 {encoder_type.upper()}: {len(steps)} data points, range: {min(cosines):.3f} to {max(cosines):.3f}")
         
         if steps and cosines:
             # Apply smoothing
@@ -87,6 +108,7 @@ def analyze_encoder_comparison():
     
     # Add good threshold line
     plt.axhline(y=0.3, color='gray', linestyle='--', alpha=0.5, label='Good Threshold')
+    plt.axhline(y=0.0, color='red', linestyle='--', alpha=0.3, label='Zero Line')
     
     plt.xlabel('Training Steps')
     plt.ylabel('Smoothed Cosine Similarity')
@@ -98,10 +120,17 @@ def analyze_encoder_comparison():
     # Save plot
     output_path = 'encoder_comparison_smoothed.png'
     plt.savefig(output_path, dpi=300, bbox_inches='tight')
-    print(f"📊 Plot saved to: {output_path}")
+    print(f"\n📊 Plot saved to: {output_path}")
     
     # Show plot
     plt.show()
+    
+    # Print summary of loaded experiments
+    print(f"\n📋 EXPERIMENT SUMMARY:")
+    for encoder_type, data in encoder_results.items():
+        exp_dir = data['experiment_dir']
+        step_count = len(data['step_data'])
+        print(f"  {encoder_type.upper()}: {exp_dir} ({step_count} steps)")
 
 if __name__ == "__main__":
     analyze_encoder_comparison() 
