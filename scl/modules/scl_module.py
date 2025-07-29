@@ -150,17 +150,131 @@ class SCLTransformer(pl.LightningModule):
             self.load_state_dict(state_dict, strict=False)
 
         # ===================== freeze ======================
+        # DEMO GRADIENT FLOW: Unfreeze all parameters để track gradient
         for name, param in self.named_parameters():
-            if 'vision_transformer.visual' in name or 'vqa_classifier' in name:
-                param.requires_grad = True
-            else:
-                param.requires_grad = False
+            param.requires_grad = True  # Unfreeze all để có thể track gradient
+        
+        # Khởi tạo dict để lưu gradient magnitude
+        self.gradient_magnitudes = {}
+        
+        # Register hooks để track gradient
+        self._register_gradient_hooks()
 
         self.val_vqa_loss_list = []
         self.val_vqa_score_list = []
 
         self.print_parameter_statistics()
             
+    def _register_gradient_hooks(self):
+        """Register hooks to track gradient magnitudes for different model components"""
+        
+        def make_hook(name):
+            def hook(grad):
+                # Lưu L2 norm của gradient
+                if grad is not None:
+                    self.gradient_magnitudes[name] = grad.norm().item()
+                return grad
+            return hook
+        
+        # Track gradient cho các phần khác nhau của model
+        module_groups = {
+            'image_encoder': [],
+            'text_encoder': [],
+            'cross_modal': [],
+            'vqa_head': []
+        }
+        
+        # Chỉ register hook cho một số layer đại diện để tránh quá nhiều overhead
+        layers_to_track = []
+        
+        for name, param in self.named_parameters():
+            if param.requires_grad:
+                # Phân loại module và chọn layers đại diện
+                if 'vision_transformer' in name and any(key in name for key in ['weight', 'bias']):
+                    # Track một số layers đại diện của image encoder
+                    if any(layer in name for layer in ['patch_embed', 'blocks.0', 'blocks.5', 'blocks.11', 'norm']):
+                        layers_to_track.append((name, param, 'image_encoder'))
+                        
+                elif 'text_transformer' in name and any(key in name for key in ['weight', 'bias']):
+                    # Track một số layers đại diện của text encoder
+                    if any(layer in name for layer in ['embeddings', 'encoder.layer.0', 'encoder.layer.5', 'encoder.layer.11']):
+                        layers_to_track.append((name, param, 'text_encoder'))
+                        
+                elif 'cross_modal' in name:
+                    # Track tất cả cross-modal layers
+                    layers_to_track.append((name, param, 'cross_modal'))
+                    
+                elif 'vqa_classifier' in name:
+                    # Track VQA head
+                    layers_to_track.append((name, param, 'vqa_head'))
+        
+        # Register hooks
+        for name, param, module_type in layers_to_track:
+            param.register_hook(make_hook(f"{module_type}:{name}"))
+
+    def _log_gradient_statistics(self):
+        """Tính toán và log gradient statistics cho các phần khác nhau của model"""
+        
+        # Nhóm gradient theo module type
+        module_gradients = {
+            'image_encoder': [],
+            'text_encoder': [],
+            'cross_modal': [],
+            'vqa_head': []
+        }
+        
+        # Phân loại gradients
+        for key, grad_mag in self.gradient_magnitudes.items():
+            module_type, param_name = key.split(':', 1)
+            module_gradients[module_type].append(grad_mag)
+        
+        # Tính và in statistics
+        print("\n" + "="*60)
+        print("GRADIENT FLOW ANALYSIS - Step {}".format(self.global_step))
+        print("="*60)
+        
+        total_gradients = []
+        for module_name, grads in module_gradients.items():
+            if grads:
+                mean_grad = sum(grads) / len(grads)
+                max_grad = max(grads)
+                min_grad = min(grads)
+                total_gradients.extend(grads)
+                
+                print(f"\n{module_name.upper()}:")
+                print(f"  Mean gradient: {mean_grad:.6f}")
+                print(f"  Max gradient:  {max_grad:.6f}")
+                print(f"  Min gradient:  {min_grad:.6f}")
+                print(f"  Num params tracked: {len(grads)}")
+                
+                # Tính tỷ lệ gradient so với total
+                if total_gradients:
+                    ratio = sum(grads) / sum(total_gradients) * 100
+                    print(f"  Gradient contribution: {ratio:.2f}%")
+        
+        # Log to tensorboard
+        if hasattr(self.logger, 'experiment') and self.logger.experiment is not None:
+            for module_name, grads in module_gradients.items():
+                if grads:
+                    mean_grad = sum(grads) / len(grads)
+                    max_grad = max(grads)
+                    
+                    self.logger.experiment.add_scalar(
+                        f"gradient_flow/{module_name}_mean", 
+                        mean_grad, 
+                        self.global_step
+                    )
+                    self.logger.experiment.add_scalar(
+                        f"gradient_flow/{module_name}_max", 
+                        max_grad, 
+                        self.global_step
+                    )
+        
+        print("="*60 + "\n")
+        
+        # Clear dict sau khi log
+        self.gradient_magnitudes.clear()
+
     # image
     def infer(
         self,
@@ -308,6 +422,10 @@ class SCLTransformer(pl.LightningModule):
         
 
         total_loss = sum([v for k, v in output.items() if "loss" in k])
+        
+        # Log gradient magnitudes mỗi 50 steps (có thể điều chỉnh)
+        if self.global_step % 50 == 0 and self.global_step > 0:
+            self._log_gradient_statistics()
 
         return total_loss
 
