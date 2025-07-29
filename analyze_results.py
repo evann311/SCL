@@ -151,7 +151,7 @@ def analyze_encoder_comparison():
     
     # Save plot
     output_path = 'encoder_comparison_smoothed.png'
-    plt.savefig(output_path, dpi=300, bbox_inches='tight')
+    plt.savefig(output_path, dpi=1000, bbox_inches='tight')
     print(f"\n📊 Plot saved to: {output_path}")
     
     # Show plot
