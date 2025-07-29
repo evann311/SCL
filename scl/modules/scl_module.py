@@ -9,8 +9,7 @@ from scl.modules import heads, objectives, scl_utils
 from .clip_model import build_model, adapt_position_encoding 
 # from .clip_model_video import build_model, adapt_position_encoding
 from .bert_model import BertCrossLayer, Adapter
-
-from .adapter import Adapter
+from .lora import LoRALayer
 
 class SCLTransformer(pl.LightningModule):
     def __init__(self, config):
@@ -34,7 +33,7 @@ class SCLTransformer(pl.LightningModule):
 
         # ===================== Pretrain ===================== #
         self.text_transformer = RobertaModel.from_pretrained('roberta-base')
-        self.vision_transformer = build_model(config['vit_path'], resolution_after=config["image_size"])
+        self.vision_transformer = build_model(config['vit_path'], resolution_after=config["image_size"], use_lora=True, lora_rank=8, lora_alpha=16)
 
 
         # ===================== Cross Modal ===================== #
@@ -151,7 +150,7 @@ class SCLTransformer(pl.LightningModule):
 
         # ===================== freeze ======================
         for name, param in self.named_parameters():
-            if 'vision_transformer.visual' in name or 'vqa_classifier' in name:
+            if 'lora' in name or 'vqa_classifier' in name:
                 param.requires_grad = True
             else:
                 param.requires_grad = False
@@ -268,6 +267,7 @@ class SCLTransformer(pl.LightningModule):
         # Masked Language Modeling
         if "mlm" in self.current_tasks:
             ret.update(objectives.compute_mlm(self, batch))
+            
 
         if "con" in self.current_tasks:
             ret.update(objectives.compute_con(self, batch))
@@ -357,7 +357,8 @@ class SCLTransformer(pl.LightningModule):
 
     def count_total_parameters(self):
         adapter_param_ids = {id(p) for module in self.modules() if isinstance(module, Adapter) for p in module.parameters()}
-        return sum(p.numel() for p in self.parameters() if id(p) not in adapter_param_ids)
+        lora_param_ids = {id(p) for module in self.modules() if isinstance(module, LoRALayer) for p in module.parameters()}
+        return sum(p.numel() for p in self.parameters() if id(p) not in adapter_param_ids and id(p) not in lora_param_ids)
 
 
     def count_trainable_parameters(self):
@@ -367,6 +368,8 @@ class SCLTransformer(pl.LightningModule):
         adapter_total = 0
         for module in self.modules():
             if isinstance(module, Adapter):
+                adapter_total += sum(p.numel() for p in module.parameters())
+            if isinstance(module, LoRALayer):
                 adapter_total += sum(p.numel() for p in module.parameters())
         return adapter_total
 
