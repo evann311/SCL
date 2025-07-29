@@ -234,12 +234,17 @@ class SCLTransformer(pl.LightningModule):
         print("="*60)
         
         total_gradients = []
+        # First pass: collect all gradients
+        for module_name, grads in module_gradients.items():
+            if grads:
+                total_gradients.extend(grads)
+        
+        # Second pass: calculate and print statistics
         for module_name, grads in module_gradients.items():
             if grads:
                 mean_grad = sum(grads) / len(grads)
                 max_grad = max(grads)
                 min_grad = min(grads)
-                total_gradients.extend(grads)
                 
                 print(f"\n{module_name.upper()}:")
                 print(f"  Mean gradient: {mean_grad:.6f}")

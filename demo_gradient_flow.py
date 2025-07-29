@@ -180,24 +180,29 @@ def main():
     )
     
     # Create trainer
-    trainer = Trainer(
-        accelerator="gpu" if _config.get("num_gpus", 0) > 0 else "cpu",
-        devices=_config.get("num_gpus", 1),
-        num_nodes=_config["num_nodes"],
-        precision=_config["precision"],
-        strategy=DDPStrategy(find_unused_parameters=True) if _config.get("num_gpus", 1) > 1 else None,
-        benchmark=True,
-        deterministic=True,
-        max_steps=_config["max_steps"],
-        callbacks=callbacks,
-        logger=logger,
-        accumulate_grad_batches=grad_steps,
-        enable_model_summary=True,
-        fast_dev_run=_config["fast_dev_run"],
-        val_check_interval=_config["val_check_interval"],
-        log_every_n_steps=10,
-        gradient_clip_val=1.0,  # Clip gradients để ổn định
-    )
+    trainer_kwargs = {
+        "accelerator": "gpu" if _config.get("num_gpus", 0) > 0 else "cpu",
+        "devices": _config.get("num_gpus", 1),
+        "num_nodes": _config["num_nodes"],
+        "precision": _config["precision"],
+        "benchmark": True,
+        "deterministic": True,
+        "max_steps": _config["max_steps"],
+        "callbacks": callbacks,
+        "logger": logger,
+        "accumulate_grad_batches": grad_steps,
+        "enable_model_summary": True,
+        "fast_dev_run": _config["fast_dev_run"],
+        "val_check_interval": _config["val_check_interval"],
+        "log_every_n_steps": 10,
+        "gradient_clip_val": 1.0,  # Clip gradients để ổn định
+    }
+    
+    # Only add strategy if using multiple GPUs
+    if _config.get("num_gpus", 1) > 1:
+        trainer_kwargs["strategy"] = DDPStrategy(find_unused_parameters=True)
+    
+    trainer = Trainer(**trainer_kwargs)
     
     # Start training
     print("\n" + "="*80)
