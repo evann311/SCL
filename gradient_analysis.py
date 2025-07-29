@@ -273,7 +273,7 @@ def unfreeze_all_parameters(model):
         total_params += 1
         param.requires_grad = False
 
-        if "vision_transformer" in name:
+        if "vision_transformer" in name or "vqa_classifier" in name:
             param.requires_grad = True
     
     print(f"🔓 Unfrozen {unfrozen_params} out of {total_params} parameters")
