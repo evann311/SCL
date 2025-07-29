@@ -78,19 +78,48 @@ def analyze_encoder_comparison():
     for encoder_type, data in encoder_results.items():
         step_data = data['step_data']
         
-        # Extract cosine similarity data
+        # Extract cosine similarity data based on gradient_analysis.py format
         steps = []
         cosines = []
         
+        # Look for the correct key based on target encoder
+        cosine_key = f'{encoder_type}_avg_cosine'
+        
         for step_info in step_data:
-            if 'step' in step_info and 'cosine_similarity' in step_info:
+            if 'step' in step_info and cosine_key in step_info:
                 steps.append(step_info['step'])
-                cosines.append(step_info['cosine_similarity'])
+                cosines.append(step_info[cosine_key])
+        
+        # If no target encoder cosine, try to find any available cosine data
+        if not cosines:
+            print(f"🔍 No {cosine_key} found, checking available keys...")
+            if step_data:
+                available_keys = list(step_data[0].keys())
+                print(f"   Available keys: {available_keys}")
+                
+                # Try different possible keys
+                possible_keys = [
+                    f'{encoder_type}_avg_cosine',
+                    f'{encoder_type}_cosine',
+                    'cosine_similarity',
+                    'avg_cosine'
+                ]
+                
+                for key in possible_keys:
+                    if key in available_keys:
+                        for step_info in step_data:
+                            if 'step' in step_info and key in step_info:
+                                steps.append(step_info['step'])
+                                cosines.append(step_info[key])
+                        if cosines:
+                            print(f"   ✅ Using key: {key}")
+                            break
         
         if cosines:  # Only print if we have data
             print(f"📈 {encoder_type.upper()}: {len(steps)} data points, range: {min(cosines):.3f} to {max(cosines):.3f}")
         else:
             print(f"⚠️  {encoder_type.upper()}: No valid cosine data found")
+            continue
         
         if steps and cosines:
             # Apply smoothing
@@ -107,6 +136,8 @@ def analyze_encoder_comparison():
                     color=colors.get(encoder_type, 'black'), 
                     linewidth=2, 
                     label=f'{encoder_type.title()} Encoder')
+            
+            print(f"✅ Plotted {encoder_type} encoder with {len(smoothed)} smoothed points")
     
     # Add good threshold line
     plt.axhline(y=0.3, color='gray', linestyle='--', alpha=0.5, label='Good Threshold')
