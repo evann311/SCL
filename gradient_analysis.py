@@ -588,13 +588,13 @@ def main():
     # Modify config for analysis
     _config["max_steps"] = 1000 # Reduce steps for analysis
     _config["val_check_interval"] = 200
-    _config["log_every_n_steps"] = 20
+    _config["log_every_n_steps"] = 5
     
     # Configure for 2 GPU setup
-    _config["num_gpus"] = 2
+    _config["num_gpus"] = 1
     _config["num_nodes"] = 1
-    _config["batch_size"] = 32
-    _config["per_gpu_batchsize"] = 16
+    _config["batch_size"] = 64
+    _config["per_gpu_batchsize"] = 64
     
     print(f"🚀 Starting Gradient Analysis with config: {config_name}")
     print(f"📊 Analysis will run for {_config['max_steps']} steps")
