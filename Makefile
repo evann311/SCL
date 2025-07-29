@@ -1,5 +1,5 @@
 all:
 	git add .
 	git commit -m "update"
-	git push origin vision-encoder-lora
+	git push origin vision-encoder-adapter
 

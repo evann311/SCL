@@ -33,7 +33,7 @@ class SCLTransformer(pl.LightningModule):
 
         # ===================== Pretrain ===================== #
         self.text_transformer = RobertaModel.from_pretrained('roberta-base')
-        self.vision_transformer = build_model(config['vit_path'], resolution_after=config["image_size"], lora_rank=8, lora_alpha=16)
+        self.vision_transformer = build_model(config['vit_path'], resolution_after=config["image_size"])
 
 
         # ===================== Cross Modal ===================== #
