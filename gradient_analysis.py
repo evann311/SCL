@@ -619,7 +619,7 @@ def main():
     # Create gradient analysis callback
     gradient_callback = GradientAnalysisCallback(
         save_dir=f"gradient_analysis_{config_name}_{datetime.now().strftime('%Y%m%d_%H%M%S')}",
-        log_every_n_steps=10
+        log_every_n_steps=1
     )
     
     # Setup trainer
