@@ -20,68 +20,55 @@ def analyze_encoder_comparison():
     
     print(f"🔍 Found {len(experiment_dirs)} experiment directories")
     
-    # Find the most recent experiment that has ALL three encoders
-    complete_experiments = []
+    # Sort all experiments by timestamp (newest first)
+    sorted_experiments = sorted(experiment_dirs, reverse=True)
     
-    for exp_dir in experiment_dirs:
+    # Find the 3 most recent experiments (each should have one encoder)
+    encoder_results = {}
+    used_experiments = []
+    
+    for exp_dir in sorted_experiments:
+        if len(encoder_results) >= 3:  # We found all 3 encoders
+            break
+            
         print(f"📁 Checking: {exp_dir}")
         
-        # Check if this experiment has all three encoder types
-        has_all_encoders = True
-        encoders_found = []
-        
+        # Check which encoder type this experiment contains
         for encoder_type in ['text', 'image', 'cross']:
+            if encoder_type in encoder_results:  # Already found this encoder
+                continue
+                
             summary_file = exp_dir / f'cosine_summary_{encoder_type}.json'
             step_file = exp_dir / f'cosine_step_results_{encoder_type}.json'
             
             if summary_file.exists() and step_file.exists():
-                encoders_found.append(encoder_type)
-            else:
-                has_all_encoders = False
-        
-        if has_all_encoders:
-            complete_experiments.append(exp_dir)
-            print(f"  ✅ Complete experiment with all 3 encoders: {encoders_found}")
-        else:
-            print(f"  ⚠️  Incomplete experiment, only has: {encoders_found}")
+                print(f"  ✅ Found {encoder_type} encoder - loading...")
+                
+                try:
+                    with open(summary_file, 'r') as f:
+                        summary = json.load(f)
+                    with open(step_file, 'r') as f:
+                        step_data = json.load(f)
+                    
+                    encoder_results[encoder_type] = {
+                        'summary': summary,
+                        'step_data': step_data,
+                        'experiment_dir': exp_dir
+                    }
+                    used_experiments.append(exp_dir)
+                    print(f"  ✅ Successfully loaded {encoder_type} encoder from {exp_dir}")
+                    break  # Found encoder for this experiment, move to next experiment
+                    
+                except Exception as e:
+                    print(f"  ❌ Error loading {encoder_type}: {e}")
     
-    if not complete_experiments:
-        print("❌ No complete experiments found with all 3 encoders!")
+    if len(encoder_results) == 0:
+        print("❌ No encoder results found!")
         return
     
-    # Get the most recent complete experiment
-    latest_experiment = sorted(complete_experiments, reverse=True)[0]
-    print(f"\n🎯 Using LATEST COMPLETE experiment: {latest_experiment}")
-    
-    # Load data from the latest complete experiment
-    encoder_results = {}
-    
-    for encoder_type in ['text', 'image', 'cross']:
-        summary_file = latest_experiment / f'cosine_summary_{encoder_type}.json'
-        step_file = latest_experiment / f'cosine_step_results_{encoder_type}.json'
-        
-        print(f"📊 Loading {encoder_type} encoder from: {latest_experiment}")
-        
-        try:
-            with open(summary_file, 'r') as f:
-                summary = json.load(f)
-            with open(step_file, 'r') as f:
-                step_data = json.load(f)
-            
-            encoder_results[encoder_type] = {
-                'summary': summary,
-                'step_data': step_data,
-                'experiment_dir': latest_experiment
-            }
-            print(f"  ✅ Successfully loaded {encoder_type} encoder data")
-        except Exception as e:
-            print(f"  ❌ Error loading {encoder_type}: {e}")
-    
-    if len(encoder_results) != 3:
-        print("❌ Failed to load all 3 encoders!")
-        return
-    
-    print(f"\n🎯 Successfully loaded all 3 encoders from: {latest_experiment}")
+    print(f"\n🎯 Loaded {len(encoder_results)} encoders from 3 most recent experiments:")
+    for encoder_type, data in encoder_results.items():
+        print(f"  {encoder_type.upper()}: {data['experiment_dir']}")
     
     # Create the single plot
     plt.figure(figsize=(12, 6))
@@ -141,11 +128,11 @@ def analyze_encoder_comparison():
     plt.show()
     
     # Print summary
-    print(f"\n📋 LOADED FROM SINGLE EXPERIMENT:")
-    print(f"  📁 Directory: {latest_experiment}")
+    print(f"\n📋 LOADED FROM 3 RECENT EXPERIMENTS:")
     for encoder_type, data in encoder_results.items():
+        exp_dir = data['experiment_dir']
         step_count = len(data['step_data'])
-        print(f"  {encoder_type.upper()}: {step_count} steps")
+        print(f"  {encoder_type.upper()}: {exp_dir} ({step_count} steps)")
 
 if __name__ == "__main__":
     analyze_encoder_comparison() 
