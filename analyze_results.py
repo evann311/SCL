@@ -73,7 +73,7 @@ def analyze_encoder_comparison():
     # Create the single plot
     plt.figure(figsize=(12, 8))
     
-    markers = {'text': 'o', 'image': 's', 'cross': '^'}
+    linestyles = {'text': '-', 'image': '--', 'cross': ':'}
     
     for encoder_type, data in encoder_results.items():
         step_data = data['step_data']
@@ -131,13 +131,11 @@ def analyze_encoder_comparison():
                 smoothed = cosines
                 smoothed_steps = steps
             
-            # Plot smoothed line with markers
+            # Plot smoothed line with different linestyles
             plt.plot(smoothed_steps, smoothed, 
-                    marker=markers.get(encoder_type, 'o'), 
+                    linestyle=linestyles.get(encoder_type, '-'), 
                     color='darkblue',
                     linewidth=2, 
-                    markersize=6,
-                    markevery=10,
                     label=f'{encoder_type.title()} Encoder')
             
             print(f"✅ Plotted {encoder_type} encoder with {len(smoothed)} smoothed points")
