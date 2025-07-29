@@ -321,6 +321,7 @@ def set_schedule(pl_module):
     decay_power = pl_module.hparams.config["decay_power"]
     optim_type = pl_module.hparams.config["optim_type"]
     is_pretrain = pl_module.hparams.config["is_pretrain"]
+    lr_lora = pl_module.hparams.config["lr_lora"]
 
     no_decay = [
         "bias",
@@ -337,6 +338,7 @@ def set_schedule(pl_module):
     head_names = ["vqa_classifier", "nlvr2_classifier", "snli_classifier", "mlm_score", "itm_score"]
     cross_modal_names = ['cross_modal']
     adapter_names = ['adapter']
+    lora_names = ['lora']
     
     optimizer_grouped_parameters = [
         # Group 1: Base parameters (không thuộc head, cross_modal, adapter) - không decay
@@ -417,24 +419,28 @@ def set_schedule(pl_module):
             "weight_decay": 0.0,
             "lr": lr * lr_mult_cross_modal,
         },
-        # Group 7: Adapter parameters - không decay
+        # Group 7: LoRA parameters - không decay
         {
             "params": [
                 p
                 for n, p in pl_module.named_parameters()
                 if not any(nd in n for nd in no_decay)
-                and any(ad in n for ad in adapter_names)
+                and not any(bb in n for bb in head_names)
+                and not any(ht in n for ht in cross_modal_names)
+                and any(ad in n for ad in lora_names)
             ],
             "weight_decay": wd,
             "lr": lr * lr_adapter,
         },
-        # Group 8: Adapter parameters - decay off
+        # Group 8: LoRA parameters - decay off
         {
             "params": [
                 p
                 for n, p in pl_module.named_parameters()
                 if any(nd in n for nd in no_decay)
-                and any(ad in n for ad in adapter_names)
+                and not any(bb in n for bb in head_names)
+                and not any(ht in n for ht in cross_modal_names)
+                and any(ad in n for ad in lora_names)
             ],
             "weight_decay": 0.0,
             "lr": lr * lr_adapter,
