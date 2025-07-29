@@ -384,7 +384,7 @@ def main():
     """Main function để chạy experiments cho từng encoder"""
     
     config_name = 'vqa_vast'
-    max_steps = 2000
+    max_steps = 5000
     
     print(f"🚀 Starting Individual Encoder Analysis")
     print(f"📊 Config: {config_name}")
