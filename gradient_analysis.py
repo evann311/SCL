@@ -587,6 +587,7 @@ def main():
     
     # Modify config for analysis
     _config["max_steps"] = 2000 # Reduce steps for analysis
+    
     _config["val_check_interval"] = 200
     _config["log_every_n_steps"] = 5
     
