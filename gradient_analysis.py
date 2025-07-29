@@ -289,7 +289,7 @@ def main():
     _config = copy.deepcopy(config_dict[config_name])
     
     # Modify config for analysis
-    _config["max_steps"] = 200 # Reduce steps for analysis
+    _config["max_steps"] = 1000 # Reduce steps for analysis
     _config["val_check_interval"] = 200
     _config["log_every_n_steps"] = 1
     
