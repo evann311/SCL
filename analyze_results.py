@@ -71,7 +71,7 @@ def analyze_encoder_comparison():
         print(f"  {encoder_type.upper()}: {data['experiment_dir']}")
     
     # Create the single plot
-    plt.figure(figsize=(12, 6))
+    plt.figure(figsize=(12, 7))
     
     colors = {'text': 'blue', 'image': 'green', 'cross': 'red'}
     
