@@ -340,7 +340,7 @@ _config_vqa_vast = {
     # PL Trainer Setting
     'resume_from': None, # load interrupted ckpt
     'fast_dev_run': False, # for debug
-    'test_only': False,
+    'test_only': True,
 
     # below params varies with the environment
     'data_root': '/workspace/arrow-vqa2-full',
