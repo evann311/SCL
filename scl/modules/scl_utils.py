@@ -423,6 +423,8 @@ def set_schedule(pl_module):
                 p
                 for n, p in pl_module.named_parameters()
                 if not any(nd in n for nd in no_decay)
+                and not any(bb in n for bb in head_names)
+                and not any(ht in n for ht in cross_modal_names)
                 and any(ad in n for ad in adapter_names)
             ],
             "weight_decay": wd,
@@ -434,6 +436,8 @@ def set_schedule(pl_module):
                 p
                 for n, p in pl_module.named_parameters()
                 if any(nd in n for nd in no_decay)
+                and not any(bb in n for bb in head_names)
+                and not any(ht in n for ht in cross_modal_names)
                 and any(ad in n for ad in adapter_names)
             ],
             "weight_decay": 0.0,
