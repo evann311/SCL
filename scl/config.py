@@ -349,6 +349,7 @@ _config_vqa_vast = {
     'num_gpus': 2,
     'num_nodes': 1,
     'load_path': "/home/user/SCL/result/finetune_vqa_randaug_seed0_from_GLSCL-100k.ckpt/version_1/checkpoints/last.ckpt",
+    
     'num_workers': 32,
     'precision': '16-mixed',
     'is_pretrain': False,
