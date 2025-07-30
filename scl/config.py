@@ -333,6 +333,7 @@ _config_vqa_vast = {
     'lr_mult_head': 10,
     'lr_mult_cross_modal': 1, # 5
     'lr_adapter': 5,
+    'lr_lora': 5,
     'max_epoch': 7,
     'max_steps': 100,
     'warmup_steps': 0.1,
