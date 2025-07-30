@@ -430,7 +430,7 @@ def set_schedule(pl_module):
                 and any(ad in n for ad in lora_names)
             ],
             "weight_decay": wd,
-            "lr": lr * lr_adapter,
+            "lr": lr * lr_lora,
         },
         # Group 8: LoRA parameters - decay off
         {
@@ -443,7 +443,7 @@ def set_schedule(pl_module):
                 and any(ad in n for ad in lora_names)
             ],
             "weight_decay": 0.0,
-            "lr": lr * lr_adapter,
+            "lr": lr * lr_lora,
         },
     ]
 
