@@ -349,7 +349,7 @@ def set_schedule(pl_module):
                 if not any(nd in n for nd in no_decay)
                 and not any(bb in n for bb in head_names)
                 and not any(ht in n for ht in cross_modal_names)
-                and not any(ad in n for ad in adapter_names)
+                and not any(ad in n for ad in lora_names)
             ],
             "weight_decay": wd,
             "lr": lr,
@@ -362,7 +362,7 @@ def set_schedule(pl_module):
                 if any(nd in n for nd in no_decay)
                 and not any(bb in n for bb in head_names)
                 and not any(ht in n for ht in cross_modal_names)
-                and not any(ad in n for ad in adapter_names)
+                and not any(ad in n for ad in lora_names)
             ],
             "weight_decay": 0.0,
             "lr": lr,
@@ -388,7 +388,7 @@ def set_schedule(pl_module):
                 if any(nd in n for nd in no_decay)
                 and any(bb in n for bb in head_names)
                 and not any(ht in n for ht in cross_modal_names)
-                and not any(ad in n for ad in adapter_names)
+                and not any(ad in n for ad in lora_names)
             ],
             "weight_decay": 0.0,
             "lr": lr * lr_mult_head,
@@ -401,7 +401,7 @@ def set_schedule(pl_module):
                 if not any(nd in n for nd in no_decay)
                 and not any(bb in n for bb in head_names)
                 and any(ht in n for ht in cross_modal_names)
-                and not any(ad in n for ad in adapter_names)
+                and not any(ad in n for ad in lora_names)
             ],
             "weight_decay": wd,
             "lr": lr * lr_mult_cross_modal,
@@ -414,7 +414,7 @@ def set_schedule(pl_module):
                 if any(nd in n for nd in no_decay)
                 and not any(bb in n for bb in head_names)
                 and any(ht in n for ht in cross_modal_names)
-                and not any(ad in n for ad in adapter_names)
+                and not any(ad in n for ad in lora_names)
             ],
             "weight_decay": 0.0,
             "lr": lr * lr_mult_cross_modal,
